@@ -1,0 +1,375 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  GUEST
+  USER
+  LIBRARIAN
+  ADMIN
+}
+
+enum GameType {
+  BOARD
+  CARD
+  RPG
+  WARGAME
+  EDUCATIONAL
+  PARTY
+  FAMILY
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+}
+
+enum CopyStatus {
+  AVAILABLE
+  RESERVED
+  BORROWED
+  DAMAGED
+  LOST
+  REPAIR
+  RETIRED
+}
+
+enum CopyCondition {
+  NEW
+  GOOD
+  FAIR
+  POOR
+}
+
+enum ReservationStatus {
+  PENDING
+  APPROVED
+  READY_FOR_PICKUP
+  BORROWED
+  RETURNED
+  CANCELLED
+  EXPIRED
+}
+
+enum LoanStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
+  LOST
+  DAMAGED
+}
+
+enum NotificationType {
+  RESERVATION_CONFIRMED
+  READY_FOR_PICKUP
+  RETURN_REMINDER
+  OVERDUE_RETURN
+  GENERAL
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  RESERVE
+  APPROVE
+  BORROW
+  RETURN
+  CANCEL
+  IMPORT
+  EXPORT
+  SETTINGS
+}
+
+model Profile {
+  id                String    @id @default(uuid())
+  authUserId        String    @unique @map("auth_user_id")
+  email             String    @unique
+  fullName          String?   @map("full_name")
+  phone             String?
+  role              UserRole  @default(USER)
+  isBlocked         Boolean   @default(false) @map("is_blocked")
+  adminNotes        String?   @map("admin_notes")
+  avatarUrl         String?   @map("avatar_url")
+  passwordHash      String?   @map("password_hash")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  reservations      Reservation[]
+  loans             Loan[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]    @relation("AuditActor")
+
+  @@index([email])
+  @@index([role])
+  @@map("profiles")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  games       GameCategory[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  games     GameTag[]
+
+  @@map("tags")
+}
+
+model Publisher {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  website   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  games     Game[]
+
+  @@map("publishers")
+}
+
+model Designer {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  games     Game[]
+
+  @@map("designers")
+}
+
+model Game {
+  id               String     @id @default(uuid())
+  title            String
+  slug             String     @unique
+  description      String?    @db.Text
+  shortDescription String?    @map("short_description")
+  minPlayers       Int        @default(1) @map("min_players")
+  maxPlayers       Int        @default(4) @map("max_players")
+  minAge           Int        @default(8) @map("min_age")
+  minPlayTime      Int        @default(30) @map("min_play_time")
+  maxPlayTime      Int        @default(60) @map("max_play_time")
+  difficulty       Difficulty @default(MEDIUM)
+  type             GameType   @default(BOARD)
+  publisherId      String?    @map("publisher_id")
+  designerId       String?    @map("designer_id")
+  yearPublished    Int?       @map("year_published")
+  coverImageUrl    String?    @map("cover_image_url")
+  instructionUrl   String?    @map("instruction_url")
+  isActive         Boolean    @default(true) @map("is_active")
+  isFeatured       Boolean    @default(false) @map("is_featured")
+  popularityCount  Int        @default(0) @map("popularity_count")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+  deletedAt        DateTime?  @map("deleted_at")
+
+  publisher        Publisher? @relation(fields: [publisherId], references: [id])
+  designer         Designer?  @relation(fields: [designerId], references: [id])
+  copies           GameCopy[]
+  images           GameImage[]
+  categories       GameCategory[]
+  tags             GameTag[]
+  reservations     Reservation[]
+
+  @@index([title])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([popularityCount])
+  @@index([type])
+  @@map("games")
+}
+
+model GameCategory {
+  gameId     String @map("game_id")
+  categoryId String @map("category_id")
+
+  game       Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, categoryId])
+  @@map("game_categories")
+}
+
+model GameTag {
+  gameId String @map("game_id")
+  tagId  String @map("tag_id")
+
+  game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, tagId])
+  @@map("game_tags")
+}
+
+model GameImage {
+  id        String   @id @default(uuid())
+  gameId    String   @map("game_id")
+  url       String
+  alt       String?
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId])
+  @@map("game_images")
+}
+
+model GameCopy {
+  id              String        @id @default(uuid())
+  gameId          String        @map("game_id")
+  inventoryNumber String        @unique @map("inventory_number")
+  barcode         String?       @unique
+  status          CopyStatus    @default(AVAILABLE)
+  condition       CopyCondition @default(GOOD)
+  location        String?
+  notes           String?       @db.Text
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  game            Game          @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  reservations    Reservation[]
+  loans           Loan[]
+
+  @@index([gameId])
+  @@index([status])
+  @@map("game_copies")
+}
+
+model Reservation {
+  id              String            @id @default(uuid())
+  userId          String            @map("user_id")
+  gameId          String            @map("game_id")
+  copyId          String?           @map("copy_id")
+  status          ReservationStatus @default(PENDING)
+  pickupDeadline  DateTime?         @map("pickup_deadline")
+  notes           String?
+  cancelledAt     DateTime?         @map("cancelled_at")
+  approvedAt      DateTime?         @map("approved_at")
+  readyAt         DateTime?         @map("ready_at")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  user            Profile           @relation(fields: [userId], references: [id])
+  game            Game              @relation(fields: [gameId], references: [id])
+  copy            GameCopy?         @relation(fields: [copyId], references: [id])
+  loan            Loan?
+
+  @@index([userId])
+  @@index([gameId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("reservations")
+}
+
+model Loan {
+  id              String     @id @default(uuid())
+  userId          String     @map("user_id")
+  copyId          String     @map("copy_id")
+  reservationId   String?    @unique @map("reservation_id")
+  status          LoanStatus @default(ACTIVE)
+  borrowedAt      DateTime   @default(now()) @map("borrowed_at")
+  dueAt           DateTime   @map("due_at")
+  returnedAt      DateTime?  @map("returned_at")
+  returnNotes     String?    @map("return_notes") @db.Text
+  damageNotes     String?    @map("damage_notes") @db.Text
+  extensionCount  Int        @default(0) @map("extension_count")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  user            Profile    @relation(fields: [userId], references: [id])
+  copy            GameCopy   @relation(fields: [copyId], references: [id])
+  reservation     Reservation? @relation(fields: [reservationId], references: [id])
+  extensions      LoanExtension[]
+
+  @@index([userId])
+  @@index([copyId])
+  @@index([status])
+  @@index([dueAt])
+  @@map("loans")
+}
+
+model LoanExtension {
+  id          String   @id @default(uuid())
+  loanId      String   @map("loan_id")
+  previousDue DateTime @map("previous_due")
+  newDue      DateTime @map("new_due")
+  reason      String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  loan        Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@index([loanId])
+  @@map("loan_extensions")
+}
+
+model AppSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  actorId    String?     @map("actor_id")
+  action     AuditAction
+  entityType String      @map("entity_type")
+  entityId   String?     @map("entity_id")
+  metadata   Json?
+  ipAddress  String?     @map("ip_address")
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  actor      Profile?    @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([entityType])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  body      String           @db.Text
+  isRead    Boolean          @default(false) @map("is_read")
+  sentEmail Boolean          @default(false) @map("sent_email")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user      Profile          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
