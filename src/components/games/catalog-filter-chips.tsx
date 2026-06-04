@@ -1,0 +1,77 @@
+"use client";
+
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { X } from "lucide-react";
+import {
+  COLLECTION_TYPE_LABELS,
+  DIFFICULTY_LABELS,
+  GAME_TYPE_LABELS,
+} from "@/lib/constants";
+import { Button } from "@/components/ui/button";
+
+const LABELS: Record<string, (v: string) => string> = {
+  q: (v) => `Szukaj: ${v}`,
+  ean: (v) => `EAN: ${v}`,
+  collectionType: (v) => COLLECTION_TYPE_LABELS[v as keyof typeof COLLECTION_TYPE_LABELS] ?? v,
+  availability: (v) => (v === "available" ? "Tylko dostępne" : v),
+  category: (v) => `Kategoria: ${v}`,
+  tag: (v) => `Tag: ${v}`,
+  type: (v) => GAME_TYPE_LABELS[v as keyof typeof GAME_TYPE_LABELS] ?? v,
+  difficulty: (v) => DIFFICULTY_LABELS[v as keyof typeof DIFFICULTY_LABELS] ?? v,
+  minPlayers: (v) => `Min. ${v} graczy`,
+  maxPlayers: (v) => `Max. ${v} graczy`,
+  minAge: (v) => `Wiek ${v}+`,
+  maxPlayTime: (v) => `Do ${v} min`,
+  publisher: (v) => `Wydawca: ${v}`,
+  designer: (v) => `Autor: ${v}`,
+  sort: (v) => `Sort: ${v}`,
+};
+
+const SKIP = new Set(["page", "pageSize"]);
+
+export function CatalogFilterChips() {
+  const searchParams = useSearchParams();
+  const entries = [...searchParams.entries()].filter(([k, v]) => {
+    if (!v || SKIP.has(k)) return false;
+    if (k === "availability" && v !== "available") return false;
+    return true;
+  });
+
+  const chips = entries
+    .map(([key, value]) => {
+      if (key === "availability" && value !== "available") return null;
+      const labelFn = LABELS[key];
+      return { key, value, label: labelFn ? labelFn(value) : `${key}: ${value}` };
+    })
+    .filter(Boolean) as { key: string; value: string; label: string }[];
+
+  if (chips.length === 0) return null;
+
+  const removeKey = (key: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete(key);
+    if (key === "q") params.delete("ean");
+    params.delete("page");
+    return `/katalog?${params.toString()}`;
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-2" data-testid="catalog-filter-chips">
+      {chips.map(({ key, label }) => (
+        <Link
+          key={key}
+          href={removeKey(key)}
+          className="inline-flex items-center gap-1 rounded-full border bg-secondary/50 px-3 py-1 text-xs font-medium hover:bg-secondary"
+        >
+          {label}
+          <X className="h-3 w-3" aria-hidden />
+          <span className="sr-only">Usuń filtr {label}</span>
+        </Link>
+      ))}
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/katalog">Wyczyść filtry</Link>
+      </Button>
+    </div>
+  );
+}

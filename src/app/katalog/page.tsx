@@ -1,8 +1,14 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { Search } from "lucide-react";
 import { GameCard } from "@/components/games/game-card";
-import { GameSearch } from "@/components/games/game-search";
-import { CatalogFilters } from "@/components/games/catalog-filters";
+import { CatalogToolbar } from "@/components/games/catalog-toolbar";
+import { CatalogTopFilters } from "@/components/games/catalog-top-filters";
+import { CatalogSidebarFilters } from "@/components/games/catalog-sidebar-filters";
+import { CatalogMobileFilters } from "@/components/games/catalog-mobile-filters";
+import { CatalogFilterChips } from "@/components/games/catalog-filter-chips";
+import { PageShell } from "@/components/ui/page-shell";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { fetchGames } from "@/lib/games/queries";
 import { gameFilterSchema } from "@/lib/validations/game";
@@ -16,68 +22,137 @@ export default async function CatalogPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const filters = gameFilterSchema.parse({
     q: params.q,
+    ean: params.ean,
     category: params.category,
+    collectionType: params.collectionType,
     type: params.type,
     difficulty: params.difficulty,
     minPlayers: params.minPlayers,
+    maxPlayers: params.maxPlayers,
+    minAge: params.minAge,
+    maxPlayTime: params.maxPlayTime,
     availability: params.availability,
     tag: params.tag,
+    publisher: params.publisher,
+    designer: params.designer,
     sort: params.sort,
     page: params.page,
   });
 
-  const [result, categories, tags] = await Promise.all([
+  const [result, categories, tags, publishers, designers] = await Promise.all([
     fetchGames(filters),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
-    prisma.tag.findMany({ orderBy: { name: "asc" }, take: 30 }),
+    prisma.tag.findMany({ orderBy: { name: "asc" }, take: 40 }),
+    prisma.publisher.findMany({ orderBy: { name: "asc" }, take: 50 }),
+    prisma.designer.findMany({ orderBy: { name: "asc" }, take: 50 }),
   ]);
 
   const totalPages = Math.ceil(result.total / filters.pageSize);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-8 space-y-4">
-        <h1 className="text-3xl font-bold">Katalog gier</h1>
-        <Suspense>
-          <GameSearch defaultValue={filters.q} />
-        </Suspense>
-        <CatalogFilters categories={categories} tags={tags} current={filters} />
-      </div>
-
-      {result.items.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-12 text-center text-muted-foreground">
-          Brak wyników. Spróbuj zmienić filtry lub wyszukiwanie.
+    <PageShell className="overflow-x-hidden" width="wide">
+      <header className="mb-6 space-y-2">
+        <h1 className="text-display">Katalog gier</h1>
+        <p className="text-body max-w-2xl text-muted-foreground">
+          Przeglądaj planszówki i gry fabularne. Wyszukaj po tytule, autorze, wydawcy lub zeskanuj kod EAN z pudełka.
         </p>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {result.items.map((game) => (
-            <GameCard key={game.id} game={game} showReserve />
-          ))}
-        </div>
-      )}
+      </header>
 
-      {totalPages > 1 && (
-        <div className="mt-8 flex justify-center gap-2">
-          {filters.page > 1 && (
-            <Button variant="outline" asChild>
-              <Link href={`/katalog?${buildPageParams(params, filters.page - 1)}`}>
-                Poprzednia
-              </Link>
-            </Button>
+      <div className="lg:grid lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-8">
+        <aside className="hidden lg:block">
+          <div className="card-elevated sticky top-20 p-5">
+            <h2 className="text-h3 mb-4">Filtry</h2>
+            <CatalogSidebarFilters
+              categories={categories}
+              tags={tags}
+              publishers={publishers}
+              designers={designers}
+              current={filters}
+            />
+          </div>
+        </aside>
+
+        <div className="min-w-0 space-y-4">
+          <Suspense>
+            <CatalogToolbar defaultQ={filters.q} defaultEan={filters.ean} />
+          </Suspense>
+
+          <Suspense>
+            <CatalogTopFilters current={filters} />
+          </Suspense>
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Suspense>
+              <CatalogMobileFilters
+                categories={categories}
+                tags={tags}
+                publishers={publishers}
+                designers={designers}
+                current={filters}
+              />
+            </Suspense>
+            <p className="text-small text-muted-foreground" data-testid="catalog-result-count">
+              Wyników: <strong className="text-foreground">{result.total}</strong>
+            </p>
+          </div>
+
+          <Suspense>
+            <CatalogFilterChips />
+          </Suspense>
+
+          {filters.ean && result.items.length === 1 && (
+            <p className="rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm" role="status">
+              Znaleziono grę po kodzie EAN produktu.
+            </p>
           )}
-          <span className="flex items-center px-4 text-sm text-muted-foreground">
-            Strona {filters.page} z {totalPages}
-          </span>
-          {filters.page < totalPages && (
-            <Button variant="outline" asChild>
-              <Link href={`/katalog?${buildPageParams(params, filters.page + 1)}`}>
-                Następna
-              </Link>
-            </Button>
+
+          {result.items.length === 0 ? (
+            <EmptyState
+              testId="catalog-empty"
+              title={filters.ean ? "Nie znaleziono gry o tym EAN" : "Nie znaleziono gry"}
+              description={
+                filters.ean
+                  ? "Sprawdź, czy zeskanowałeś kod z pudełka produktu (nie kod naklejki egzemplarza w bibliotece)."
+                  : "Zmień wyszukiwanie lub usuń filtry — w katalogu na pewno jest coś ciekawego."
+              }
+              icon={<Search className="h-7 w-7" />}
+              action={{ label: "Wyczyść filtry", href: "/katalog" }}
+            />
+          ) : (
+            <div
+              className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3"
+              data-testid="catalog-grid"
+            >
+              {result.items.map((game) => (
+                <GameCard key={game.id} game={game} showReserve />
+              ))}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="flex flex-wrap justify-center gap-2 pt-4">
+              {filters.page > 1 && (
+                <Button variant="outline" asChild>
+                  <Link href={`/katalog?${buildPageParams(params, filters.page - 1)}`}>
+                    Poprzednia
+                  </Link>
+                </Button>
+              )}
+              <span className="flex min-h-11 items-center px-4 text-small text-muted-foreground">
+                Strona {filters.page} z {totalPages}
+              </span>
+              {filters.page < totalPages && (
+                <Button variant="outline" asChild>
+                  <Link href={`/katalog?${buildPageParams(params, filters.page + 1)}`}>
+                    Następna
+                  </Link>
+                </Button>
+              )}
+            </div>
           )}
         </div>
-      )}
-    </div>
+      </div>
+    </PageShell>
   );
 }
 

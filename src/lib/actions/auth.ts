@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { loginSchema, registerSchema, profileSchema } from "@/lib/validations/auth";
 import { updateUserRoleSchema, uuidSchema } from "@/lib/validations/ids";
 import { z } from "zod";
+import { safeRedirectPath } from "@/lib/auth/redirect";
 import { fail, ok, type ActionResult } from "@/lib/actions/utils";
 
 export async function loginAction(
@@ -24,11 +25,13 @@ export async function loginAction(
   });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd");
 
+  const redirectTo = safeRedirectPath(formData.get("redirect")?.toString());
+
   if (getAuthProvider() === "local") {
     const result = await loginLocal(parsed.data.email, parsed.data.password);
     if (!result.ok) return fail(result.error);
     revalidatePath("/", "layout");
-    redirect("/moje-rezerwacje");
+    redirect(redirectTo);
   }
 
   await clearOtherAuthSessions();
@@ -37,7 +40,7 @@ export async function loginAction(
   if (error) return fail("Nieprawidłowy e-mail lub hasło.");
 
   revalidatePath("/", "layout");
-  redirect("/moje-rezerwacje");
+  redirect(redirectTo);
 }
 
 export async function registerAction(

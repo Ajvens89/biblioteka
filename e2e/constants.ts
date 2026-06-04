@@ -1,3 +1,5 @@
+import { buildEan13 } from "../src/lib/services/ean";
+
 export const E2E_PREFIX = "e2e-";
 
 /** Gra i egzemplarz do scenariuszy 1 i 3 (tworzone w global-setup). */
@@ -14,6 +16,11 @@ export const CREDENTIALS = {
 export const E2E_ADMIN_GAME_TITLE = "E2E Gra administracyjna";
 export const E2E_ADMIN_GAME_SLUG = `${E2E_PREFIX}gra-administracyjna`;
 export const E2E_ADMIN_COPY_INVENTORY = "E2E-ADMIN-001";
+
+/** Scenariusz EAN — fikcyjny kod z poprawną sumą kontrolną (baza 590888000001). */
+export const E2E_EAN_RPG_TITLE = "E2E Gra fabularna EAN";
+export const E2E_EAN_RPG_SLUG = `${E2E_PREFIX}gra-rpg-ean`;
+export const E2E_EAN_RPG_CODE = buildEan13("590888000001");
 
 export const TOAST_SUCCESS_RESERVATION = "Rezerwacja została złożona";
 export const STATUS_PENDING_LABEL = "Oczekuje";

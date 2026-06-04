@@ -2,6 +2,8 @@ import { test, expect } from "@playwright/test";
 import {
   E2E_ADMIN_COPY_INVENTORY,
   E2E_ADMIN_GAME_TITLE,
+  E2E_EAN_RPG_CODE,
+  E2E_EAN_RPG_TITLE,
   E2E_FLOW_GAME_SLUG,
   E2E_FLOW_GAME_TITLE,
   STATUS_PENDING_LABEL,
@@ -16,7 +18,7 @@ import {
   loginAsLibrarian,
   loginAsUser,
 } from "./helpers";
-import { cleanupE2eAdminGame } from "./db-cleanup";
+import { cleanupE2eAdminGame, cleanupE2eEanRpgGame } from "./db-cleanup";
 
 test.describe.configure({ mode: "serial" });
 
@@ -100,9 +102,14 @@ test.describe("Biblioteka — E2E", () => {
     await loginAsAdmin(page);
     await page.goto("/admin/gry");
     await page.getByTestId("admin-new-game-link").click();
+    await page.getByTestId("wizard-step-1").click();
+    await page.getByRole("button", { name: "Dodaj ręcznie" }).click();
+    await page.getByRole("button", { name: "Dalej" }).click();
+    await page.getByTestId("wizard-step-3").click();
 
     await page.getByTestId("game-form-title").fill(E2E_ADMIN_GAME_TITLE);
     await page.getByTestId("game-form-description").fill("Gra utworzona w teście E2E Playwright.");
+    await page.getByTestId("wizard-step-6").click();
     await page.getByTestId("game-form-submit").click();
     await expect(page).toHaveURL(/\/admin\/gry$/);
     await expectToast(page, "Utworzono grę");
@@ -118,5 +125,146 @@ test.describe("Biblioteka — E2E", () => {
     await expect(page.locator('[data-testid="game-card"]').filter({ hasText: E2E_ADMIN_GAME_TITLE })).toBeVisible({
       timeout: 15_000,
     });
+  });
+
+  test("scenariusz 5: admin dodaje grę przez EAN z okładką i wyszukuje w katalogu", async ({ page }) => {
+    const E2E_COVER_URL = "https://placehold.co/200x280?text=E2E+Cover";
+    await cleanupE2eEanRpgGame();
+    await loginAsAdmin(page);
+    await page.goto("/admin/gry/nowa?mode=ean");
+    await page.getByTestId("wizard-step-2").click();
+    await page.getByTestId("ean-input").fill(E2E_EAN_RPG_CODE);
+    await page.getByTestId("ean-lookup-button").click();
+    await page.getByTestId("collection-type-select").selectOption("RPG");
+
+    const candidateCard = page.getByTestId("cover-candidate-card").first();
+    if (await candidateCard.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await candidateCard.getByRole("button", { name: "Użyj tej okładki" }).click();
+    } else {
+      await page.getByTestId("custom-cover-url").fill(E2E_COVER_URL);
+    }
+
+    await page.getByTestId("wizard-step-3").click();
+    await page.getByTestId("game-form-title").fill(E2E_EAN_RPG_TITLE);
+    await page.getByTestId("game-form-description").fill("Test E2E — gra fabularna dodana po kodzie EAN.");
+    await page.getByTestId("wizard-step-6").click();
+    await page.getByTestId("game-form-submit").click();
+    await expect(page).toHaveURL(/\/admin\/gry$/);
+    await expectToast(page, "Utworzono grę");
+
+    await page.goto(`/katalog?ean=${E2E_EAN_RPG_CODE}`);
+    const card = page.locator('[data-testid="game-card"]').filter({ hasText: E2E_EAN_RPG_TITLE });
+    await expect(card).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("game-type-badge").first()).toContainText("Gry fabularne");
+    await expect(card.locator("img").first()).toBeVisible();
+  });
+
+  test("katalog: ładuje karty gier", async ({ page }) => {
+    await page.goto("/katalog");
+    await expect(page.getByRole("heading", { name: "Katalog gier" })).toBeVisible();
+    await expect(page.getByTestId("game-card").first()).toBeVisible({ timeout: 15_000 });
+  });
+
+  test("katalog: filtr RPG działa", async ({ page }) => {
+    await page.goto("/katalog");
+    await page.getByTestId("collection-type-filter").selectOption("RPG");
+    await expect(page).toHaveURL(/collectionType=RPG/);
+    const badges = page.getByTestId("game-type-badge");
+    const count = await badges.count();
+    if (count > 0) {
+      await expect(badges.first()).toContainText(/fabularne/i);
+    }
+  });
+
+  test("katalog: wyszukiwanie po EAN działa", async ({ page }) => {
+    await page.goto(`/katalog?ean=${E2E_EAN_RPG_CODE}`);
+    const card = page.locator('[data-testid="game-card"]').filter({ hasText: E2E_EAN_RPG_TITLE });
+    await expect(card).toBeVisible({ timeout: 15_000 });
+  });
+
+  test("szczegóły gry: pokazuje EAN i typ zbioru", async ({ page }) => {
+    await page.goto(`/gry/${E2E_FLOW_GAME_SLUG}`);
+    await expect(page.getByTestId("game-collection-type")).toBeVisible();
+    await expect(page.getByTestId("game-collection-type")).toContainText(/planszowe|fabularne/i);
+  });
+
+  test("mobile: katalog bez poziomego scrolla (390px)", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/katalog");
+    await expect(page.getByRole("heading", { name: "Katalog gier" })).toBeVisible();
+    await expect(page.getByTestId("catalog-toolbar")).toBeVisible();
+    const overflow = await page.evaluate(() => {
+      const doc = document.documentElement;
+      return doc.scrollWidth > doc.clientWidth + 2;
+    });
+    expect(overflow).toBe(false);
+  });
+
+  test("admin: dashboard pokazuje szybkie akcje", async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto("/admin");
+    await expect(page.getByTestId("admin-quick-actions")).toBeVisible();
+    await expect(page.getByTestId("admin-quick-add-game")).toBeVisible();
+    await expect(page.getByTestId("admin-quick-import")).toBeVisible();
+  });
+
+  test("admin: filtruje gry po Brak EAN", async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto("/admin/gry");
+    await page.getByTestId("admin-filter-no-ean").click();
+    await expect(page).toHaveURL(/missingEan=1/);
+  });
+
+  test("admin: filtruje gry po RPG", async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto("/admin/gry");
+    await page.getByTestId("collection-type-filter").selectOption("RPG");
+    await expect(page).toHaveURL(/collectionType=RPG/);
+  });
+
+  test("admin: otwiera kreator dodawania gry", async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto("/admin/gry/nowa");
+    await expect(page.getByTestId("game-wizard")).toBeVisible();
+    await expect(page.getByTestId("wizard-step-1")).toBeVisible();
+  });
+
+  test("admin: formularz — EAN w kroku 2 kreatora", async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto("/admin/gry/nowa?mode=ean");
+    await page.getByTestId("wizard-step-2").click();
+    await expect(page.getByTestId("ean-input")).toBeVisible();
+    await expect(page.getByTestId("collection-type-select")).toBeVisible();
+  });
+
+  test("admin: dodaje egzemplarz do istniejącej gry (EAN)", async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto("/admin/gry/nowa?mode=ean");
+    await page.getByTestId("wizard-step-2").click();
+    await page.getByTestId("ean-input").fill(E2E_EAN_RPG_CODE);
+    await page.getByTestId("ean-lookup-button").click();
+    await expect(page.getByTestId("ean-add-copy-button")).toBeVisible({ timeout: 15_000 });
+    await page.getByTestId("ean-add-copy-button").click();
+    await expect(page).toHaveURL(/\/admin\/egzemplarze\?gameId=/);
+  });
+
+  test("zwykły user nie ma dostępu do /admin/import", async ({ page }) => {
+    await loginAsUser(page);
+    await page.goto("/admin/import");
+    await expect(page).toHaveURL(/\?error=brak-uprawnien|\/$/);
+    await expect(page.getByTestId("admin-import-page")).not.toBeVisible();
+  });
+
+  test("scenariusz 6: ponowny EAN nie tworzy duplikatu gry", async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto("/admin/gry/nowa?mode=ean");
+    await page.getByTestId("wizard-step-2").click();
+
+    await page.getByTestId("ean-input").fill(E2E_EAN_RPG_CODE);
+    await page.getByTestId("ean-lookup-button").click();
+
+    await expect(page.getByText(/Ta gra już jest w bibliotece/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("ean-add-copy-button")).toBeVisible();
+    await expect(page.getByTestId("game-form-submit")).toBeDisabled();
   });
 });

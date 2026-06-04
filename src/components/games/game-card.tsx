@@ -1,12 +1,22 @@
-import Image from "next/image";
 import Link from "next/link";
-import { Users, Clock } from "lucide-react";
-import type { Game, GameCopy, Category, Tag, Publisher, Designer, GameCategory, GameTag } from "@prisma/client";
-import { DIFFICULTY_LABELS, GAME_TYPE_LABELS } from "@/lib/constants";
+import { Clock, Users } from "lucide-react";
+import type {
+  Game,
+  GameCopy,
+  Category,
+  Tag,
+  Publisher,
+  Designer,
+  GameCategory,
+  GameTag,
+  GameCollectionType,
+} from "@prisma/client";
 import { countAvailableCopies, getAvailabilityLabel } from "@/lib/games/availability";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { GameCover } from "@/components/ui/game-cover";
+import { GameTypeBadge } from "@/components/ui/game-type-badge";
+import { cn } from "@/lib/utils";
 
 type GameWithRelations = Game & {
   copies: Pick<GameCopy, "status">[];
@@ -16,59 +26,89 @@ type GameWithRelations = Game & {
   designer: Designer | null;
 };
 
-const PLACEHOLDER = "/placeholder-game.svg";
-
-export function GameCard({ game, showReserve = false }: { game: GameWithRelations; showReserve?: boolean }) {
+export function GameCard({
+  game,
+  showReserve = false,
+  className,
+}: {
+  game: GameWithRelations;
+  showReserve?: boolean;
+  className?: string;
+}) {
   const available = countAvailableCopies(game.copies);
   const total = game.copies.length;
   const avail = getAvailabilityLabel(available, total);
-  const category = game.categories[0]?.category.name;
+  const isBoard = game.collectionType !== "RPG";
+  const collectionType = game.collectionType as GameCollectionType;
 
   return (
-    <Card
-      className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-md"
+    <article
+      className={cn(
+        "card-elevated flex h-full max-w-full flex-col overflow-hidden transition-shadow hover:shadow-md",
+        className,
+      )}
       data-testid="game-card"
       data-available={available > 0 ? "true" : "false"}
     >
-      <div className="relative aspect-[4/3] bg-muted">
-        <Image
-          src={game.coverImageUrl || PLACEHOLDER}
-          alt={game.title}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 300px"
+      <Link href={`/gry/${game.slug}`} className="relative block">
+        <GameCover
+          src={game.coverImageUrl}
+          alt={`Okładka: ${game.title}`}
+          collectionType={collectionType}
+          className="rounded-none"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"
         />
-        <Badge variant={avail.variant} className="absolute right-2 top-2">
+        <Badge variant={avail.variant} className="absolute right-3 top-3 shadow-sm" aria-label={`Status: ${avail.label}`}>
           {avail.label}
         </Badge>
-      </div>
-      <CardContent className="flex flex-1 flex-col gap-2 pt-4">
-        <h3 className="line-clamp-2 font-semibold leading-tight">{game.title}</h3>
-        {category && <p className="text-xs text-muted-foreground">{category}</p>}
-        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Users className="h-3 w-3" />
-            {game.minPlayers}–{game.maxPlayers}
-          </span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {game.minPlayTime}–{game.maxPlayTime} min
-          </span>
+      </Link>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
+        <div className="space-y-2">
+          <h3 className="text-h3 line-clamp-2 leading-snug">
+            <Link href={`/gry/${game.slug}`} className="hover:text-primary">
+              {game.title}
+            </Link>
+          </h3>
+          <GameTypeBadge collectionType={collectionType} />
         </div>
-        <p className="text-xs">
-          {GAME_TYPE_LABELS[game.type]} · {DIFFICULTY_LABELS[game.difficulty]} · {game.minAge}+
+
+        <p className="text-small text-muted-foreground">
+          <span className="font-medium text-foreground">{available}</span>
+          {total > 0 ? ` z ${total} egzemplarzy dostępnych` : " — brak egzemplarzy w systemie"}
         </p>
-      </CardContent>
-      <CardFooter className="gap-2">
-        <Button variant="outline" className="flex-1" asChild>
+
+        {isBoard && (
+          <div className="text-small flex flex-wrap gap-3 text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <Users className="h-3.5 w-3.5" aria-hidden />
+              {game.minPlayers}–{game.maxPlayers}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" aria-hidden />
+              {game.minPlayTime}–{game.maxPlayTime} min
+            </span>
+            <span>{game.minAge}+</span>
+          </div>
+        )}
+
+        {(game.shortDescription || game.description) && (
+          <p className="text-small line-clamp-2 text-muted-foreground">
+            {game.shortDescription || game.description}
+          </p>
+        )}
+      </div>
+
+      <div className="flex gap-2 border-t border-border/60 p-4 pt-0">
+        <Button variant="outline" className="min-h-11 flex-1" asChild>
           <Link href={`/gry/${game.slug}`}>Szczegóły</Link>
         </Button>
         {showReserve && available > 0 && (
-          <Button className="flex-1" asChild>
-            <Link href={`/gry/${game.slug}#rezerwacja`}>Rezerwuj</Link>
+          <Button className="min-h-11 flex-1" asChild>
+            <Link href={`/gry/${game.slug}#rezerwacja`}>Zarezerwuj</Link>
           </Button>
         )}
-      </CardFooter>
-    </Card>
+      </div>
+    </article>
   );
 }

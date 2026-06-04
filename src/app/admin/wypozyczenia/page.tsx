@@ -1,59 +1,115 @@
+import Link from "next/link";
 import { LoanActions } from "@/components/admin/loan-actions";
-import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard } from "@/components/ui/section-card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
 import { LOAN_STATUS_LABELS } from "@/lib/constants";
 import { prisma } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
+import type { LoanStatus } from "@prisma/client";
+import { ClipboardList } from "lucide-react";
 
 export const metadata = { title: "Wypożyczenia" };
 
-export default async function AdminLoansPage() {
+const statuses = Object.keys(LOAN_STATUS_LABELS) as LoanStatus[];
+
+export default async function AdminLoansPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status } = await searchParams;
   const loans = await prisma.loan.findMany({
-    include: {
-      user: true,
-      copy: { include: { game: true } },
-    },
+    where: status ? { status: status as LoanStatus } : undefined,
+    include: { user: true, copy: { include: { game: true } } },
     orderBy: { createdAt: "desc" },
     take: 100,
   });
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Wypożyczenia</h1>
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="p-3 text-left">Gra</th>
-              <th className="p-3 text-left">Użytkownik</th>
-              <th className="p-3 text-left">Termin</th>
-              <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left">Akcje</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loans.map((l) => (
-              <tr
-                key={l.id}
-                className="border-t"
-                data-testid="admin-loan-row"
-                data-game-title={l.copy.game.title}
-              >
-                <td className="p-3">{l.copy.game.title}</td>
-                <td className="p-3">{l.user.fullName ?? l.user.email}</td>
-                <td className="p-3">{formatDate(l.dueAt)}</td>
-                <td className="p-3">
-                  <Badge variant={l.status === "OVERDUE" ? "destructive" : "secondary"}>
-                    {LOAN_STATUS_LABELS[l.status]}
-                  </Badge>
-                </td>
-                <td className="p-3">
-                  <LoanActions loanId={l.id} status={l.status} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="space-y-6 overflow-x-hidden">
+      <PageHeader title="Wypożyczenia" description="Aktywne wypożyczenia, zwroty i przeterminowania." />
+
+      <div className="flex flex-wrap gap-2">
+        <Button variant={!status ? "default" : "outline"} size="sm" asChild>
+          <Link href="/admin/wypozyczenia">Wszystkie</Link>
+        </Button>
+        {statuses.map((s) => (
+          <Button key={s} variant={status === s ? "default" : "outline"} size="sm" asChild>
+            <Link href={`/admin/wypozyczenia?status=${s}`}>{LOAN_STATUS_LABELS[s]}</Link>
+          </Button>
+        ))}
       </div>
+
+      {loans.length === 0 ? (
+        <EmptyState
+          title="Brak wypożyczeń"
+          description={status ? "Brak pozycji w wybranym statusie." : "Nie zarejestrowano jeszcze wypożyczeń."}
+          icon={<ClipboardList className="h-7 w-7" />}
+        />
+      ) : (
+        <>
+          <div className="hidden overflow-hidden rounded-xl border md:block">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="p-3 text-left">Gra</th>
+                  <th className="p-3 text-left">Użytkownik</th>
+                  <th className="p-3 text-left">Termin</th>
+                  <th className="p-3 text-left">Status</th>
+                  <th className="p-3 text-left">Akcje</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loans.map((l) => (
+                  <tr
+                    key={l.id}
+                    className={`border-t ${l.status === "OVERDUE" ? "bg-destructive/5" : ""}`}
+                    data-testid="admin-loan-row"
+                    data-game-title={l.copy.game.title}
+                  >
+                    <td className="p-3 font-medium">{l.copy.game.title}</td>
+                    <td className="p-3">{l.user.fullName ?? l.user.email}</td>
+                    <td className="p-3">{formatDate(l.dueAt)}</td>
+                    <td className="p-3">
+                      <StatusBadge kind="loan" status={l.status} />
+                    </td>
+                    <td className="p-3">
+                      <LoanActions loanId={l.id} status={l.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="grid gap-4 md:hidden">
+            {loans.map((l) => (
+              <SectionCard key={l.id}>
+                <div
+                  className="space-y-3"
+                  data-testid="admin-loan-row"
+                  data-game-title={l.copy.game.title}
+                >
+                  <div
+                    className={`flex items-start justify-between gap-2 rounded-lg p-2 ${
+                      l.status === "OVERDUE" ? "border border-destructive/40 bg-destructive/10" : ""
+                    }`}
+                  >
+                    <p className="font-semibold">{l.copy.game.title}</p>
+                    <StatusBadge kind="loan" status={l.status} />
+                  </div>
+                  <p className="text-small text-muted-foreground">{l.user.fullName ?? l.user.email}</p>
+                  <p className="text-small">Termin zwrotu: {formatDate(l.dueAt)}</p>
+                  <LoanActions loanId={l.id} status={l.status} />
+                </div>
+              </SectionCard>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

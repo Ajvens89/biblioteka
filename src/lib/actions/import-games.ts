@@ -4,8 +4,12 @@ import slugify from "slugify";
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
 import { isActorResult, requireActorAdmin } from "@/lib/auth/actor";
-import { parseGamesCsv } from "@/lib/csv/games";
+import { parseCsvCollectionType, parseGamesCsv } from "@/lib/csv/games";
+import type { GameCollectionType } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { assertEanNotDuplicate } from "@/lib/services/games";
+import { normalizeEan } from "@/lib/services/ean";
+import { isServiceError } from "@/lib/services/errors";
 import { fail, ok, type ActionResult } from "@/lib/actions/utils";
 
 export async function importGamesCsv(formData: FormData): Promise<ActionResult<{ count: number }>> {
@@ -29,11 +33,48 @@ export async function importGamesCsv(formData: FormData): Promise<ActionResult<{
     const slug =
       row.slug ||
       slugify(row.title, { lower: true, strict: true, locale: "pl" });
+
+    let ean: string | null = null;
+    if (row.ean?.trim()) {
+      try {
+        ean = normalizeEan(row.ean);
+        await assertEanNotDuplicate(prisma, ean);
+      } catch (e) {
+        if (isServiceError(e) && e.code === "EAN_DUPLICATE") {
+          const existing = await prisma.game.findFirst({ where: { ean, deletedAt: null } });
+          if (existing?.slug === slug) {
+            await prisma.game.update({
+              where: { slug },
+              data: {
+                title: row.title,
+                description: row.description,
+                shortDescription: row.shortDescription,
+                collectionType: parseCsvCollectionType(row.collectionType),
+              },
+            });
+            count++;
+            continue;
+          }
+          return fail(e.message);
+        }
+        return fail(e instanceof Error ? e.message : "Błąd EAN w CSV");
+      }
+    }
+
+    let collectionType: GameCollectionType = "BOARD_GAME";
+    try {
+      collectionType = parseCsvCollectionType(row.collectionType);
+    } catch (e) {
+      return fail(e instanceof Error ? e.message : "Błąd typu zbioru");
+    }
+
     await prisma.game.upsert({
       where: { slug },
       create: {
         title: row.title,
         slug,
+        ean,
+        collectionType,
         description: row.description,
         shortDescription: row.shortDescription,
         minPlayers: Number(row.minPlayers) || 2,
@@ -47,6 +88,8 @@ export async function importGamesCsv(formData: FormData): Promise<ActionResult<{
       },
       update: {
         title: row.title,
+        ean: ean ?? undefined,
+        collectionType,
         description: row.description,
         shortDescription: row.shortDescription,
       },

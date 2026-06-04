@@ -22,7 +22,15 @@ type CopyData = {
   notes?: string | null;
 };
 
-export function CopyForm({ copy, games }: { copy?: CopyData; games: Pick<Game, "id" | "title">[] }) {
+export function CopyForm({
+  copy,
+  games,
+  defaultGameId,
+}: {
+  copy?: CopyData;
+  games: Pick<Game, "id" | "title">[];
+  defaultGameId?: string;
+}) {
   const router = useRouter();
   const [pending, start] = useTransition();
 
@@ -57,7 +65,7 @@ export function CopyForm({ copy, games }: { copy?: CopyData; games: Pick<Game, "
           name="gameId"
           data-testid="copy-form-game"
           className="h-10 w-full rounded-md border px-2"
-          defaultValue={copy?.gameId ?? games[0]?.id}
+          defaultValue={copy?.gameId ?? defaultGameId ?? games[0]?.id}
           required
         >
           {games.map((g) => (
@@ -75,8 +83,17 @@ export function CopyForm({ copy, games }: { copy?: CopyData; games: Pick<Game, "
         />
       </div>
       <div className="space-y-2">
-        <Label>Kod kreskowy</Label>
-        <Input name="barcode" defaultValue={copy?.barcode ?? ""} />
+        <Label htmlFor="copy-barcode">Kod egzemplarza (naklejka / barcode)</Label>
+        <Input
+          id="copy-barcode"
+          name="barcode"
+          data-testid="copy-form-barcode"
+          defaultValue={copy?.barcode ?? ""}
+          placeholder="Wewnętrzny kod pudełka — nie wpisuj EAN z okładki"
+        />
+        <p className="text-xs text-muted-foreground">
+          To nie jest EAN produktu. EAN ustawiasz w formularzu gry, nie tutaj.
+        </p>
       </div>
       <div className="space-y-2">
         <Label>Status</Label>

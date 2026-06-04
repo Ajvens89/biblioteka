@@ -1,20 +1,20 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Clock, ExternalLink, Users } from "lucide-react";
+import { GameCard } from "@/components/games/game-card";
 import { ReserveButton } from "@/components/games/reserve-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { GameCover } from "@/components/ui/game-cover";
+import { GameTypeBadge } from "@/components/ui/game-type-badge";
+import { PageShell } from "@/components/ui/page-shell";
+import { SectionCard } from "@/components/ui/section-card";
+import { COLLECTION_TYPE_LABELS, DIFFICULTY_LABELS, GAME_TYPE_LABELS } from "@/lib/constants";
 import { getSessionUser } from "@/lib/auth/session";
-import {
-  DIFFICULTY_LABELS,
-  GAME_TYPE_LABELS,
-  RESERVATION_STATUS_LABELS,
-} from "@/lib/constants";
 import { countAvailableCopies, getAvailabilityLabel } from "@/lib/games/availability";
-import { fetchGameBySlug } from "@/lib/games/queries";
-import { formatDate } from "@/lib/utils";
+import { copyStatusCounts } from "@/lib/games/copy-stats";
+import { fetchGameBySlug, fetchSimilarGames } from "@/lib/games/queries";
+import Image from "next/image";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -32,120 +32,200 @@ export default async function GameDetailPage({ params }: Props) {
   const user = await getSessionUser();
   const available = countAvailableCopies(game.copies);
   const avail = getAvailabilityLabel(available, game.copies.length);
+  const stats = copyStatusCounts(game.copies);
+  const isBoard = game.collectionType !== "RPG";
+  const categoryIds = game.categories.map((c) => c.categoryId);
+  const similar = await fetchSimilarGames(game.id, categoryIds, game.collectionType, 4);
+  const loginHref = `/login?redirect=${encodeURIComponent(`/gry/${game.slug}#rezerwacja`)}`;
+
+  const infoRows = [
+    { label: "Typ zbioru", value: COLLECTION_TYPE_LABELS[game.collectionType] },
+    isBoard && { label: "Gracze", value: `${game.minPlayers}–${game.maxPlayers}` },
+    isBoard && { label: "Czas gry", value: `${game.minPlayTime}–${game.maxPlayTime} min` },
+    { label: "Wiek", value: `${game.minAge}+` },
+    { label: "Wydawca", value: game.publisher?.name },
+    { label: "Autor", value: game.designer?.name },
+    { label: "Rok", value: game.yearPublished?.toString() },
+    isBoard && { label: "Trudność", value: DIFFICULTY_LABELS[game.difficulty] },
+    isBoard && { label: "Rodzaj", value: GAME_TYPE_LABELS[game.type] },
+  ].filter((r): r is { label: string; value: string | undefined } => Boolean(r));
+
+  const titleBlock = (
+    <div className="space-y-3">
+      <div data-testid="game-collection-type">
+        <GameTypeBadge collectionType={game.collectionType} size="md" />
+      </div>
+      <h1 className="text-display">{game.title}</h1>
+      {game.ean && (
+        <p className="text-small font-mono text-muted-foreground" data-testid="game-ean">
+          EAN produktu: {game.ean}
+        </p>
+      )}
+      <Badge variant={avail.variant} className="text-sm" aria-label={`Status: ${avail.label}`}>
+        {avail.label}
+      </Badge>
+    </div>
+  );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="grid gap-8 lg:grid-cols-2">
+    <PageShell className="overflow-x-hidden">
+      <div className="mb-6 lg:hidden">{titleBlock}</div>
+
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,22rem)_1fr] lg:items-start">
         <div className="space-y-4">
-          <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
-            <Image
-              src={game.coverImageUrl || "/placeholder-game.svg"}
-              alt={game.title}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
+          <GameCover
+            src={game.coverImageUrl}
+            alt={`Okładka gry ${game.title}`}
+            collectionType={game.collectionType}
+            aspect="square"
+            priority
+            className="rounded-xl"
+            sizes="(max-width: 1024px) 100vw, 352px"
+          />
           {game.images.length > 0 && (
             <div className="grid grid-cols-4 gap-2">
               {game.images.map((img) => (
-                <div key={img.id} className="relative aspect-square rounded-md bg-muted">
-                  <Image src={img.url} alt={img.alt ?? ""} fill className="object-cover rounded-md" />
+                <div key={img.id} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+                  <Image
+                    src={img.url}
+                    alt={img.alt ?? `Zdjęcie gry ${game.title}`}
+                    fill
+                    className="object-cover"
+                    sizes="80px"
+                  />
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <Badge variant={avail.variant} className="mb-2">
-              {avail.label} · {available}/{game.copies.length} egzemplarzy
-            </Badge>
-            <h1 className="text-3xl font-bold">{game.title}</h1>
-            <p className="mt-2 text-muted-foreground">
-              {game.publisher?.name}
-              {game.designer ? ` · ${game.designer.name}` : ""}
-              {game.yearPublished ? ` · ${game.yearPublished}` : ""}
+        <div className="min-w-0 space-y-6">
+          <div className="hidden lg:block">{titleBlock}</div>
+
+          <SectionCard title="Opis">
+            <p className="text-body whitespace-pre-wrap">{game.description}</p>
+          </SectionCard>
+
+          <SectionCard title="Dostępność">
+            <p className="text-body">
+              <strong>{available}</strong> z {stats.total} egzemplarzy można zarezerwować teraz.
             </p>
-          </div>
+            <dl className="text-small mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div>
+                <dt className="text-muted-foreground">Wszystkie</dt>
+                <dd className="text-lg font-semibold">{stats.total}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Dostępne</dt>
+                <dd className="text-lg font-semibold text-success">{stats.available}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Zarezerwowane</dt>
+                <dd className="text-lg font-semibold">{stats.reserved}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Wypożyczone</dt>
+                <dd className="text-lg font-semibold">{stats.borrowed}</dd>
+              </div>
+            </dl>
+          </SectionCard>
 
-          <div className="flex flex-wrap gap-4 text-sm">
-            <span className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
-              {game.minPlayers}–{game.maxPlayers} graczy
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              {game.minPlayTime}–{game.maxPlayTime} min
-            </span>
-            <span>Wiek: {game.minAge}+</span>
-            <span>{DIFFICULTY_LABELS[game.difficulty]}</span>
-            <span>{GAME_TYPE_LABELS[game.type]}</span>
-          </div>
+          <SectionCard title="Informacje">
+            <dl className="grid gap-3 sm:grid-cols-2">
+              {infoRows.map(
+                (row) =>
+                  row.value && (
+                    <div key={row.label}>
+                      <dt className="text-small font-medium text-muted-foreground">{row.label}</dt>
+                      <dd className="text-body font-medium">{row.value}</dd>
+                    </div>
+                  ),
+              )}
+            </dl>
+            {isBoard && (
+              <div className="text-small mt-4 flex flex-wrap gap-4 text-muted-foreground lg:hidden">
+                <span className="inline-flex items-center gap-1">
+                  <Users className="h-4 w-4" aria-hidden />
+                  {game.minPlayers}–{game.maxPlayers} graczy
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Clock className="h-4 w-4" aria-hidden />
+                  {game.minPlayTime}–{game.maxPlayTime} min
+                </span>
+              </div>
+            )}
+          </SectionCard>
 
-          <div className="flex flex-wrap gap-2">
-            {game.categories.map((c) => (
-              <Badge key={c.categoryId} variant="secondary">
-                {c.category.name}
-              </Badge>
-            ))}
-            {game.tags.map((t) => (
-              <Badge key={t.tagId} variant="outline">
-                {t.tag.name}
-              </Badge>
-            ))}
-          </div>
-
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <p>{game.description}</p>
-          </div>
+          {(game.categories.length > 0 || game.tags.length > 0) && (
+            <div className="flex flex-wrap gap-2">
+              {game.categories.map((c) => (
+                <Badge key={c.categoryId} variant="secondary">
+                  {c.category.name}
+                </Badge>
+              ))}
+              {game.tags.map((t) => (
+                <Badge key={t.tagId} variant="outline">
+                  {t.tag.name}
+                </Badge>
+              ))}
+            </div>
+          )}
 
           {game.instructionUrl && (
-            <Button variant="outline" asChild>
+            <Button variant="outline" className="min-h-11" asChild>
               <a href={game.instructionUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-4 w-4" />
-                Instrukcja
+                <ExternalLink className="h-4 w-4" aria-hidden />
+                Instrukcja PDF / link
               </a>
             </Button>
           )}
 
-          <Card>
-            <CardContent className="space-y-4 pt-6">
+          <SectionCard
+            title="Rezerwacja"
+            description={
+              available > 0
+                ? "Zarezerwuj egzemplarz — potwierdzimy w bibliotece."
+                : "Obecnie brak wolnych egzemplarzy."
+            }
+          >
+            <div id="rezerwacja" className="scroll-mt-24">
               {user ? (
                 available > 0 ? (
                   <ReserveButton gameId={game.id} />
                 ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Wszystkie egzemplarze są zajęte. Sprawdź ponownie później lub skontaktuj się z
-                    biblioteką.
+                  <p
+                    className="text-body rounded-lg border border-warning/30 bg-warning/10 p-4"
+                    role="status"
+                  >
+                    Wszystkie egzemplarze są zajęte. Sprawdź katalog później lub zapytaj bibliotekarza.
                   </p>
                 )
               ) : (
-                <p className="text-sm">
-                  <Link href="/login" className="font-medium text-primary underline">
+                <p className="text-body">
+                  <Link
+                    href={loginHref}
+                    className="font-semibold text-primary underline-offset-2 hover:underline"
+                  >
                     Zaloguj się
                   </Link>
                   , aby zarezerwować tę grę.
                 </p>
               )}
-            </CardContent>
-          </Card>
-
-          {game.reservations.length > 0 && (
-            <div>
-              <h2 className="mb-2 font-semibold">Aktywne rezerwacje</h2>
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                {game.reservations.map((r) => (
-                  <li key={r.id}>
-                    {RESERVATION_STATUS_LABELS[r.status]} — {formatDate(r.createdAt)}
-                  </li>
-                ))}
-              </ul>
             </div>
-          )}
+          </SectionCard>
         </div>
       </div>
-    </div>
+
+      {similar.length > 0 && (
+        <section className="mt-12 space-y-6">
+          <h2 className="text-h2">Podobne gry</h2>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {similar.map((g) => (
+              <GameCard key={g.id} game={g} />
+            ))}
+          </div>
+        </section>
+      )}
+    </PageShell>
   );
 }

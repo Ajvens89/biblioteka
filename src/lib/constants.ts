@@ -1,6 +1,7 @@
 import type {
   CopyStatus,
   Difficulty,
+  GameCollectionType,
   GameType,
   LoanStatus,
   ReservationStatus,
@@ -16,6 +17,11 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   USER: "Użytkownik",
   LIBRARIAN: "Bibliotekarz",
   ADMIN: "Administrator",
+};
+
+export const COLLECTION_TYPE_LABELS: Record<GameCollectionType, string> = {
+  BOARD_GAME: "Gry planszowe",
+  RPG: "Gry fabularne",
 };
 
 export const GAME_TYPE_LABELS: Record<GameType, string> = {

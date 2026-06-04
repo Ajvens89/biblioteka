@@ -1,54 +1,36 @@
 # Biblioteka Zakątka Fantastyki
 
-**To nie jest makieta.** Aplikacja zapisuje dane w PostgreSQL (Prisma), obsługuje rezerwacje, wypożyczenia i panel admina z kontrolą ról. Logowanie działa w dwóch trybach:
+Aplikacja webowa biblioteki gier Fundacji Zakątek Fantastyki: katalog publiczny, rezerwacje online, panel bibliotekarza i administratora. Dane w **PostgreSQL** (Prisma), logika biznesowa w **Server Actions** i `src/lib/services`.
 
-| Tryb | Kiedy | Logowanie |
-|------|--------|-----------|
-| **local** (domyślny bez Supabase) | Dev, Docker Postgres | Hasło w `profiles.password_hash` + cookie |
-| **supabase** | Produkcja, klucze API | Supabase Auth + ten sam model `profiles` |
+To **nie jest makieta** — rezerwacje, wypożyczenia, EAN i import zapisują się w bazie.
 
-## Co jest „prawdziwe” (nie mock UI)
+## Funkcje
 
-| Funkcja | Implementacja |
-|---------|----------------|
-| Baza danych | Prisma → PostgreSQL (`games`, `game_copies`, `reservations`, `loans`, …) |
-| Katalog / filtry | Zapytania Prisma w `src/lib/games/queries.ts` |
-| Rezerwacja | Serwis `reserveGame` → `src/lib/services/reservations.ts` (akcja: `src/lib/actions/reservations.ts`) |
-| Wydanie / zwrot | Serwisy w `src/lib/services/loans.ts` (akcja: `src/lib/actions/loans.ts`) |
-| Dodanie gry / egzemplarza | Server Actions + Zod (`src/lib/actions/games.ts`) |
-| Role | `profiles.role` — weryfikacja w akcjach i `requireStaffFromDb()` w `/admin` |
-| Walidacja | Zod po stronie serwera (formularze auth, gry, egzemplarze) |
-| Seed | `prisma/seed.ts` — 20 gier, konta, rezerwacje, wypożyczenia |
-| E-mail | Resend lub **log w konsoli** (nie wysyła „na niby” w UI — zapis w `notifications`) |
+| Obszar | Opis |
+|--------|------|
+| **Katalog** | Wyszukiwanie, filtry planszówki/RPG, dostępność, skan EAN, karty z okładkami |
+| **Rezerwacje** | Użytkownik rezerwuje wolny egzemplarz; staff zatwierdza → odbiór → wypożyczenie → zwrot |
+| **Panel admin** | Gry, egzemplarze, rezerwacje, wypożyczenia, użytkownicy, import, dashboard |
+| **EAN / ISBN** | Lookup po stronie serwera (lokalna baza → Google Books → Open Library → BGG po tytule) |
+| **Skaner** | Kamera tylko po otwarciu modala (BarcodeDetector / ZXing) |
+| **Import `products.json`** | Gry planszowe + egzemplarze (`npm run import:products`) |
+| **Typy zbioru** | `BOARD_GAME` (planszowe), `RPG` (fabularne) |
+| **Okładki** | URL zewnętrzny lub placeholder; opcjonalnie Supabase Storage |
 
-## Warstwa usług: `src/lib/services`
+## Szybki start
 
-Logika biznesowa rezerwacji i wypożyczeń jest w jednym miejscu:
+### 1. Baza danych
 
-- `src/lib/services/reservations.ts` — rezerwacja, zatwierdzenie, gotowość do odbioru, anulowanie, limity użytkownika
-- `src/lib/services/loans.ts` — wydanie z rezerwacji, zwrot, status egzemplarza w transakcji
-- `src/lib/services/errors.ts` — `ServiceError` (kody błędów biznesowych)
-
-**Server Actions** (`src/lib/actions/reservations.ts`, `loans.ts`) **nie** powinny zawierać własnych transakcji biznesowych. Ich rola:
-
-1. Walidacja wejścia (Zod)
-2. Auth i role (`requireActor`, `requireActorStaff`, …)
-3. Wywołanie funkcji z `src/lib/services/*`
-4. Warstwa UI: powiadomienia (`notifyUser`), `revalidatePath` (toasty obsługuje klient)
-
-Testy integracyjne na bazie używają **tych samych serwisów** co UI:
-
-- `npm run verify:flow` → `src/lib/flows/library-flow.ts` woła `services/reservations` i `services/loans`
-- `npm run verify:race` → `attemptFlowCreateReservation` → `reserveGame` (ten sam kod co przy rezerwacji z panelu/katalogu)
-
-**Zasada na przyszłość:** nie duplikuj logiki rezerwacji/wypożyczeń w akcjach, komponentach ani testach. Jeśli zmienia się przepływ biblioteki, zmieniaj najpierw `services`, potem dopasuj akcje i testy (`verify:flow`, `verify:race`, ewentualnie E2E).
-
-## Szybki start (lokalnie, bez Supabase)
-
-### 1. PostgreSQL
+**Docker (zalecane):**
 
 ```bash
 docker compose up -d
+```
+
+**Albo Prisma Dev (bez Dockera):**
+
+```bash
+npx prisma dev --detach
 ```
 
 ### 2. Konfiguracja
@@ -58,22 +40,25 @@ cp .env.local.example .env
 npm install
 ```
 
-### 3. Schema + seed
+Ustaw `DATABASE_URL` i `DIRECT_URL` w `.env` (lokalnie często ten sam URL; Docker: `postgresql://biblioteka:biblioteka@localhost:5432/biblioteka`).
+
+### 3. Schema i dane
 
 ```bash
 npx prisma db push
+# lub z migracjami: npm run db:migrate:deploy  (staging/prod)
 npm run db:seed
 ```
 
-### 4. Uruchom
+### 4. Uruchomienie
 
 ```bash
 npm run dev
 ```
 
-Otwórz [http://localhost:3000](http://localhost:3000). Na `/login` zobaczysz baner **Tryb lokalny**.
+→ [http://localhost:3000](http://localhost:3000) — na `/login` baner **Tryb lokalny** gdy `AUTH_PROVIDER=local`.
 
-### Konta testowe (po seedzie)
+## Konta testowe (po `db:seed`)
 
 | Rola | E-mail | Hasło |
 |------|--------|-------|
@@ -81,138 +66,143 @@ Otwórz [http://localhost:3000](http://localhost:3000). Na `/login` zobaczysz ba
 | Bibliotekarz | bibliotekarz@example.com | Bibliotekarz123! |
 | Użytkownik | user@example.com | User123! |
 
-### Przepływ do ręcznego sprawdzenia
+## Komendy (`package.json`)
 
-1. Zaloguj jako **user** → katalog → rezerwacja gry (egzemplarz `RESERVED` w DB).
-2. Zaloguj jako **bibliotekarz** → `/admin/rezerwacje` → Zatwierdź → Gotowe → **Wydaj**.
-3. **Zwrot** w `/admin/wypozyczenia`.
-4. Zaloguj jako **admin** → `/admin/gry/nowa` — nowa gra w bazie; `/admin/egzemplarze` — nowy egzemplarz.
+| Skrypt | Opis |
+|--------|------|
+| `npm run dev` | Serwer deweloperski Next.js |
+| `npm run build` | `prisma generate` + build produkcyjny |
+| `npm run start` | Serwer po buildzie |
+| `npm run lint` | ESLint |
+| `npm run db:push` | `prisma db push` — schema → DB (dev) |
+| `npm run db:migrate:deploy` | `prisma migrate deploy` — **staging / produkcja** |
+| `npm run db:seed` | Dane startowe (gry, konta, przykłady) |
+| `npm run db:seed:staging` | Seed idempotentny na staging (bez usuwania danych) |
+| `npm run db:migrate` | `prisma migrate dev` — nowa migracja w dev |
+| `npm run db:studio` | Prisma Studio |
+| `npm run verify` | Szybki ping bazy + liczniki tabel |
+| `npm run verify:flow` | Integracja: rezerwacja → zwrot (serwisy) |
+| `npm run verify:race` | Test wyścigu dwóch rezerwacji |
+| `npm run verify:ean` | EAN + typy zbiorów na DB |
+| `npm run verify:products-import` | Weryfikacja importu products.json |
+| `npm run verify:ean-images` | Okładki (mocki providerów + DB) — opcjonalny |
+| `npm run audit:ean` | Audyt duplikatów EAN (**tylko odczyt**) |
+| `npm run import:products` | Import z `products.json` (ścieżka jako argument) |
+| `npm run test:unit` | Testy jednostkowe serwisów (bez DB) |
+| `npm run test:e2e` | Playwright (wymaga DB + dev na :3001 lub `test:e2e:ci`) |
+| `npm run test:e2e:ci` | E2E z buildem (`PLAYWRIGHT_FORCE_WEBSERVER=1` w CI) |
+| `npm run test:e2e:staging` | E2E przeciwko URL (`PLAYWRIGHT_BASE_URL=…`) |
+| `npm run check:all` | Pełna weryfikacja przed commitem (patrz niżej) |
+| `npm run db:ping` | `SELECT 1` — test połączenia |
 
-## Podpięcie Supabase
-
-- **[docs/LOCAL_AUTH.md](docs/LOCAL_AUTH.md)** — logowanie lokalne  
-- **[docs/SUPABASE.md](docs/SUPABASE.md)** — Supabase Auth  
-- **[docs/SECURITY.md](docs/SECURITY.md)** — audyt bezpieczeństwa
-
-Skrót:
-
-1. Ustaw `AUTH_PROVIDER=supabase` i klucze z panelu.
-2. `DATABASE_URL` z tego samego projektu Supabase.
-3. `npm run db:seed` — utworzy użytkowników w Supabase Auth.
-
-## Zmienne środowiskowe
-
-| Zmienna | Opis |
-|---------|------|
-| `DATABASE_URL` | **Wymagane** — PostgreSQL |
-| `AUTH_PROVIDER` | `local` lub `supabase` (auto-detekcja) |
-| `AUTH_SECRET` | Podpis cookie w trybie local (min. 16 znaków) |
-| `NEXT_PUBLIC_SUPABASE_*` | Tylko dla `supabase` |
-| `RESEND_API_KEY` | Opcjonalnie — maile |
-
-## Skrypty
+### Jedna komenda przed commitem
 
 ```bash
-npm run dev          # dev server
-npm run build        # prisma generate + next build
-npm run lint
-npm run db:seed
-npm run db:studio    # podgląd bazy
-npx prisma migrate dev
-npm run verify:flow  # pełny przepływ na DB (serwisy)
-npm run verify:race  # test wyścigu rezerwacji
-npm run test:e2e     # Playwright (wymaga działającego dev + seed)
+npm run check:all
 ```
 
-### Test przepływu na bazie (`verify:flow`)
+Kolejność: `prisma validate` → `lint` → `test:unit` → `verify:flow` → `verify:race` → `verify:ean` → `audit:ean` → `test:e2e:ci` → `build`.
 
-Wymaga działającego PostgreSQL i seeda:
+Jeśli PostgreSQL nie działa, skrypt wypisze:
+
+> Uruchom `npx prisma dev --detach` albo `docker compose up -d`
+
+i pominie kroki wymagające bazy (bez długiego stack trace).
+
+## Import produktów
+
+Plik: `./products.json`, `./data/products.json` lub `./public/products.json` (wzór: `data/products.json.example`).
 
 ```bash
-docker compose up -d
-npx prisma db push
-npm run db:seed
-npm run verify:flow
+npm run import:products -- ./data/products.json --dry-run
+npm run import:products -- ./data/products.json
+npm run verify:products-import
 ```
 
-Skrypt (`scripts/verify-flow.ts` → `src/lib/flows/library-flow.ts` → **`src/lib/services/*`**) wykonuje na żywej bazie:
+- `barcode` → `games.ean` (kod produktu, nie egzemplarza).
+- Domyślnie `BOARD_GAME`.
+- Ponowny import **aktualizuje** istniejące gry (tytuł zawsze; opis/okładka gdy są w JSON) — zrób `--dry-run` na produkcji.
 
-rezerwacja (PENDING) → zatwierdzenie → gotowe do odbioru → wydanie (loan ACTIVE) → zwrot (AVAILABLE),
+Panel admin: `/admin/import`.
 
-sprawdza statusy w tabelach i wpisy `audit_logs`, potem **usuwa** dane testowe (tag `verify-flow:{runId}`).
-
-Sukces: `✅ FLOW OK` · Błąd: `❌ FLOW FAILED: …`
-
-Szybki ping bazy (bez pełnego flow): `npm run verify`
-
-### Test wyścigu rezerwacji (`verify:race`)
-
-Sprawdza, czy **tylko jedna** z dwóch równoległych rezerwacji wygrywa o ten sam egzemplarz:
+## Audyt EAN
 
 ```bash
-npm run verify:race
+npm run audit:ean
+npm run audit:ean -- --json
 ```
 
-- Fixture: gra `verify-race-game` z **jednym** egzemplarzem `VF-RACE-001`
-- Użytkownicy: `user@example.com` + `verify-race-b@example.com` (tworzony przez test)
-- Dwie równoległe transakcje Prisma (`Promise.all`, osobne klienty)
-- Oczekiwane: 1× sukces, 1× błąd (RACE / brak dostępności), copy → `RESERVED`, jedna aktywna rezerwacja
-- Po teście: cleanup
+Tylko odczyt — duplikaty, konflikty, błędne sumy kontrolne. Plan scalania: `npm run plan:ean-merge`.
 
-Sukces: `✅ RACE TEST OK` · Błąd: `❌ RACE TEST FAILED: …`
-
-## Aktualny status MVP
-
-Ostatnia weryfikacja lokalna (PostgreSQL przez `npx prisma dev --detach`, po `npm run db:seed`):
-
-| Sprawdzenie | Wynik |
-|-------------|--------|
-| `npx prisma validate` | OK |
-| `npm run lint` | OK (1 ostrzeżenie: `<img>` w `copy-qr.tsx`) |
-| `npm run verify:flow` | OK |
-| `npm run verify:race` | OK |
-| `npm run test:e2e` | OK — 4/4 scenariusze |
-| `npm run build` | OK |
-
-**Windows:** przed `npm run build` zatrzymaj `npm run dev`, bo `prisma generate` może dostać `EPERM` na zablokowanym pliku silnika Prisma (gdy działa `next dev`).
-
-## Jak sprawdzić projekt przed commitem
-
-Przy działającym PostgreSQL (Docker lub `npx prisma dev --detach`) i po `npm run db:seed`:
+## Testy
 
 ```bash
-npx prisma validate
-npm run lint
+npm run test:unit          # bez bazy
+npm run db:ping            # połączenie
 npm run verify:flow
 npm run verify:race
-npm run test:e2e
+npm run verify:ean
+npm run audit:ean
+npm run test:e2e           # uruchom wcześniej npm run dev (port 3001) lub:
+# PLAYWRIGHT_FORCE_WEBSERVER=1 CI=1 npm run test:e2e:ci
 npm run build
 ```
 
-**Uwaga (Windows):** jeśli `npm run build` kończy się błędem `EPERM` przy `prisma generate`, zatrzymaj `npm run dev` / `next dev` (blokada pliku silnika Prisma) i uruchom build ponownie.
+**Windows:** przed `build` zatrzymaj `npm run dev` (blokada pliku Prisma, błąd `EPERM`).
 
-Dla E2E: domyślnie Playwright łączy się z dev serverem na porcie **3001** (gdy 3000 jest zajęty). Uruchom `npm run dev` przed `npm run test:e2e`.
+## Staging / Preview (Vercel)
 
-## Stack
+Żywy link testowy bez dotykania produkcji: **[docs/STAGING.md](docs/STAGING.md)** (checklist, import, E2E na URL).
 
-Next.js 16 · TypeScript · Tailwind · Prisma 6 · PostgreSQL · Supabase (opcjonalnie) · Zod · Server Actions
+Skrót po pierwszym deployu:
 
-## Struktura
-
-```
-src/lib/services/    # Logika biznesowa rezerwacji i wypożyczeń (źródło prawdy)
-src/lib/actions/     # Server Actions: Zod, auth, serwisy, revalidate
-src/lib/flows/       # verify:flow / verify:race (wołają services)
-src/lib/auth/        # local + supabase, sesja, RBAC
-e2e/                 # Playwright (prawdziwa przeglądarka)
-prisma/schema.prisma # Model bazy
-prisma/seed.ts       # Dane startowe
-docs/SUPABASE.md     # Podpięcie Supabase
+```bash
+npm run db:migrate:deploy
+npm run db:seed:staging
+PLAYWRIGHT_BASE_URL=https://twoj-preview.vercel.app npm run test:e2e:staging
 ```
 
-## Wdrożenie (Vercel)
+## Wdrożenie
 
-Zmienne jak w `.env.example`, `AUTH_PROVIDER=supabase`, `npx prisma migrate deploy`, redirect URL w Supabase Auth.
+- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** — Docker, Prisma Dev, Supabase, **Vercel staging**, migracje
+- **[docs/SUPABASE.md](docs/SUPABASE.md)** — Auth Supabase
+- **[docs/LOCAL_AUTH.md](docs/LOCAL_AUTH.md)** — Auth lokalne (dev)
+- **[docs/SECURITY.md](docs/SECURITY.md)** — model bezpieczeństwa
+- **[docs/SECURITY_CHECKLIST.md](docs/SECURITY_CHECKLIST.md)** — checklist przed prod
+
+Skrót produkcji: `AUTH_PROVIDER=supabase`, silne `AUTH_SECRET`, `prisma migrate deploy`, redirect URLs w Supabase Auth.
+
+## Architektura
+
+```
+src/lib/services/     # Źródło prawdy: rezerwacje, wypożyczenia, EAN, import
+src/lib/actions/      # Zod + auth + wywołanie serwisów
+src/lib/games/        # Zapytania katalogu
+src/app/              # Strony Next.js (App Router)
+e2e/                  # Playwright
+prisma/               # Schema + seed
+```
+
+**Zasada:** nie duplikuj logiki rezerwacji/wypożyczeń poza `services/`.
+
+## Znane ograniczenia
+
+- **RLS Supabase** — nie jest pełnym modelem dostępu w tym repo; autoryzacja przez Prisma + role w `profiles`.
+- **Storage okładek** — opcjonalny; bez konfiguracji zostają zewnętrzne URL.
+- **E-mail** — bez `RESEND_API_KEY` tylko log + wpis w `notifications`.
+- **Import** — może nadpisać tytuł istniejącej gry przy ponownym imporcie.
+- **Planszeo** — tylko link do ręcznego wyszukiwania, brak automatycznego API.
+- **Middleware admin** — sprawdza sesję, rolę staff weryfikuje layout + akcje.
+
+## Roadmapa
+
+- [ ] Supabase Storage dla okładek + polityki bucketu
+- [ ] RLS / polityki dostępu do DB (jeśli wymagane przez audyt)
+- [ ] Maile transakcyjne (Resend) na produkcji
+- [ ] Cron: przypomnienia / przeterminowane
+- [ ] Flaga importu „nie nadpisuj ręcznych pól”
+- [ ] Migracje produkcyjne na dedykowanej bazie testowej
+- [ ] Dopracowanie UI (mobile, dostępność)
 
 ---
 

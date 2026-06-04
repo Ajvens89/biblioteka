@@ -4,8 +4,13 @@ import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 import slugify from "slugify";
 import { DEFAULT_SETTINGS } from "../src/lib/constants";
+import { buildEan13 } from "../src/lib/services/ean";
 
 const prisma = new PrismaClient();
+
+const args = process.argv.slice(2);
+const isStaging = args.includes("--staging");
+const resetSeedData = args.includes("--reset-seed-data");
 
 function localAuthUserId(email: string) {
   return `local:${email.toLowerCase()}`;
@@ -17,9 +22,17 @@ const TEST_USERS = [
   { email: "user@example.com", password: "User123!", role: "USER" as UserRole, fullName: "Użytkownik Testowy" },
 ];
 
+/** Fikcyjne kody testowe (suma kontrolna wyliczona algorytmem EAN-13). */
+const TEST_EAN = {
+  catan: buildEan13("590123412345"),
+  carcassonne: buildEan13("590123412346"),
+  dnd: buildEan13("978078696559"),
+  gloomhaven: buildEan13("978099785487"),
+} as const;
+
 const GAMES = [
-  { title: "Catan", type: "BOARD", difficulty: "MEDIUM", minPlayers: 3, maxPlayers: 4, minPlayTime: 60, maxPlayTime: 120, minAge: 10, featured: true },
-  { title: "Carcassonne", type: "BOARD", difficulty: "EASY", minPlayers: 2, maxPlayers: 5, minPlayTime: 30, maxPlayTime: 45, minAge: 7, featured: true },
+  { title: "Catan", type: "BOARD", collectionType: "BOARD_GAME" as const, ean: TEST_EAN.catan, difficulty: "MEDIUM", minPlayers: 3, maxPlayers: 4, minPlayTime: 60, maxPlayTime: 120, minAge: 10, featured: true },
+  { title: "Carcassonne", type: "BOARD", collectionType: "BOARD_GAME" as const, ean: TEST_EAN.carcassonne, difficulty: "EASY", minPlayers: 2, maxPlayers: 5, minPlayTime: 30, maxPlayTime: 45, minAge: 7, featured: true },
   { title: "Ticket to Ride", type: "BOARD", difficulty: "EASY", minPlayers: 2, maxPlayers: 5, minPlayTime: 30, maxPlayTime: 60, minAge: 8 },
   { title: "Pandemic", type: "BOARD", difficulty: "MEDIUM", minPlayers: 2, maxPlayers: 4, minPlayTime: 45, maxPlayTime: 60, minAge: 8 },
   { title: "Dixit", type: "PARTY", difficulty: "EASY", minPlayers: 3, maxPlayers: 8, minPlayTime: 30, maxPlayTime: 30, minAge: 8 },
@@ -30,8 +43,8 @@ const GAMES = [
   { title: "King of Tokyo", type: "FAMILY", difficulty: "EASY", minPlayers: 2, maxPlayers: 6, minPlayTime: 20, maxPlayTime: 30, minAge: 8 },
   { title: "Codenames", type: "PARTY", difficulty: "EASY", minPlayers: 2, maxPlayers: 8, minPlayTime: 15, maxPlayTime: 15, minAge: 10 },
   { title: "Terraforming Mars", type: "BOARD", difficulty: "HARD", minPlayers: 1, maxPlayers: 5, minPlayTime: 90, maxPlayTime: 120, minAge: 12 },
-  { title: "Gloomhaven", type: "RPG", difficulty: "EXPERT", minPlayers: 1, maxPlayers: 4, minPlayTime: 60, maxPlayTime: 120, minAge: 14 },
-  { title: "Dungeons & Dragons Starter Set", type: "RPG", difficulty: "MEDIUM", minPlayers: 3, maxPlayers: 6, minPlayTime: 120, maxPlayTime: 180, minAge: 12 },
+  { title: "Gloomhaven", type: "RPG", collectionType: "RPG" as const, ean: TEST_EAN.gloomhaven, difficulty: "EXPERT", minPlayers: 1, maxPlayers: 4, minPlayTime: 60, maxPlayTime: 120, minAge: 14 },
+  { title: "Dungeons & Dragons Starter Set", type: "RPG", collectionType: "RPG" as const, ean: TEST_EAN.dnd, difficulty: "MEDIUM", minPlayers: 3, maxPlayers: 6, minPlayTime: 120, maxPlayTime: 180, minAge: 12 },
   { title: "Warhammer Age of Sigmar Starter", type: "WARGAME", difficulty: "HARD", minPlayers: 2, maxPlayers: 2, minPlayTime: 60, maxPlayTime: 120, minAge: 12 },
   { title: "Scythe", type: "BOARD", difficulty: "HARD", minPlayers: 1, maxPlayers: 5, minPlayTime: 90, maxPlayTime: 115, minAge: 14 },
   { title: "Root", type: "BOARD", difficulty: "HARD", minPlayers: 2, maxPlayers: 4, minPlayTime: 60, maxPlayTime: 90, minAge: 10 },
@@ -39,6 +52,43 @@ const GAMES = [
   { title: "Klask", type: "PARTY", difficulty: "EASY", minPlayers: 2, maxPlayers: 2, minPlayTime: 10, maxPlayTime: 15, minAge: 8 },
   { title: "Biblioteka Zakątka — zestaw edukacyjny", type: "EDUCATIONAL", difficulty: "EASY", minPlayers: 2, maxPlayers: 6, minPlayTime: 20, maxPlayTime: 40, minAge: 6 },
 ];
+
+const SEED_GAME_SLUGS = GAMES.map((g) =>
+  slugify(g.title, { lower: true, strict: true, locale: "pl" }),
+);
+
+/**
+ * Usuwa tylko dane z seeda (gry demo + egzemplarze ZF-*).
+ * Wymaga jawnej flagi --reset-seed-data. Nie dotyka importu products.json ani ręcznych gier.
+ */
+async function resetSeedCatalogOnly() {
+  console.log("⚠️  --reset-seed-data: usuwanie gier i egzemplarzy z seeda…");
+  const seedGames = await prisma.game.findMany({
+    where: { slug: { in: SEED_GAME_SLUGS } },
+    select: { id: true },
+  });
+  const gameIds = seedGames.map((g) => g.id);
+  if (gameIds.length === 0) {
+    console.log("   Brak gier seed do usunięcia.");
+    return;
+  }
+
+  await prisma.loan.deleteMany({ where: { copy: { gameId: { in: gameIds } } } });
+  await prisma.reservation.deleteMany({ where: { gameId: { in: gameIds } } });
+  await prisma.gameCopy.deleteMany({
+    where: {
+      OR: [
+        { gameId: { in: gameIds } },
+        { inventoryNumber: { startsWith: "ZF-" } },
+      ],
+    },
+  });
+  await prisma.gameCategory.deleteMany({ where: { gameId: { in: gameIds } } });
+  await prisma.gameTag.deleteMany({ where: { gameId: { in: gameIds } } });
+  await prisma.gameImage.deleteMany({ where: { gameId: { in: gameIds } } });
+  await prisma.game.deleteMany({ where: { id: { in: gameIds } } });
+  console.log(`   Usunięto ${gameIds.length} gier seed.`);
+}
 
 /** Zawsze: konta z hasłem w PostgreSQL (tryb AUTH_PROVIDER=local). */
 async function seedLocalUsers() {
@@ -107,8 +157,91 @@ async function seedSupabaseUsers() {
   }
 }
 
+async function seedDemoReservations(
+  userProfile: { id: string },
+  gameRecords: { id: string }[],
+) {
+  if (gameRecords.length < 3) return;
+
+  const existingPending = await prisma.reservation.findFirst({
+    where: { userId: userProfile.id, gameId: gameRecords[0].id, status: "PENDING" },
+  });
+  if (!existingPending) {
+    const copy = await prisma.gameCopy.findFirst({
+      where: { gameId: gameRecords[0].id, status: "AVAILABLE" },
+    });
+    if (copy) {
+      await prisma.gameCopy.update({ where: { id: copy.id }, data: { status: "RESERVED" } });
+      await prisma.reservation.create({
+        data: {
+          userId: userProfile.id,
+          gameId: gameRecords[0].id,
+          copyId: copy.id,
+          status: "PENDING",
+          pickupDeadline: new Date(Date.now() + 3 * 86400000),
+        },
+      });
+    }
+  }
+
+  const existingReady = await prisma.reservation.findFirst({
+    where: { userId: userProfile.id, gameId: gameRecords[1].id, status: "READY_FOR_PICKUP" },
+  });
+  if (!existingReady) {
+    const copy2 = await prisma.gameCopy.findFirst({
+      where: { gameId: gameRecords[1].id, status: "AVAILABLE" },
+    });
+    if (copy2) {
+      await prisma.reservation.create({
+        data: {
+          userId: userProfile.id,
+          gameId: gameRecords[1].id,
+          copyId: copy2.id,
+          status: "READY_FOR_PICKUP",
+          pickupDeadline: new Date(Date.now() + 2 * 86400000),
+          approvedAt: new Date(),
+          readyAt: new Date(),
+        },
+      });
+      await prisma.gameCopy.update({ where: { id: copy2.id }, data: { status: "RESERVED" } });
+    }
+  }
+
+  const existingLoan = await prisma.loan.findFirst({
+    where: { userId: userProfile.id, copy: { gameId: gameRecords[2].id } },
+  });
+  if (!existingLoan) {
+    const borrowedCopy = await prisma.gameCopy.findFirst({
+      where: { gameId: gameRecords[2].id },
+    });
+    if (borrowedCopy) {
+      await prisma.gameCopy.update({ where: { id: borrowedCopy.id }, data: { status: "BORROWED" } });
+      const due = new Date();
+      due.setDate(due.getDate() - 2);
+      await prisma.loan.create({
+        data: {
+          userId: userProfile.id,
+          copyId: borrowedCopy.id,
+          status: "OVERDUE",
+          dueAt: due,
+        },
+      });
+    }
+  }
+}
+
 async function main() {
-  console.log("🌱 Seed bazy danych…");
+  if (isStaging) {
+    console.log("🌱 Seed STAGING (idempotentny upsert, bez usuwania danych)…");
+  } else {
+    console.log("🌱 Seed bazy danych…");
+  }
+
+  if (resetSeedData) {
+    await resetSeedCatalogOnly();
+  } else if (isStaging) {
+    console.log("   Pominięto usuwanie — aby wyczyścić katalog seed, użyj: npm run db:seed:staging -- --reset-seed-data");
+  }
 
   for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
     await prisma.appSetting.upsert({
@@ -167,6 +300,8 @@ async function main() {
       create: {
         title: g.title,
         slug,
+        ean: "ean" in g ? (g as { ean?: string }).ean : null,
+        collectionType: "collectionType" in g ? (g as { collectionType?: "BOARD_GAME" | "RPG" }).collectionType ?? "BOARD_GAME" : "BOARD_GAME",
         description: `${g.title} — przykładowa gra w bibliotece Zakątka Fantastyki.`,
         shortDescription: `Popularna gra planszowa: ${g.title}.`,
         minPlayers: g.minPlayers,
@@ -188,7 +323,12 @@ async function main() {
           create: [{ tagId: tags[i % tags.length].id }],
         },
       },
-      update: { isActive: true, deletedAt: null },
+      update: {
+        isActive: true,
+        deletedAt: null,
+        ean: "ean" in g ? (g as { ean?: string }).ean : undefined,
+        collectionType: "collectionType" in g ? (g as { collectionType?: "BOARD_GAME" | "RPG" }).collectionType : undefined,
+      },
     });
 
     await prisma.gameCopy.upsert({
@@ -196,7 +336,7 @@ async function main() {
       create: {
         gameId: game.id,
         inventoryNumber: `ZF-${String(i + 1).padStart(4, "0")}`,
-        barcode: `5900000${String(i + 1).padStart(6, "0")}`,
+        barcode: `ZF-EGZ-${String(i + 1).padStart(4, "0")}`,
         status: i % 5 === 0 ? "BORROWED" : i % 7 === 0 ? "RESERVED" : "AVAILABLE",
         location: "Regał A",
       },
@@ -223,68 +363,25 @@ async function main() {
   const userProfile = await prisma.profile.findUnique({ where: { email: "user@example.com" } });
   const librarian = await prisma.profile.findUnique({ where: { email: "bibliotekarz@example.com" } });
 
-  if (userProfile && gameRecords[0]) {
-    const copy = await prisma.gameCopy.findFirst({
-      where: { gameId: gameRecords[0].id, status: "AVAILABLE" },
-    });
-    if (copy) {
-      await prisma.gameCopy.update({ where: { id: copy.id }, data: { status: "RESERVED" } });
-      await prisma.reservation.create({
-        data: {
-          userId: userProfile.id,
-          gameId: gameRecords[0].id,
-          copyId: copy.id,
-          status: "PENDING",
-          pickupDeadline: new Date(Date.now() + 3 * 86400000),
-        },
-      });
-    }
-
-    const copy2 = await prisma.gameCopy.findFirst({
-      where: { gameId: gameRecords[1].id, status: "AVAILABLE" },
-    });
-    if (copy2) {
-      await prisma.reservation.create({
-        data: {
-          userId: userProfile.id,
-          gameId: gameRecords[1].id,
-          copyId: copy2.id,
-          status: "READY_FOR_PICKUP",
-          pickupDeadline: new Date(Date.now() + 2 * 86400000),
-          approvedAt: new Date(),
-          readyAt: new Date(),
-        },
-      });
-      await prisma.gameCopy.update({ where: { id: copy2.id }, data: { status: "RESERVED" } });
-    }
-
-    const borrowedCopy = await prisma.gameCopy.findFirst({
-      where: { gameId: gameRecords[2].id },
-    });
-    if (borrowedCopy) {
-      await prisma.gameCopy.update({ where: { id: borrowedCopy.id }, data: { status: "BORROWED" } });
-      const due = new Date();
-      due.setDate(due.getDate() - 2);
-      await prisma.loan.create({
-        data: {
-          userId: userProfile.id,
-          copyId: borrowedCopy.id,
-          status: "OVERDUE",
-          dueAt: due,
-        },
-      });
-    }
+  if (userProfile && gameRecords.length > 0) {
+    await seedDemoReservations(userProfile, gameRecords);
   }
 
   if (librarian) {
-    await prisma.auditLog.create({
-      data: {
-        actorId: librarian.id,
-        action: "LOGIN",
-        entityType: "system",
-        metadata: { seed: true },
-      },
+    const recentLogin = await prisma.auditLog.findFirst({
+      where: { actorId: librarian.id, action: "LOGIN", entityType: "system" },
+      orderBy: { createdAt: "desc" },
     });
+    if (!recentLogin?.metadata || !(recentLogin.metadata as { seed?: boolean }).seed) {
+      await prisma.auditLog.create({
+        data: {
+          actorId: librarian.id,
+          action: "LOGIN",
+          entityType: "system",
+          metadata: { seed: true },
+        },
+      });
+    }
   }
 
   console.log("✅ Seed zakończony.");

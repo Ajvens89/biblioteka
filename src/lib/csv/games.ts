@@ -1,9 +1,12 @@
 import Papa from "papaparse";
-import type { Difficulty, GameType } from "@prisma/client";
+import type { Difficulty, GameCollectionType, GameType } from "@prisma/client";
+import { parseCollectionType } from "@/lib/services/collection-type";
 
 export type GameCsvRow = {
   title: string;
   slug?: string;
+  ean?: string;
+  collectionType?: string;
   description?: string;
   shortDescription?: string;
   minPlayers?: string;
@@ -24,6 +27,8 @@ export function gamesToCsv(
   games: Array<{
     title: string;
     slug: string;
+    ean: string | null;
+    collectionType: GameCollectionType;
     description: string | null;
     shortDescription: string | null;
     minPlayers: number;
@@ -41,6 +46,9 @@ export function gamesToCsv(
   const rows = games.map((g) => ({
     title: g.title,
     slug: g.slug,
+    /** EAN produktu (games.ean) — nie mylić z game_copies.barcode */
+    ean: g.ean ?? "",
+    collectionType: g.collectionType,
     description: g.description ?? "",
     shortDescription: g.shortDescription ?? "",
     minPlayers: g.minPlayers,
@@ -63,4 +71,9 @@ export function parseGamesCsv(content: string): GameCsvRow[] {
     throw new Error(result.errors[0]?.message ?? "Błąd parsowania CSV");
   }
   return result.data.filter((r) => r.title?.trim());
+}
+
+export function parseCsvCollectionType(raw: string | undefined): GameCollectionType {
+  if (!raw?.trim()) return "BOARD_GAME";
+  return parseCollectionType(raw);
 }

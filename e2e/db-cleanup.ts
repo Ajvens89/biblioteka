@@ -4,6 +4,7 @@ import {
   CREDENTIALS,
   E2E_ADMIN_COPY_INVENTORY,
   E2E_ADMIN_GAME_SLUG,
+  E2E_EAN_RPG_SLUG,
   E2E_FLOW_COPY_INVENTORY,
   E2E_FLOW_GAME_SLUG,
   E2E_FLOW_GAME_TITLE,
@@ -155,11 +156,11 @@ export async function cleanupE2eData() {
   }
 }
 
-export async function cleanupE2eAdminGame() {
+async function deleteGameBySlug(slug: string) {
   const prisma = new PrismaClient();
   try {
     const game = await prisma.game.findUnique({
-      where: { slug: E2E_ADMIN_GAME_SLUG },
+      where: { slug },
       include: { copies: true },
     });
     if (!game) return;
@@ -180,6 +181,14 @@ export async function cleanupE2eAdminGame() {
   } finally {
     await prisma.$disconnect();
   }
+}
+
+export async function cleanupE2eEanRpgGame() {
+  await deleteGameBySlug(E2E_EAN_RPG_SLUG);
+}
+
+export async function cleanupE2eAdminGame() {
+  await deleteGameBySlug(E2E_ADMIN_GAME_SLUG);
 }
 
 export async function ensureE2eAdminGameRemoved() {

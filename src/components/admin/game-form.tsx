@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { DIFFICULTY_LABELS, GAME_TYPE_LABELS } from "@/lib/constants";
+import { COLLECTION_TYPE_LABELS, DIFFICULTY_LABELS, GAME_TYPE_LABELS } from "@/lib/constants";
 
 type GameData = {
   id?: string;
   title: string;
+  ean?: string | null;
+  collectionType?: string;
   description?: string | null;
   shortDescription?: string | null;
   minPlayers: number;
@@ -59,6 +61,8 @@ export function GameForm({
 
       const input = {
         title: String(formData.get("title")),
+        ean: String(formData.get("ean") || "") || null,
+        collectionType: String(formData.get("collectionType")) as "BOARD_GAME" | "RPG",
         description: String(formData.get("description") || ""),
         shortDescription: String(formData.get("shortDescription") || ""),
         minPlayers: Number(formData.get("minPlayers")),
@@ -68,6 +72,7 @@ export function GameForm({
         maxPlayTime: Number(formData.get("maxPlayTime")),
         difficulty: String(formData.get("difficulty")) as "EASY" | "MEDIUM" | "HARD" | "EXPERT",
         type: String(formData.get("type")) as "BOARD",
+        skipEanChecksum: formData.get("skipEanChecksum") === "on",
         publisherId: String(formData.get("publisherId") || "") || null,
         designerId: String(formData.get("designerId") || "") || null,
         yearPublished: formData.get("yearPublished")
@@ -95,6 +100,30 @@ export function GameForm({
 
   return (
     <form action={submit} className="max-w-2xl space-y-4" data-testid="game-form">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="ean">EAN / ISBN (produkt)</Label>
+          <Input id="ean" name="ean" data-testid="ean-input" defaultValue={game?.ean ?? ""} placeholder="Kod produktu — nie kod egzemplarza" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="collectionType">Typ zbioru</Label>
+          <select
+            id="collectionType"
+            name="collectionType"
+            data-testid="collection-type-select"
+            className="h-10 w-full rounded-md border px-2"
+            defaultValue={game?.collectionType ?? "BOARD_GAME"}
+          >
+            {Object.entries(COLLECTION_TYPE_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="skipEanChecksum" />
+        Zapisz mimo ostrzeżenia sumy kontrolnej EAN
+      </label>
       <div className="space-y-2">
         <Label htmlFor="title">Tytuł</Label>
         <Input id="title" name="title" data-testid="game-form-title" defaultValue={game?.title} required />

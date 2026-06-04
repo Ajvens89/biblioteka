@@ -10,13 +10,15 @@ type Props = {
   action: (prev: unknown, formData: FormData) => Promise<ActionResult>;
   fields: Array<{ name: string; label: string; type?: string }>;
   submitLabel: string;
+  redirectPath?: string;
 };
 
-export function AuthForm({ action, fields, submitLabel }: Props) {
+export function AuthForm({ action, fields, submitLabel, redirectPath }: Props) {
   const [state, formAction, pending] = useActionState(action, null);
 
   return (
     <form action={formAction} className="space-y-4" data-testid="auth-form">
+      {redirectPath && <input type="hidden" name="redirect" value={redirectPath} />}
       {fields.map((f) => (
         <div key={f.name} className="space-y-2">
           <Label htmlFor={f.name}>{f.label}</Label>

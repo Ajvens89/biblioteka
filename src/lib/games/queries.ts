@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { normalizeEan } from "@/lib/services/ean";
 import type { GameFilterInput } from "@/lib/validations/game";
 
 export const gameListInclude = {
@@ -16,14 +17,34 @@ export function buildGameWhere(filters: GameFilterInput): Prisma.GameWhereInput 
     isActive: true,
   };
 
-  if (filters.q) {
-    where.OR = [
+  if (filters.ean) {
+    try {
+      const normalized = normalizeEan(filters.ean);
+      where.ean = normalized;
+    } catch {
+      where.ean = "__invalid__";
+    }
+  } else if (filters.q) {
+    let eanClause: Prisma.GameWhereInput | null = null;
+    try {
+      const normalized = normalizeEan(filters.q);
+      eanClause = { ean: normalized };
+    } catch {
+      /* nie wygląda na EAN — szukaj tekstowo */
+    }
+    const textClauses: Prisma.GameWhereInput[] = [
       { title: { contains: filters.q, mode: "insensitive" } },
       { description: { contains: filters.q, mode: "insensitive" } },
       { shortDescription: { contains: filters.q, mode: "insensitive" } },
       { tags: { some: { tag: { name: { contains: filters.q, mode: "insensitive" } } } } },
+      { publisher: { name: { contains: filters.q, mode: "insensitive" } } },
+      { designer: { name: { contains: filters.q, mode: "insensitive" } } },
     ];
+    if (eanClause) textClauses.push(eanClause);
+    where.OR = textClauses;
   }
+
+  if (filters.collectionType) where.collectionType = filters.collectionType;
 
   if (filters.category) {
     where.categories = { some: { category: { slug: filters.category } } };
@@ -32,6 +53,7 @@ export function buildGameWhere(filters: GameFilterInput): Prisma.GameWhereInput 
   if (filters.difficulty) where.difficulty = filters.difficulty;
   if (filters.minPlayers) where.maxPlayers = { gte: filters.minPlayers };
   if (filters.maxPlayers) where.minPlayers = { lte: filters.maxPlayers };
+  if (filters.maxPlayTime) where.minPlayTime = { lte: filters.maxPlayTime };
   if (filters.minAge) where.minAge = { lte: filters.minAge };
   if (filters.tag) {
     where.tags = { some: { tag: { slug: filters.tag } } };
@@ -130,4 +152,69 @@ export async function fetchAvailableNow(limit = 6) {
     orderBy: { title: "asc" },
     take: limit,
   });
+}
+
+export async function fetchNewestGames(limit = 6) {
+  return prisma.game.findMany({
+    where: { isActive: true, deletedAt: null },
+    include: gameListInclude,
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+}
+
+export async function fetchRpgGames(limit = 6) {
+  return prisma.game.findMany({
+    where: { isActive: true, deletedAt: null, collectionType: "RPG" },
+    include: gameListInclude,
+    orderBy: { title: "asc" },
+    take: limit,
+  });
+}
+
+export async function fetchSimilarGames(
+  gameId: string,
+  categoryIds: string[],
+  collectionType: "BOARD_GAME" | "RPG",
+  limit = 4,
+) {
+  if (categoryIds.length === 0) {
+    return prisma.game.findMany({
+      where: {
+        id: { not: gameId },
+        deletedAt: null,
+        isActive: true,
+        collectionType,
+      },
+      include: gameListInclude,
+      take: limit,
+      orderBy: { popularityCount: "desc" },
+    });
+  }
+  return prisma.game.findMany({
+    where: {
+      id: { not: gameId },
+      deletedAt: null,
+      isActive: true,
+      OR: [
+        { categories: { some: { categoryId: { in: categoryIds } } } },
+        { collectionType },
+      ],
+    },
+    include: gameListInclude,
+    take: limit,
+    orderBy: { popularityCount: "desc" },
+  });
+}
+
+export async function fetchPublicStats() {
+  const [games, copies, available, rpg] = await Promise.all([
+    prisma.game.count({ where: { deletedAt: null, isActive: true } }),
+    prisma.gameCopy.count(),
+    prisma.gameCopy.count({ where: { status: "AVAILABLE" } }),
+    prisma.game.count({
+      where: { deletedAt: null, isActive: true, collectionType: "RPG" },
+    }),
+  ]);
+  return { games, copies, available, rpg };
 }

@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum UserRole {
@@ -22,6 +23,12 @@ enum GameType {
   EDUCATIONAL
   PARTY
   FAMILY
+}
+
+/** Zbiór biblioteczny: planszówki vs gry fabularne (RPG). */
+enum GameCollectionType {
+  BOARD_GAME
+  RPG
 }
 
 enum Difficulty {
@@ -164,23 +171,27 @@ model Designer {
 }
 
 model Game {
-  id               String     @id @default(uuid())
+  id               String              @id @default(uuid())
   title            String
-  slug             String     @unique
-  description      String?    @db.Text
-  shortDescription String?    @map("short_description")
-  minPlayers       Int        @default(1) @map("min_players")
-  maxPlayers       Int        @default(4) @map("max_players")
-  minAge           Int        @default(8) @map("min_age")
-  minPlayTime      Int        @default(30) @map("min_play_time")
-  maxPlayTime      Int        @default(60) @map("max_play_time")
-  difficulty       Difficulty @default(MEDIUM)
-  type             GameType   @default(BOARD)
+  slug             String              @unique
+  ean              String?
+  collectionType   GameCollectionType  @default(BOARD_GAME) @map("collection_type")
+  description      String?             @db.Text
+  shortDescription String?             @map("short_description")
+  minPlayers       Int                 @default(1) @map("min_players")
+  maxPlayers       Int                 @default(4) @map("max_players")
+  minAge           Int                 @default(8) @map("min_age")
+  minPlayTime      Int                 @default(30) @map("min_play_time")
+  maxPlayTime      Int                 @default(60) @map("max_play_time")
+  difficulty       Difficulty          @default(MEDIUM)
+  type             GameType            @default(BOARD)
   publisherId      String?    @map("publisher_id")
   designerId       String?    @map("designer_id")
   yearPublished    Int?       @map("year_published")
-  coverImageUrl    String?    @map("cover_image_url")
-  instructionUrl   String?    @map("instruction_url")
+  coverImageUrl         String?    @map("cover_image_url")
+  coverImageSource      String?    @map("cover_image_source")
+  coverImageExternalId  String?    @map("cover_image_external_id")
+  instructionUrl        String?    @map("instruction_url")
   isActive         Boolean    @default(true) @map("is_active")
   isFeatured       Boolean    @default(false) @map("is_featured")
   popularityCount  Int        @default(0) @map("popularity_count")
@@ -201,6 +212,8 @@ model Game {
   @@index([isFeatured])
   @@index([popularityCount])
   @@index([type])
+  @@index([ean])
+  @@index([collectionType])
   @@map("games")
 }
 

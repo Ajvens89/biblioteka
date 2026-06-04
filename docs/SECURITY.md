@@ -1,5 +1,7 @@
 # Bezpieczeństwo
 
+Checklist przed wdrożeniem: **[SECURITY_CHECKLIST.md](./SECURITY_CHECKLIST.md)**.
+
 ## Autoryzacja
 
 - **Źródło prawdy ról:** tabela `profiles` w PostgreSQL.

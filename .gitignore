@@ -38,12 +38,17 @@ yarn-error.log*
 # env (nie commituj sekretów; szablony są w repo)
 .env
 .env.local
+.env.production
 .env.*.local
 !.env.example
 !.env.local.example
 
 # lokalna baza / cache Prisma dev (jeśli pojawi się w katalogu projektu)
 /prisma/dev/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
 
 # vercel
 .vercel

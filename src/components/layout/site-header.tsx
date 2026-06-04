@@ -10,9 +10,9 @@ export async function SiteHeader() {
   const user = await getSessionUser();
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-border/80 bg-card/90 shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold text-primary">
+        <Link href="/" className="flex items-center gap-2 font-semibold text-primary transition-opacity hover:opacity-90">
           <BookOpen className="h-6 w-6" />
           <span className="hidden sm:inline">{APP_NAME}</span>
           <span className="sm:hidden">Zakątek</span>

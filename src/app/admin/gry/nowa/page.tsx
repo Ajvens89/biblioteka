@@ -1,11 +1,15 @@
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
-import { GameForm } from "@/components/admin/game-form";
+import { AdminGameWizard } from "@/components/admin/admin-new-game-form";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const metadata = { title: "Nowa gra" };
 
-export default async function NewGamePage() {
+type Props = { searchParams: Promise<{ mode?: string; scan?: string }> };
+
+export default async function NewGamePage({ searchParams }: Props) {
   await requireAdmin();
+  const { mode, scan } = await searchParams;
   const [publishers, designers, categories, tags] = await Promise.all([
     prisma.publisher.findMany({ orderBy: { name: "asc" } }),
     prisma.designer.findMany({ orderBy: { name: "asc" } }),
@@ -15,8 +19,18 @@ export default async function NewGamePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Nowa gra</h1>
-      <GameForm publishers={publishers} designers={designers} categories={categories} tags={tags} />
+      <PageHeader
+        title="Nowa gra"
+        description="Kreator krok po kroku — EAN nie tworzy gry automatycznie bez zatwierdzenia."
+      />
+      <AdminGameWizard
+        publishers={publishers}
+        designers={designers}
+        categories={categories}
+        tags={tags}
+        initialSource={mode === "manual" ? "manual" : "ean"}
+        openScanner={scan === "1"}
+      />
     </div>
   );
 }

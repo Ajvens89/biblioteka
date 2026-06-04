@@ -1,24 +1,57 @@
+import Link from "next/link";
+import type { Prisma } from "@prisma/client";
 import { requireStaff } from "@/lib/auth/guards";
-import { COPY_STATUS_LABELS } from "@/lib/constants";
 import { prisma } from "@/lib/db";
+import { normalizeEan } from "@/lib/services/ean";
 import { CopyForm } from "@/components/admin/copy-form";
 import { CopyQr } from "@/components/admin/copy-qr";
-import { Badge } from "@/components/ui/badge";
+import { CopiesScanPanel } from "@/components/admin/copies-scan-panel";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard } from "@/components/ui/section-card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export const metadata = { title: "Egzemplarze" };
 
 export default async function AdminCopiesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ scan?: string }>;
+  searchParams: Promise<{ scan?: string; scanMode?: string; q?: string; gameId?: string }>;
 }) {
   await requireStaff();
-  const { scan } = await searchParams;
+  const { scan, scanMode, q, gameId } = await searchParams;
+
+  const listWhere: Prisma.GameCopyWhereInput = {};
+  if (q?.trim()) {
+    const term = q.trim();
+    const or: Prisma.GameCopyWhereInput[] = [
+      { inventoryNumber: { contains: term, mode: "insensitive" } },
+      { barcode: { contains: term, mode: "insensitive" } },
+      { game: { title: { contains: term, mode: "insensitive" } } },
+    ];
+    try {
+      or.push({ game: { ean: normalizeEan(term) } });
+    } catch {
+      or.push({ game: { ean: { contains: term } } });
+    }
+    listWhere.OR = or;
+  }
 
   const [copies, games] = await Promise.all([
     prisma.gameCopy.findMany({
-      include: { game: true },
+      where: listWhere,
+      include: {
+        game: { select: { id: true, title: true, ean: true, slug: true } },
+        loans: {
+          where: { status: { in: ["ACTIVE", "OVERDUE"] } },
+          take: 1,
+          include: { user: { select: { fullName: true, email: true } } },
+        },
+      },
       orderBy: { inventoryNumber: "asc" },
+      take: 200,
     }),
     prisma.game.findMany({
       where: { deletedAt: null, isActive: true },
@@ -27,68 +60,171 @@ export default async function AdminCopiesPage({
     }),
   ]);
 
-  const highlighted = scan
-    ? copies.find((c) => c.barcode === scan || c.inventoryNumber === scan)
-    : null;
+  const highlighted =
+    scan && scanMode !== "product_ean"
+      ? await prisma.gameCopy.findFirst({
+          where: { OR: [{ barcode: scan }, { inventoryNumber: scan }] },
+          include: {
+            game: { select: { id: true, title: true, ean: true, slug: true } },
+            loans: {
+              where: { status: { in: ["ACTIVE", "OVERDUE"] } },
+              take: 1,
+              include: { user: { select: { fullName: true, email: true } } },
+            },
+          },
+        })
+      : null;
+
+  let productEanMatch: { id: string; title: string; ean: string | null; slug: string } | null = null;
+  if (scan && !highlighted && (scanMode === "product_ean" || !scanMode)) {
+    try {
+      const normalized = normalizeEan(scan);
+      const game = await prisma.game.findFirst({
+        where: { ean: normalized, deletedAt: null },
+        select: { id: true, title: true, ean: true, slug: true },
+      });
+      if (game?.ean) productEanMatch = game;
+    } catch {
+      /* nie EAN */
+    }
+  }
+
+  const selectedCopy = highlighted;
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Egzemplarze</h1>
+    <div className="space-y-8 overflow-x-hidden">
+      <PageHeader
+        title="Egzemplarze"
+        description="Konkretne pudełka w bibliotece — numery inwentarzowe, kody naklejek i statusy."
+      />
 
-      {highlighted && (
-        <div className="rounded-lg border border-primary bg-primary/5 p-4">
-          <p className="font-medium">Znaleziono: {highlighted.game.title}</p>
-          <p className="text-sm">{highlighted.inventoryNumber}</p>
+      <CopiesScanPanel defaultScan={scan} />
+
+      {scan && (
+        <div
+          className="rounded-lg border p-4 text-sm"
+          data-testid="scan-result-banner"
+        >
+          <p className="font-medium">
+            Zeskanowano ({scanMode === "product_ean" ? "EAN produktu" : "kod egzemplarza"}):{" "}
+            <span className="font-mono">{scan}</span>
+          </p>
         </div>
       )}
 
+      {selectedCopy && (
+        <SectionCard title="Znaleziony egzemplarz">
+          <div className="space-y-3">
+            <p className="text-h3">{selectedCopy.game.title}</p>
+            <p className="text-small">Nr inw.: <strong>{selectedCopy.inventoryNumber}</strong></p>
+            {selectedCopy.barcode && (
+              <p className="font-mono text-xs">Kod: {selectedCopy.barcode}</p>
+            )}
+            <StatusBadge kind="copy" status={selectedCopy.status} />
+            {selectedCopy.loans[0] && (
+              <p className="text-small text-muted-foreground">
+                Wypożyczone: {selectedCopy.loans[0].user.fullName ?? selectedCopy.loans[0].user.email}
+              </p>
+            )}
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" asChild>
+                <Link href={`/admin/egzemplarze?gameId=${selectedCopy.gameId}`}>Dodaj kolejny</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href={`/gry/${selectedCopy.game.slug}`}>Katalog publiczny</Link>
+              </Button>
+            </div>
+          </div>
+        </SectionCard>
+      )}
+
+      {productEanMatch && (
+        <SectionCard title="EAN produktu — gra w katalogu">
+          <p className="text-sm">
+            Kod <span className="font-mono">{productEanMatch.ean}</span> należy do „{productEanMatch.title}”.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button size="sm" asChild>
+              <Link href={`/admin/egzemplarze?gameId=${productEanMatch.id}`}>Dodaj egzemplarz</Link>
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <Link href={`/admin/gry?ean=${productEanMatch.ean}`}>Panel gier</Link>
+            </Button>
+          </div>
+        </SectionCard>
+      )}
+
+      {scan && !selectedCopy && !productEanMatch && (
+        <p className="text-sm text-muted-foreground">Nie znaleziono wyniku dla tego kodu.</p>
+      )}
+
       <div className="grid gap-8 lg:grid-cols-2">
-        <div>
-          <h2 className="mb-4 text-lg font-semibold">Dodaj egzemplarz</h2>
-          <CopyForm games={games} />
-        </div>
-        <div>
-          <h2 className="mb-4 text-lg font-semibold">Skanuj kod</h2>
-          <form className="flex gap-2" action="/admin/egzemplarze" method="get">
-            <input
-              name="scan"
-              placeholder="Numer inwentarzowy lub kod kreskowy"
-              className="h-10 flex-1 rounded-md border px-3 text-sm"
-              defaultValue={scan}
+        <SectionCard title="Dodaj egzemplarz">
+          <CopyForm games={games} defaultGameId={gameId} />
+        </SectionCard>
+        <SectionCard title="Wyszukaj na liście">
+          <form action="/admin/egzemplarze" method="get" className="flex gap-2">
+            <Input
+              name="q"
+              defaultValue={q}
+              placeholder="Tytuł, nr inw., barcode, EAN gry…"
+              className="flex-1"
+              data-testid="copies-search-input"
             />
-            <button type="submit" className="rounded-md bg-primary px-4 text-sm text-primary-foreground">
-              Szukaj
-            </button>
+            <Button type="submit">Szukaj</Button>
           </form>
-        </div>
+        </SectionCard>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="p-3 text-left">Nr inw.</th>
-              <th className="p-3 text-left">Gra</th>
-              <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left">QR</th>
-            </tr>
-          </thead>
-          <tbody>
+      {copies.length === 0 ? (
+        <EmptyState title="Brak egzemplarzy" description="Zmień wyszukiwanie lub dodaj pierwszy egzemplarz." />
+      ) : (
+        <>
+          <div className="hidden overflow-hidden rounded-xl border md:block">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="p-3 text-left">Nr inw.</th>
+                  <th className="p-3 text-left">Gra</th>
+                  <th className="p-3 text-left">EAN produktu</th>
+                  <th className="p-3 text-left">Status</th>
+                  <th className="p-3 text-left">Wypożyczenie</th>
+                  <th className="p-3 text-left">QR</th>
+                </tr>
+              </thead>
+              <tbody>
+                {copies.map((c) => (
+                  <tr key={c.id} className="border-t">
+                    <td className="p-3 font-mono">{c.inventoryNumber}</td>
+                    <td className="p-3">{c.game.title}</td>
+                    <td className="p-3 font-mono text-xs">{c.game.ean ?? "—"}</td>
+                    <td className="p-3">
+                      <StatusBadge kind="copy" status={c.status} />
+                    </td>
+                    <td className="p-3 text-xs text-muted-foreground">
+                      {c.loans[0]
+                        ? c.loans[0].user.fullName ?? c.loans[0].user.email
+                        : "—"}
+                    </td>
+                    <td className="p-3">
+                      <CopyQr inventoryNumber={c.inventoryNumber} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="grid gap-3 md:hidden">
             {copies.map((c) => (
-              <tr key={c.id} className="border-t">
-                <td className="p-3 font-mono">{c.inventoryNumber}</td>
-                <td className="p-3">{c.game.title}</td>
-                <td className="p-3">
-                  <Badge>{COPY_STATUS_LABELS[c.status]}</Badge>
-                </td>
-                <td className="p-3">
-                  <CopyQr inventoryNumber={c.inventoryNumber} />
-                </td>
-              </tr>
+              <div key={c.id} className="card-elevated p-4 text-sm">
+                <p className="font-semibold">{c.game.title}</p>
+                <p className="font-mono text-xs">{c.inventoryNumber}</p>
+                <StatusBadge kind="copy" status={c.status} className="mt-2" />
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

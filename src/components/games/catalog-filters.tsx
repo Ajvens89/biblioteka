@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Category, Tag } from "@prisma/client";
-import { DIFFICULTY_LABELS, GAME_TYPE_LABELS } from "@/lib/constants";
+import { COLLECTION_TYPE_LABELS, DIFFICULTY_LABELS, GAME_TYPE_LABELS } from "@/lib/constants";
 import type { GameFilterInput } from "@/lib/validations/game";
 
 export function CatalogFilters({
@@ -25,10 +25,14 @@ export function CatalogFilters({
     router.push(`/katalog?${params.toString()}`);
   };
 
+  const selectClass =
+    "h-10 min-w-0 flex-1 rounded-lg border border-input bg-background px-3 text-sm shadow-sm sm:flex-none sm:min-w-[140px]";
+
   return (
     <div className="flex flex-wrap gap-2">
       <select
-        className="h-9 rounded-md border bg-background px-2 text-sm"
+        className={selectClass}
+        aria-label="Sortowanie"
         value={current.sort ?? "title"}
         onChange={(e) => update("sort", e.target.value)}
       >
@@ -39,7 +43,22 @@ export function CatalogFilters({
       </select>
 
       <select
-        className="h-9 rounded-md border bg-background px-2 text-sm"
+        data-testid="collection-type-filter"
+        className={selectClass}
+        aria-label="Typ zbioru"
+        value={current.collectionType ?? ""}
+        onChange={(e) => update("collectionType", e.target.value)}
+      >
+        <option value="">Wszystko</option>
+        {Object.entries(COLLECTION_TYPE_LABELS).map(([k, v]) => (
+          <option key={k} value={k}>
+            {v}
+          </option>
+        ))}
+      </select>
+
+      <select
+        className={selectClass}
         value={current.category ?? ""}
         onChange={(e) => update("category", e.target.value)}
       >
@@ -52,7 +71,7 @@ export function CatalogFilters({
       </select>
 
       <select
-        className="h-9 rounded-md border bg-background px-2 text-sm"
+        className={selectClass}
         value={current.type ?? ""}
         onChange={(e) => update("type", e.target.value)}
       >
@@ -65,7 +84,7 @@ export function CatalogFilters({
       </select>
 
       <select
-        className="h-9 rounded-md border bg-background px-2 text-sm"
+        className={selectClass}
         value={current.difficulty ?? ""}
         onChange={(e) => update("difficulty", e.target.value)}
       >
@@ -78,7 +97,7 @@ export function CatalogFilters({
       </select>
 
       <select
-        className="h-9 rounded-md border bg-background px-2 text-sm"
+        className={selectClass}
         value={current.availability ?? "all"}
         onChange={(e) => update("availability", e.target.value === "all" ? "" : e.target.value)}
       >
@@ -87,7 +106,7 @@ export function CatalogFilters({
       </select>
 
       <select
-        className="h-9 rounded-md border bg-background px-2 text-sm"
+        className={selectClass}
         value={current.tag ?? ""}
         onChange={(e) => update("tag", e.target.value)}
       >

@@ -1,10 +1,18 @@
 import { defineConfig, devices } from "@playwright/test";
 
+/** Zewnętrzny staging/preview (Vercel) — bez lokalnego webServer i bez mutacji bazy w globalSetup. */
+const remoteBaseUrl = process.env.PLAYWRIGHT_BASE_URL?.trim();
+const isRemoteTarget =
+  Boolean(remoteBaseUrl) &&
+  !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(remoteBaseUrl!);
+
 const skipWebServer =
+  isRemoteTarget ||
   process.env.PLAYWRIGHT_SKIP_WEBSERVER === "1" ||
   (!process.env.CI && process.env.PLAYWRIGHT_FORCE_WEBSERVER !== "1");
+
 const port = process.env.PLAYWRIGHT_PORT ?? (skipWebServer ? "3001" : "3099");
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${port}`;
+const baseURL = remoteBaseUrl || `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -12,7 +20,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  retries: process.env.CI || isRemoteTarget ? 1 : 0,
   timeout: 60_000,
   expect: { timeout: 10_000 },
   reporter: [["list"]],

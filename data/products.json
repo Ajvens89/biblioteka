@@ -1,0 +1,15 @@
+{
+  "collection": [
+    {
+      "name": "Ryzyk Fizyk",
+      "description": "Gra planszowa — import z products.json.",
+      "author": "Egmont",
+      "image": "/covers/ryzyk-fizyk.full.png",
+      "thumbnail": "/covers/ryzyk-fizyk.thumbnail.webp",
+      "stock_count": 1,
+      "on_stock": 1,
+      "barcode": "5908215009229"
+    }
+  ],
+  "result": "success"
+}

@@ -1,0 +1,13 @@
+{
+  "collection": [
+    {
+      "name": "Verify Import Gry Test",
+      "description": "Rekord do verify:products-import — nie usuwać ręcznie przed testem.",
+      "author": "Verify Publisher",
+      "stock_count": 2,
+      "on_stock": 2,
+      "barcode": "5907770000016"
+    }
+  ],
+  "result": "success"
+}
