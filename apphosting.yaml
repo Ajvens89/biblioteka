@@ -1,9 +1,5 @@
 # Firebase App Hosting — Biblioteka Zakątka Fantastyki
-# Dokumentacja: docs/FIREBASE-WDROZENIE.md
-#
-# Zmienne (hasła, DATABASE_URL, klucze API) ustaw w:
-# Firebase Console → Hosting & Serverless → App Hosting → Twój backend → Settings → Environment
-# Wartości z konsoli mają pierwszeństwo przed tym plikiem.
+# Sekrety (DATABASE_URL) → Firebase Console → Environment lub: firebase apphosting:secrets:set
 
 runConfig:
   minInstances: 0
@@ -14,3 +10,30 @@ runConfig:
 
 scripts:
   buildCommand: npm run build
+
+env:
+  - variable: AUTH_PROVIDER
+    value: local
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: ALLOW_LOCAL_AUTH_IN_PRODUCTION
+    value: "true"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: AUTH_SECRET
+    value: bibl-prod-auth-secret-change-me-32chars-min!!
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: APP_URL
+    value: https://bookshelf--bibl-2c364.europe-west4.hosted.app
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_APP_URL
+    value: https://bookshelf--bibl-2c364.europe-west4.hosted.app
+    availability:
+      - BUILD
+      - RUNTIME
