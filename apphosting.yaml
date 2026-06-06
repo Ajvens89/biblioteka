@@ -37,3 +37,13 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: DATABASE_URL
+    secret: DATABASE_URL
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: DIRECT_URL
+    secret: DIRECT_URL
+    availability:
+      - BUILD
+      - RUNTIME
