@@ -37,13 +37,20 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  # Placeholder na build (prisma generate); prawdziwe URL z Secret Manager w runtime
+  - variable: DATABASE_URL
+    value: postgresql://build:build@127.0.0.1:5432/build?sslmode=disable
+    availability:
+      - BUILD
+  - variable: DIRECT_URL
+    value: postgresql://build:build@127.0.0.1:5432/build?sslmode=disable
+    availability:
+      - BUILD
   - variable: DATABASE_URL
     secret: DATABASE_URL
     availability:
-      - BUILD
       - RUNTIME
   - variable: DIRECT_URL
     secret: DIRECT_URL
     availability:
-      - BUILD
       - RUNTIME
