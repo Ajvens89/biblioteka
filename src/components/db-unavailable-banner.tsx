@@ -6,6 +6,8 @@ type Props = {
 };
 
 export function DbUnavailableBanner({ compact }: Props) {
+  const isProd = process.env.NODE_ENV === "production";
+
   return (
     <div
       className={
@@ -19,17 +21,26 @@ export function DbUnavailableBanner({ compact }: Props) {
         <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden />
         <div className="space-y-2 text-muted-foreground">
           <p className="font-medium text-foreground">Baza danych jest wyłączona</p>
-          <p>Katalog i rezerwacje chwilowo niedostępne. Uruchom PostgreSQL lokalnie:</p>
-          <ol className="list-decimal space-y-1 pl-5 font-mono text-xs text-foreground">
-            <li>npm run dev:db</li>
-            <li>npm run db:patch</li>
-            <li>Odśwież stronę (F5)</li>
-          </ol>
-          <p className="text-xs">
-            Jeśli błąd wraca:{" "}
-            <code className="rounded bg-muted px-1">npx prisma dev stop default</code>, poczekaj 10 s,
-            potem ponów krok 1.
-          </p>
+          {isProd ? (
+            <p>
+              Katalog i rezerwacje chwilowo niedostępne — trwa konfiguracja bazy w chmurze. Strona wróci w
+              pełni za chwilę.
+            </p>
+          ) : (
+            <>
+              <p>Katalog i rezerwacje chwilowo niedostępne. Uruchom PostgreSQL lokalnie:</p>
+              <ol className="list-decimal space-y-1 pl-5 font-mono text-xs text-foreground">
+                <li>npm run dev:db</li>
+                <li>npm run db:patch</li>
+                <li>Odśwież stronę (F5)</li>
+              </ol>
+              <p className="text-xs">
+                Jeśli błąd wraca:{" "}
+                <code className="rounded bg-muted px-1">npx prisma dev stop default</code>, poczekaj 10 s,
+                potem ponów krok 1.
+              </p>
+            </>
+          )}
           {!compact && (
             <p>
               <Link href="/kontakt" className="text-primary underline">
