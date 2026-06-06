@@ -7,11 +7,11 @@ import {
   useLayoutEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import {
   parseTheme,
-  readStoredTheme,
   writeThemePersistence,
   type Theme,
 } from "@/lib/theme";
@@ -26,13 +26,18 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function systemTheme(): ResolvedTheme {
-  if (typeof window === "undefined") return "light";
+function subscribeSystemTheme(onChange: () => void) {
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+function getSystemThemeSnapshot(): ResolvedTheme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function resolveTheme(theme: Theme): ResolvedTheme {
-  return theme === "system" ? systemTheme() : theme;
+function getServerThemeSnapshot(): ResolvedTheme {
+  return "light";
 }
 
 function applyTheme(resolved: ResolvedTheme) {
@@ -49,36 +54,17 @@ export function ThemeProvider({
   initialTheme?: Theme;
 }) {
   const [theme, setThemeState] = useState<Theme>(() => parseTheme(initialTheme));
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
-    initialTheme === "dark" ? "dark" : initialTheme === "light" ? "light" : "light",
+  const systemTheme = useSyncExternalStore(
+    subscribeSystemTheme,
+    getSystemThemeSnapshot,
+    getServerThemeSnapshot,
   );
+  const resolvedTheme: ResolvedTheme = theme === "system" ? systemTheme : theme;
 
   useLayoutEffect(() => {
-    const stored = readStoredTheme();
-    setThemeState(stored);
-    const resolved = resolveTheme(stored);
-    setResolvedTheme(resolved);
-    applyTheme(resolved);
-  }, []);
-
-  useLayoutEffect(() => {
-    const resolved = resolveTheme(theme);
-    setResolvedTheme(resolved);
-    applyTheme(resolved);
+    applyTheme(resolvedTheme);
     writeThemePersistence(theme);
-  }, [theme]);
-
-  useLayoutEffect(() => {
-    if (theme !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => {
-      const resolved = systemTheme();
-      setResolvedTheme(resolved);
-      applyTheme(resolved);
-    };
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, [theme]);
+  }, [theme, resolvedTheme]);
 
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next);

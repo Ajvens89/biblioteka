@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Database } from "lucide-react";
 
 type Props = {
   compact?: boolean;
@@ -12,19 +12,27 @@ export function DbUnavailableBanner({ compact }: Props) {
     <div
       className={
         compact
-          ? "rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm"
-          : "card-elevated border-warning/30 p-6"
+          ? "rounded-xl border border-warning/35 bg-warning/10 p-4 text-sm shadow-sm"
+          : "landing-db-banner rounded-2xl p-5 md:p-6"
       }
       role="alert"
     >
-      <div className="flex gap-3">
-        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden />
-        <div className="space-y-2 text-muted-foreground">
-          <p className="font-medium text-foreground">Baza danych jest wyłączona</p>
+      <div className="flex gap-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning">
+          {isProd ? (
+            <Database className="h-5 w-5" aria-hidden />
+          ) : (
+            <AlertCircle className="h-5 w-5" aria-hidden />
+          )}
+        </div>
+        <div className="space-y-2 text-sm text-muted-foreground">
+          <p className="font-display text-base font-semibold text-foreground">
+            Baza danych jest chwilowo niedostępna
+          </p>
           {isProd ? (
             <p>
-              Katalog i rezerwacje chwilowo niedostępne — trwa konfiguracja bazy w chmurze. Strona wróci w
-              pełni za chwilę.
+              Katalog i rezerwacje mogą być ograniczone — trwa konfiguracja lub restart bazy w
+              chmurze. Spróbuj ponownie za chwilę.
             </p>
           ) : (
             <>
@@ -36,15 +44,15 @@ export function DbUnavailableBanner({ compact }: Props) {
               </ol>
               <p className="text-xs">
                 Jeśli błąd wraca:{" "}
-                <code className="rounded bg-muted px-1">npx prisma dev stop default</code>, poczekaj 10 s,
-                potem ponów krok 1.
+                <code className="rounded bg-muted px-1.5 py-0.5">npx prisma dev stop default</code>,
+                poczekaj 10 s, potem ponów krok 1.
               </p>
             </>
           )}
           {!compact && (
             <p>
-              <Link href="/kontakt" className="text-primary underline">
-                Kontakt
+              <Link href="/kontakt" className="font-medium text-primary underline-offset-2 hover:underline">
+                Skontaktuj się z nami
               </Link>
             </p>
           )}

@@ -22,4 +22,4 @@ firebase apphosting:secrets:grantaccess DATABASE_URL --backend bookshelf --proje
 firebase apphosting:secrets:grantaccess DIRECT_URL --backend bookshelf --project bibl-2c364
 
 Remove-Item .tmp-db-url.txt, .tmp-direct-url.txt -ErrorAction SilentlyContinue
-Write-Host "OK — uruchom: firebase deploy --only apphosting:bookshelf"
+Write-Host "OK - uruchom: firebase deploy --only apphosting:bookshelf"

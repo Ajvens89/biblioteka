@@ -21,7 +21,7 @@ export function GameSection({ title, description, href, games, showReserve }: Pr
     <section className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-h2">{title}</h2>
+          <h2 className="font-display text-h2">{title}</h2>
           {description && <p className="text-body mt-1 text-muted-foreground">{description}</p>}
         </div>
         <Button variant="outline" size="sm" asChild>

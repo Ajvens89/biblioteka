@@ -21,30 +21,38 @@ export function HomeHeroSearch() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-3" data-testid="home-hero-search">
+    <div className="mx-auto w-full max-w-3xl" data-testid="home-hero-search">
       <label htmlFor="home-search" className="sr-only">
         Szukaj gry w katalogu
       </label>
-      <div className="flex flex-col gap-2 sm:flex-row">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch">
         <div className="relative min-w-0 flex-1">
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Search
+            className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary/80"
+            aria-hidden
+          />
           <Input
             id="home-search"
             data-testid="home-search-input"
-            className="h-12 border-0 bg-card pl-11 text-base shadow-soft"
-            placeholder="Tytuł, autor, wydawca lub EAN…"
+            className="landing-search-input h-14 rounded-xl border-2 border-primary/20 bg-background pl-12 pr-4 text-base shadow-sm"
+            placeholder="Np. Azul, Catan lub kod EAN…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && search()}
           />
         </div>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-3 sm:flex sm:shrink-0">
           <ScannerButton
             onClick={() => setScannerOpen(true)}
-            className="h-12 flex-1 sm:flex-none"
+            className="h-14 min-w-[8.5rem] rounded-xl font-semibold shadow-sm"
             variant="secondary"
           />
-          <Button type="button" className="h-12 flex-1 sm:flex-none" onClick={() => search()}>
+          <Button
+            type="button"
+            className="h-14 min-w-[8.5rem] rounded-xl px-6 text-base font-semibold shadow-md"
+            onClick={() => search()}
+          >
+            <Search className="h-4 w-4" aria-hidden />
             Szukaj
           </Button>
         </div>

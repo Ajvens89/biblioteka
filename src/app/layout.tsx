@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Geist } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -9,9 +9,15 @@ import { parseTheme, THEME_COOKIE, themeHtmlClasses } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin", "latin-ext"],
+});
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const dynamic = "force-dynamic";
@@ -29,7 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang="pl"
       suppressHydrationWarning
-      className={cn(geistSans.variable, ...themeHtmlClasses(initialTheme))}
+      className={cn(inter.variable, poppins.variable, ...themeHtmlClasses(initialTheme))}
     >
       <body className="min-h-screen flex flex-col antialiased">
         <Providers initialTheme={initialTheme}>

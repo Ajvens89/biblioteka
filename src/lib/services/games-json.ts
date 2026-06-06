@@ -104,6 +104,7 @@ function makeSlug(text: string) {
 export function resolveGamesJsonPath(argv: string[]): string | null {
   const pathArg = argv.find((a) => {
     if (a.startsWith("-")) return false;
+    if (!a.toLowerCase().endsWith(".json")) return false;
     const resolved = path.resolve(a);
     return existsSync(resolved);
   });

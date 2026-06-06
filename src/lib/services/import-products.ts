@@ -66,6 +66,7 @@ export function normalizeProductBarcode(raw: string | undefined | null): string 
 export function resolveProductsFilePath(argv: string[]): string | null {
   const pathArg = argv.find((a) => {
     if (a.startsWith("-")) return false;
+    if (!a.toLowerCase().endsWith(".json")) return false;
     const resolved = path.resolve(a);
     return existsSync(resolved);
   });
