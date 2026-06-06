@@ -1,6 +1,18 @@
-import { prisma } from "@/lib/db";
+import { prisma, withPrismaRetry } from "@/lib/db";
+import { isPrismaConnectionError } from "@/lib/db-errors";
 
 export async function fetchAdminDashboard() {
+  try {
+    return await withPrismaRetry(() => fetchAdminDashboardInner());
+  } catch (error) {
+    if (isPrismaConnectionError(error)) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+async function fetchAdminDashboardInner() {
   const [
     gamesCount,
     copiesCount,

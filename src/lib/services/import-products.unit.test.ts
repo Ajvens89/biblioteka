@@ -1,9 +1,11 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
+  isPublicCoverAvailable,
   isValidBarcodeLength,
   normalizeProductBarcode,
   parseProductsJson,
+  resolveCoverUrl,
 } from "./import-products";
 
 describe("import-products", () => {
@@ -28,5 +30,13 @@ describe("import-products", () => {
 
   it("odrzuca śmieciowy barcode", () => {
     assert.equal(normalizeProductBarcode("abc"), null);
+  });
+
+  it("resolveCoverUrl nie zwraca martwej ścieżki /covers bez pliku", () => {
+    assert.equal(resolveCoverUrl("/covers/nie-istnieje.full.png", process.cwd()), null);
+  });
+
+  it("isPublicCoverAvailable dla https zawsze true", () => {
+    assert.equal(isPublicCoverAvailable("https://cf.geekdo-static.com/x.jpg"), true);
   });
 });

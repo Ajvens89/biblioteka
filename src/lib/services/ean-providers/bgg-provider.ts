@@ -1,3 +1,4 @@
+import { getBggRequestHeaders, getBggToken, isBggConfigured } from "./bgg-auth";
 import { fetchWithTimeout, validateCoverImageUrl } from "./image-utils";
 import type { CoverCandidate } from "./types";
 
@@ -18,18 +19,18 @@ async function fetchBggXml(path: string): Promise<string | null> {
   if (hit && hit.expires > Date.now()) return hit.xml;
 
   const url = `${BGG_BASE}${path}`;
+  const headers = getBggRequestHeaders();
   try {
-    const res = await fetchWithTimeout(url, {
-      headers: { Accept: "application/xml" },
-    });
+    const res = await fetchWithTimeout(url, { headers });
     if (res.status === 202) {
       await new Promise((r) => setTimeout(r, 1500));
-      const retry = await fetchWithTimeout(url);
+      const retry = await fetchWithTimeout(url, { headers });
       if (!retry.ok) return null;
       const xml = await retry.text();
       bggCache.set(key, { xml, expires: Date.now() + CACHE_TTL_MS });
       return xml;
     }
+    if (res.status === 401 || res.status === 403) return null;
     if (!res.ok || res.status >= 500) return null;
     const xml = await res.text();
     bggCache.set(key, { xml, expires: Date.now() + CACHE_TTL_MS });
@@ -123,13 +124,24 @@ export async function lookupBggProvider(titleHint: string): Promise<{
   const q = titleHint.trim();
   if (!q) return { candidates: [] };
 
+  if (!isBggConfigured()) {
+    return {
+      candidates: [],
+      error:
+        "Brak BGG_TOKEN — zarejestruj aplikację na boardgamegeek.com/applications i dodaj token do .env.",
+    };
+  }
+
   const searchXml = await fetchBggXml(
     `/search?query=${encodeURIComponent(q)}&type=boardgame,boardgameexpansion,rpgitem`,
   );
   if (!searchXml) {
+    const token = getBggToken();
     return {
       candidates: [],
-      error: "BGG nie odpowiada — spróbuj ponownie później lub użyj Planu D.",
+      error: token
+        ? "BGG nie odpowiada lub odrzucił token (401) — sprawdź BGG_TOKEN."
+        : "BGG wymaga tokenu API — ustaw BGG_TOKEN w .env.",
     };
   }
 

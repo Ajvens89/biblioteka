@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Dices, Scroll } from "lucide-react";
 import type { GameCollectionType } from "@prisma/client";
@@ -22,8 +25,15 @@ export function GameCover({
   sizes = "(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 280px",
   collectionType = "BOARD_GAME",
 }: Props) {
-  const isPlaceholder = !src?.trim();
+  const [failed, setFailed] = useState(false);
+  const trimmed = src?.trim() ?? "";
+  const isPlaceholder = !trimmed || failed;
   const isRpg = collectionType === "RPG";
+  const isExternal = /^https?:\/\//i.test(trimmed);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [trimmed]);
 
   return (
     <div
@@ -50,12 +60,14 @@ export function GameCover({
         </div>
       ) : (
         <Image
-          src={src!.trim()}
+          src={trimmed}
           alt={alt}
           fill
           className="object-cover"
           sizes={sizes}
           priority={priority}
+          unoptimized={isExternal}
+          onError={() => setFailed(true)}
         />
       )}
     </div>

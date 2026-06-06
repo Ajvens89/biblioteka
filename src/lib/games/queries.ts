@@ -11,6 +11,8 @@ export const gameListInclude = {
   copies: { select: { id: true, status: true } },
 } satisfies Prisma.GameInclude;
 
+export type GameListItem = Prisma.GameGetPayload<{ include: typeof gameListInclude }>;
+
 export function buildGameWhere(filters: GameFilterInput): Prisma.GameWhereInput {
   const where: Prisma.GameWhereInput = {
     deletedAt: null,

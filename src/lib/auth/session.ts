@@ -1,8 +1,5 @@
 import type { UserRole } from "@prisma/client";
-import { getAuthProvider } from "@/lib/auth/config";
-import { getLocalSessionProfileId } from "@/lib/auth/local-session";
-import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { getActorFromDb, type Actor } from "@/lib/auth/actor";
 
 export type SessionUser = {
   id: string;
@@ -13,14 +10,7 @@ export type SessionUser = {
   isBlocked: boolean;
 };
 
-function toSessionUser(profile: {
-  id: string;
-  authUserId: string;
-  email: string;
-  fullName: string | null;
-  role: UserRole;
-  isBlocked: boolean;
-}): SessionUser {
+function toSessionUser(profile: Actor): SessionUser {
   return {
     id: profile.id,
     authUserId: profile.authUserId,
@@ -31,51 +21,10 @@ function toSessionUser(profile: {
   };
 }
 
-async function getLocalSessionUser(): Promise<SessionUser | null> {
-  const profileId = await getLocalSessionProfileId();
-  if (!profileId) return null;
-
-  const profile = await prisma.profile.findUnique({ where: { id: profileId } });
-  if (!profile || profile.isBlocked) return null;
-  return toSessionUser(profile);
-}
-
-async function getSupabaseSessionUser(): Promise<SessionUser | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user?.email) return null;
-
-  let profile = await prisma.profile.findUnique({
-    where: { authUserId: user.id },
-  });
-
-  if (!profile) {
-    profile = await prisma.profile.create({
-      data: {
-        authUserId: user.id,
-        email: user.email.toLowerCase(),
-        fullName: user.user_metadata?.full_name ?? null,
-        role: "USER",
-      },
-    });
-  }
-
-  if (profile.isBlocked) return null;
-  return toSessionUser(profile);
-}
-
+/** Nie rzuca przy padniętej bazie — zwraca null. */
 export async function getSessionUser(): Promise<SessionUser | null> {
-  try {
-    if (getAuthProvider() === "local") {
-      return getLocalSessionUser();
-    }
-    return getSupabaseSessionUser();
-  } catch (e) {
-    console.error("getSessionUser failed", e);
-    return null;
-  }
+  const actor = await getActorFromDb();
+  return actor ? toSessionUser(actor) : null;
 }
 
 export function isStaff(role: UserRole) {

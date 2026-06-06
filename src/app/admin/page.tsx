@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 import { fetchAdminDashboard } from "@/lib/admin/dashboard";
 import { AdminQuickActions } from "@/components/admin/admin-quick-actions";
+import { DbUnavailableBanner } from "@/components/admin/db-unavailable-banner";
 import { PageHeader } from "@/components/ui/page-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { StatCard } from "@/components/ui/stat-card";
@@ -15,7 +16,6 @@ export const metadata = { title: "Panel administracyjny" };
 
 export default async function AdminDashboardPage() {
   const data = await fetchAdminDashboard();
-  const { stats } = data;
 
   return (
     <div className="space-y-8">
@@ -24,6 +24,24 @@ export default async function AdminDashboardPage() {
         description="Centrum pracy biblioteki — szybkie akcje, statystyki i ostatnia aktywność."
       />
 
+      {!data ? (
+        <DbUnavailableBanner />
+      ) : (
+        <DashboardContent data={data} />
+      )}
+    </div>
+  );
+}
+
+function DashboardContent({
+  data,
+}: {
+  data: NonNullable<Awaited<ReturnType<typeof fetchAdminDashboard>>>;
+}) {
+  const { stats } = data;
+
+  return (
+    <>
       <SectionCard title="Szybkie akcje" description="Najczęstsze zadania bibliotekarza">
         <AdminQuickActions />
       </SectionCard>
@@ -167,6 +185,6 @@ export default async function AdminDashboardPage() {
           )}
         </SectionCard>
       </div>
-    </div>
+    </>
   );
 }

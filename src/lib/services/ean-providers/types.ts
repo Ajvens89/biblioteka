@@ -1,6 +1,13 @@
 import type { GameCollectionType } from "@prisma/client";
 
-export type CoverSource = "local" | "google_books" | "open_library" | "bgg" | "manual";
+export type CoverSource =
+  | "local"
+  | "google_books"
+  | "google_images"
+  | "open_library"
+  | "upcitemdb"
+  | "bgg"
+  | "manual";
 
 export type CoverConfidence = "high" | "medium" | "low";
 
@@ -56,7 +63,9 @@ export type EanLookupResult = {
 export const COVER_SOURCE_LABELS: Record<CoverSource, string> = {
   local: "Okładka z biblioteki lokalnej.",
   google_books: "Dane pobrane z Google Books — sprawdź przed zapisem.",
+  google_images: "Okładka z Google (Custom Search — Grafika) — sprawdź przed zapisem.",
   open_library: "Okładka pobrana z Open Library — sprawdź przed zapisem.",
+  upcitemdb: "Okładka z katalogu produktów (UPCitemdb) — sprawdź przed zapisem.",
   bgg: "Propozycja z BoardGameGeek — wybierz poprawną okładkę.",
   manual:
     "Nie znaleziono okładki automatycznie. Możesz wkleić własny URL albo skorzystać z ręcznego wyszukiwania w Planszeo/BGG.",

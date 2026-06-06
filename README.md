@@ -14,6 +14,7 @@ To **nie jest makieta** — rezerwacje, wypożyczenia, EAN i import zapisują si
 | **EAN / ISBN** | Lookup po stronie serwera (lokalna baza → Google Books → Open Library → BGG po tytule) |
 | **Skaner** | Kamera tylko po otwarciu modala (BarcodeDetector / ZXing) |
 | **Import `products.json`** | Gry planszowe + egzemplarze (`npm run import:products`) |
+| **Import / eksport `games.json`** | Pełny katalog biblioteki (`npm run export:games`, `npm run import:games`) |
 | **Typy zbioru** | `BOARD_GAME` (planszowe), `RPG` (fabularne) |
 | **Okładki** | URL zewnętrzny lub placeholder; opcjonalnie Supabase Storage |
 
@@ -56,7 +57,7 @@ npm run db:seed
 npm run dev
 ```
 
-→ [http://localhost:3000](http://localhost:3000) — na `/login` baner **Tryb lokalny** gdy `AUTH_PROVIDER=local`.
+→ [http://localhost:3001](http://localhost:3001) — na `/login` baner **Tryb lokalny** gdy `AUTH_PROVIDER=local`.
 
 ## Konta testowe (po `db:seed`)
 
@@ -88,6 +89,8 @@ npm run dev
 | `npm run verify:ean-images` | Okładki (mocki providerów + DB) — opcjonalny |
 | `npm run audit:ean` | Audyt duplikatów EAN (**tylko odczyt**) |
 | `npm run import:products` | Import z `products.json` (ścieżka jako argument) |
+| `npm run export:games` | Eksport katalogu do `games.json` |
+| `npm run import:games` | Import z `games.json` (`--dry-run` opcjonalnie) |
 | `npm run test:unit` | Testy jednostkowe serwisów (bez DB) |
 | `npm run test:e2e` | Playwright (wymaga DB + dev na :3001 lub `test:e2e:ci`) |
 | `npm run test:e2e:ci` | E2E z buildem (`PLAYWRIGHT_FORCE_WEBSERVER=1` w CI) |
@@ -124,6 +127,21 @@ npm run verify:products-import
 - Ponowny import **aktualizuje** istniejące gry (tytuł zawsze; opis/okładka gdy są w JSON) — zrób `--dry-run` na produkcji.
 
 Panel admin: `/admin/import`.
+
+## Import / eksport `games.json`
+
+Pełny zrzut katalogu (gry, wydawca, kategorie, tagi, egzemplarze). Wzór: `data/games.json.example`.
+
+```bash
+npm run export:games
+npm run export:games -- ./backup/gry-2026.json
+npm run import:games -- ./data/games.json --dry-run
+npm run import:games -- ./data/games.json
+```
+
+W panelu admin: **Import / eksport** → sekcja **games.json** (przycisk eksportu + upload + dry-run).
+
+Import dopasowuje gry po **slug**, **EAN** lub tytule; egzemplarze po **numerze inwentarzowym**. Nie usuwa gier ani egzemplarzy spoza pliku.
 
 ## Audyt EAN
 
@@ -164,7 +182,8 @@ PLAYWRIGHT_BASE_URL=https://twoj-preview.vercel.app npm run test:e2e:staging
 
 ## Wdrożenie
 
-- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** — Docker, Prisma Dev, Supabase, **Vercel staging**, migracje
+- **[docs/FIREBASE-WDROZENIE.md](docs/FIREBASE-WDROZENIE.md)** — **Firebase App Hosting** (krok po kroku, bez Vercela)
+- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** — alternatywa: Vercel + Supabase, Docker, migracje
 - **[docs/SUPABASE.md](docs/SUPABASE.md)** — Auth Supabase
 - **[docs/LOCAL_AUTH.md](docs/LOCAL_AUTH.md)** — Auth lokalne (dev)
 - **[docs/SECURITY.md](docs/SECURITY.md)** — model bezpieczeństwa

@@ -15,12 +15,15 @@ import { HomeHeroSearch } from "@/components/games/home-hero-search";
 import { GameSection } from "@/components/games/game-section";
 import { PageShell } from "@/components/ui/page-shell";
 import { Button } from "@/components/ui/button";
+import { DbUnavailableBanner } from "@/components/db-unavailable-banner";
 import { APP_NAME } from "@/lib/constants";
+import { isDatabaseAvailable } from "@/lib/db";
 import {
   fetchAvailableNow,
   fetchNewestGames,
   fetchPopularGames,
   fetchRpgGames,
+  type GameListItem,
 } from "@/lib/games/queries";
 
 const steps = [
@@ -51,12 +54,16 @@ const faq = [
 ];
 
 export default async function HomePage() {
-  const [available, newest, rpg, popular] = await Promise.all([
-    fetchAvailableNow(6),
-    fetchNewestGames(6),
-    fetchRpgGames(6),
-    fetchPopularGames(6),
-  ]);
+  const empty: GameListItem[] = [];
+  const dbOk = await isDatabaseAvailable();
+  const [available, newest, rpg, popular] = dbOk
+    ? await Promise.all([
+        fetchAvailableNow(6),
+        fetchNewestGames(6),
+        fetchRpgGames(6),
+        fetchPopularGames(6),
+      ])
+    : [empty, empty, empty, empty];
 
   return (
     <div className="overflow-x-hidden">
@@ -99,6 +106,7 @@ export default async function HomePage() {
       </section>
 
       <PageShell className="space-y-16">
+        {!dbOk && <DbUnavailableBanner />}
         <section className="card-elevated -mt-8 p-4 md:-mt-12 md:p-6">
           <h2 className="text-h3 mb-4 text-center">Szybkie wyszukiwanie</h2>
           <HomeHeroSearch />

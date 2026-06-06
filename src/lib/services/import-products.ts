@@ -1,9 +1,11 @@
 import type { CopyStatus, GameCollectionType, PrismaClient } from "@prisma/client";
-import { readFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import slugify from "slugify";
 import { buildEan13, normalizeEan } from "@/lib/services/ean";
+import { fetchCoverForGame } from "@/lib/services/cover-fetch";
+import { validateCoverImageUrl } from "@/lib/services/ean-providers/image-utils";
 
 export type ProductRecord = {
   name?: string;
@@ -30,6 +32,9 @@ export type ImportProductsStats = {
   skipped: number;
   copiesAdded: number;
   invalidEan: number;
+  coversResolved: number;
+  coversMissing: number;
+  coversFetchedRemote: number;
   issues: string[];
 };
 
@@ -75,44 +80,155 @@ export function resolveProductsFilePath(argv: string[]): string | null {
 }
 
 export function parseProductsJson(content: string): ProductsFile {
-  const data = JSON.parse(content) as ProductsFile;
+  const trimmed = content.trim();
+  if (!trimmed) {
+    throw new Error(
+      "Plik JSON jest pusty. Otwórz products.json w Notatniku → Ctrl+A → Ctrl+C → wklej w sekcji „Wklej products.json”.",
+    );
+  }
+  let data: ProductsFile;
+  try {
+    data = JSON.parse(trimmed) as ProductsFile;
+  } catch (e) {
+    const detail = e instanceof Error ? e.message : "błąd składni";
+    throw new Error(
+      `Niepoprawny JSON (${detail}). Plik mógł się nie skopiować (OneDrive) — użyj wklejania z Notatnika.`,
+    );
+  }
   if (!Array.isArray(data.collection)) {
     throw new Error("Plik products.json musi zawierać tablicę „collection”.");
+  }
+  if (data.collection.length === 0) {
+    throw new Error("Tablica „collection” jest pusta — brak produktów do importu.");
   }
   return data;
 }
 
 export async function loadProductsFile(filePath: string): Promise<{ data: ProductsFile; baseDir: string }> {
-  const content = await readFile(filePath, "utf8");
+  const resolved = path.resolve(filePath);
+  const info = await stat(resolved);
+  if (info.size === 0) {
+    throw new Error(
+      `Plik ${resolved} ma 0 bajtów (pusty). Przeciągnij ponownie z pulpitu lub wklej JSON w sekcji powyżej.`,
+    );
+  }
+  const content = await readFile(resolved, "utf8");
   const data = parseProductsJson(content);
-  return { data, baseDir: path.dirname(path.resolve(filePath)) };
+  return { data, baseDir: path.dirname(resolved) };
 }
 
+const PUBLIC_DIR = path.resolve("public");
+const PUBLIC_COVERS_DIR = path.join(PUBLIC_DIR, "covers");
+
+/** Katalogi, w których szukamy plików okładek obok products.json. */
+export function getCoverSearchDirs(baseDir: string): string[] {
+  const dirs = [path.resolve(baseDir), PUBLIC_DIR, path.resolve("data"), path.resolve(".")];
+  for (const candidate of ["./products.json", "../products.json", path.join("..", "products.json")]) {
+    const resolved = path.resolve(candidate);
+    if (existsSync(resolved)) {
+      dirs.push(path.dirname(resolved));
+    }
+  }
+  return [...new Set(dirs)];
+}
+
+export function publicCoverPath(coverUrl: string): string {
+  return path.join(PUBLIC_DIR, coverUrl.replace(/^\//, "").replace(/\//g, path.sep));
+}
+
+export function isPublicCoverAvailable(coverUrl: string | null | undefined): boolean {
+  if (!coverUrl?.trim()) return false;
+  const trimmed = coverUrl.trim();
+  if (/^https?:\/\//i.test(trimmed)) return true;
+  if (!trimmed.startsWith("/")) return false;
+  return existsSync(publicCoverPath(trimmed));
+}
+
+function findCoverSourceFile(
+  imagePath: string,
+  baseDir: string,
+  searchDirs = getCoverSearchDirs(baseDir),
+): string | null {
+  const raw = imagePath.trim();
+  const fileName = path.basename(raw.replace(/^\//, ""));
+  const candidates: string[] = [];
+
+  if (raw.startsWith("/")) {
+    candidates.push(publicCoverPath(raw));
+    candidates.push(path.resolve(baseDir, raw.replace(/^\//, "")));
+  } else {
+    candidates.push(path.resolve(baseDir, raw));
+    candidates.push(path.join(PUBLIC_DIR, raw));
+  }
+
+  for (const dir of searchDirs) {
+    candidates.push(path.join(dir, raw.replace(/^\//, "")));
+    candidates.push(path.join(dir, "covers", fileName));
+  }
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
+/**
+ * Zwraca publiczny URL okładki tylko gdy plik istnieje lub można go skopiować do public/covers.
+ * Nie zapisuje „martwych” ścieżek /covers/… bez pliku na dysku.
+ */
+export async function ensureProductCover(
+  imagePath: string | undefined,
+  baseDir: string,
+): Promise<string | null> {
+  const raw = imagePath?.trim();
+  if (!raw) return null;
+
+  if (/^https?:\/\//i.test(raw)) {
+    return validateCoverImageUrl(raw);
+  }
+
+  if (raw.startsWith("/") && isPublicCoverAvailable(raw)) {
+    return raw;
+  }
+
+  const source = findCoverSourceFile(raw, baseDir);
+  if (!source) return null;
+
+  const relToPublic = path.relative(PUBLIC_DIR, source);
+  if (!relToPublic.startsWith("..") && !path.isAbsolute(relToPublic)) {
+    return `/${relToPublic.replace(/\\/g, "/")}`;
+  }
+
+  const fileName = path.basename(source);
+  await mkdir(PUBLIC_COVERS_DIR, { recursive: true });
+  const dest = path.join(PUBLIC_COVERS_DIR, fileName);
+  if (!existsSync(dest)) {
+    await copyFile(source, dest);
+  }
+  return `/covers/${fileName}`;
+}
+
+/** @deprecated Użyj ensureProductCover — synchroniczna wersja tylko do testów. */
 export function resolveCoverUrl(
   imagePath: string | undefined,
   baseDir: string,
 ): string | null {
   const raw = imagePath?.trim();
   if (!raw) return null;
-  if (/^https?:\/\//i.test(raw)) return raw;
-  if (raw.startsWith("/")) return raw;
+  if (/^https?:\/\//i.test(raw)) return validateCoverImageUrl(raw);
+  if (raw.startsWith("/") && isPublicCoverAvailable(raw)) return raw;
 
-  const fromFile = path.resolve(baseDir, raw);
-  if (existsSync(fromFile)) {
-    const publicDir = path.resolve("public");
-    const rel = path.relative(publicDir, fromFile);
-    if (!rel.startsWith("..") && !path.isAbsolute(rel)) {
-      return `/${rel.replace(/\\/g, "/")}`;
-    }
-    return raw;
+  const source = findCoverSourceFile(raw, baseDir);
+  if (!source) return null;
+
+  const relToPublic = path.relative(PUBLIC_DIR, source);
+  if (!relToPublic.startsWith("..") && !path.isAbsolute(relToPublic)) {
+    return `/${relToPublic.replace(/\\/g, "/")}`;
   }
 
-  const inPublic = path.resolve("public", raw.replace(/^\//, ""));
-  if (existsSync(inPublic)) {
-    return `/${raw.replace(/^\//, "").replace(/\\/g, "/")}`;
-  }
-
-  return raw.startsWith("/") ? raw : `/${raw.replace(/\\/g, "/")}`;
+  const fileName = path.basename(source);
+  const dest = path.join(PUBLIC_COVERS_DIR, fileName);
+  return existsSync(dest) ? `/covers/${fileName}` : null;
 }
 
 function makeSlug(title: string) {
@@ -178,11 +294,43 @@ async function ensurePublisher(prisma: PrismaClient, author: string | undefined)
   return pub.id;
 }
 
-function pickCover(product: ProductRecord, baseDir: string): string | null {
-  return (
-    resolveCoverUrl(product.image, baseDir) ??
-    resolveCoverUrl(product.thumbnail, baseDir)
-  );
+type PickedCover = {
+  url: string | null;
+  source: string | null;
+  fromRemote: boolean;
+};
+
+function shouldFetchCoversOnImport(): boolean {
+  const flag = process.env.IMPORT_FETCH_COVERS?.trim().toLowerCase();
+  return flag === "1" || flag === "true" || flag === "yes";
+}
+
+async function pickCover(product: ProductRecord, baseDir: string): Promise<PickedCover> {
+  const local =
+    (await ensureProductCover(product.image, baseDir)) ??
+    (await ensureProductCover(product.thumbnail, baseDir));
+  if (local) {
+    return { url: local, source: "products_import", fromRemote: false };
+  }
+
+  if (!shouldFetchCoversOnImport()) {
+    return { url: null, source: null, fromRemote: false };
+  }
+
+  const title = product.name?.trim();
+  if (!title) return { url: null, source: null, fromRemote: false };
+
+  const fetched = await fetchCoverForGame({
+    title,
+    ean: normalizeProductBarcode(product.barcode),
+    collectionType: "BOARD_GAME",
+  });
+
+  return {
+    url: fetched.coverImageUrl,
+    source: fetched.coverImageSource,
+    fromRemote: Boolean(fetched.coverImageUrl),
+  };
 }
 
 function clampInt(value: unknown, fallback: number, min = 0, max = 999): number {
@@ -268,7 +416,14 @@ export async function ensureCopiesForGame(
 }
 
 export type UpsertProductResult =
-  | { action: "created" | "updated"; gameId: string; copiesAdded: number }
+  | {
+      action: "created" | "updated";
+      gameId: string;
+      copiesAdded: number;
+      hadCoverPath: boolean;
+      coverResolved: boolean;
+      coverFromRemote: boolean;
+    }
   | { action: "skipped"; reason: string };
 
 export async function upsertGameFromProduct(
@@ -281,6 +436,8 @@ export async function upsertGameFromProduct(
   const title = product.name?.trim();
   if (!title) return { action: "skipped", reason: "Brak nazwy (name)" };
 
+  const hadCoverPath = Boolean(product.image?.trim() || product.thumbnail?.trim());
+
   const ean = normalizeProductBarcode(product.barcode);
   const invalidBarcode = Boolean(product.barcode?.trim()) && !ean;
   const stockCount = clampInt(product.stock_count, 1);
@@ -290,7 +447,15 @@ export async function upsertGameFromProduct(
     if (invalidBarcode) {
       return { action: "skipped", reason: `Niepoprawny barcode (dry-run bez DB): ${title}` };
     }
-    return { action: "created", gameId: "dry-run", copiesAdded: stockCount };
+    const dryCover = await pickCover(product, baseDir);
+    return {
+      action: "created",
+      gameId: "dry-run",
+      copiesAdded: stockCount,
+      hadCoverPath,
+      coverResolved: Boolean(dryCover.url),
+      coverFromRemote: dryCover.fromRemote,
+    };
   }
 
   if (invalidBarcode) {
@@ -301,7 +466,7 @@ export async function upsertGameFromProduct(
   }
 
   const existing = await findExistingGameByBarcodeOrTitle(prisma, ean, title);
-  const cover = pickCover(product, baseDir);
+  const cover = await pickCover(product, baseDir);
   const description = product.description?.trim() || null;
   const publisherId = dryRun ? null : await ensurePublisher(prisma, product.author);
 
@@ -312,8 +477,8 @@ export async function upsertGameFromProduct(
       title,
       collectionType,
       description: description ?? undefined,
-      coverImageUrl: cover ?? undefined,
-      coverImageSource: cover ? "products_import" : undefined,
+      coverImageUrl: cover.url ?? undefined,
+      coverImageSource: cover.source ?? undefined,
       publisherId: publisherId ?? undefined,
       ean: ean && !existing.ean ? ean : undefined,
       isActive: true,
@@ -326,7 +491,14 @@ export async function upsertGameFromProduct(
           title: updateData.title,
           collectionType: updateData.collectionType,
           ...(updateData.description ? { description: updateData.description } : {}),
-          ...(updateData.coverImageUrl ? { coverImageUrl: updateData.coverImageUrl, coverImageSource: "products_import" } : {}),
+          ...(updateData.coverImageUrl
+            ? {
+                coverImageUrl: updateData.coverImageUrl,
+                coverImageSource: updateData.coverImageSource ?? "products_import",
+              }
+            : existing.coverImageUrl && !isPublicCoverAvailable(existing.coverImageUrl)
+              ? { coverImageUrl: null, coverImageSource: null }
+              : {}),
           ...(updateData.publisherId ? { publisherId: updateData.publisherId } : {}),
           ...(updateData.ean ? { ean: updateData.ean } : {}),
           isActive: true,
@@ -341,7 +513,14 @@ export async function upsertGameFromProduct(
       onStock,
       dryRun,
     );
-    return { action: "updated", gameId: existing.id, copiesAdded };
+    return {
+      action: "updated",
+      gameId: existing.id,
+      copiesAdded,
+      hadCoverPath,
+      coverResolved: Boolean(cover.url),
+      coverFromRemote: cover.fromRemote,
+    };
   }
 
   if (invalidBarcode && !ean) {
@@ -352,7 +531,14 @@ export async function upsertGameFromProduct(
 
   if (dryRun) {
     const wouldAdd = Math.max(0, stockCount);
-    return { action: "created", gameId: "dry-run", copiesAdded: wouldAdd };
+    return {
+      action: "created",
+      gameId: "dry-run",
+      copiesAdded: wouldAdd,
+      hadCoverPath,
+      coverResolved: Boolean(cover.url),
+      coverFromRemote: cover.fromRemote,
+    };
   }
 
   const created = await prisma.game.create({
@@ -364,8 +550,8 @@ export async function upsertGameFromProduct(
       type: "BOARD",
       difficulty: "MEDIUM",
       description,
-      coverImageUrl: cover,
-      coverImageSource: cover ? "products_import" : null,
+      coverImageUrl: cover.url,
+      coverImageSource: cover.source,
       publisherId,
       minPlayers: 2,
       maxPlayers: 4,
@@ -384,12 +570,21 @@ export async function upsertGameFromProduct(
     false,
   );
 
-  return { action: "created", gameId: created.id, copiesAdded };
+  return {
+    action: "created",
+    gameId: created.id,
+    copiesAdded,
+    hadCoverPath,
+    coverResolved: Boolean(cover.url),
+    coverFromRemote: cover.fromRemote,
+  };
 }
 
-export async function importProductsFromFile(
+async function runProductsImport(
   prisma: PrismaClient,
-  filePath: string,
+  data: ProductsFile,
+  baseDir: string,
+  label: string,
   options?: { dryRun?: boolean; dbAvailable?: boolean },
 ): Promise<ImportProductsStats> {
   const dryRun = options?.dryRun ?? false;
@@ -401,9 +596,8 @@ export async function importProductsFromFile(
       dbAvailable = false;
     }
   }
-  const { data, baseDir } = await loadProductsFile(filePath);
   const stats: ImportProductsStats = {
-    filePath,
+    filePath: label,
     dryRun,
     read: data.collection!.length,
     created: 0,
@@ -411,6 +605,9 @@ export async function importProductsFromFile(
     skipped: 0,
     copiesAdded: 0,
     invalidEan: 0,
+    coversResolved: 0,
+    coversMissing: 0,
+    coversFetchedRemote: 0,
     issues: [],
   };
 
@@ -432,9 +629,19 @@ export async function importProductsFromFile(
       } else if (result.action === "created") {
         stats.created += 1;
         stats.copiesAdded += result.copiesAdded;
+        if (result.hadCoverPath) {
+          if (result.coverResolved) stats.coversResolved += 1;
+          else stats.coversMissing += 1;
+        }
+        if (result.coverFromRemote) stats.coversFetchedRemote += 1;
       } else {
         stats.updated += 1;
         stats.copiesAdded += result.copiesAdded;
+        if (result.hadCoverPath) {
+          if (result.coverResolved) stats.coversResolved += 1;
+          else stats.coversMissing += 1;
+        }
+        if (result.coverFromRemote) stats.coversFetchedRemote += 1;
       }
     } catch (e) {
       stats.skipped += 1;
@@ -444,6 +651,30 @@ export async function importProductsFromFile(
   }
 
   return stats;
+}
+
+export async function importProductsFromFile(
+  prisma: PrismaClient,
+  filePath: string,
+  options?: { dryRun?: boolean; dbAvailable?: boolean },
+): Promise<ImportProductsStats> {
+  const { data, baseDir } = await loadProductsFile(filePath);
+  return runProductsImport(prisma, data, baseDir, filePath, options);
+}
+
+/** Import z wklejonego tekstu JSON (bez wyboru pliku w przeglądarce). */
+export async function importProductsFromContent(
+  prisma: PrismaClient,
+  content: string,
+  options?: { dryRun?: boolean; dbAvailable?: boolean },
+): Promise<ImportProductsStats> {
+  const trimmed = content.trim();
+  if (!trimmed) {
+    throw new Error("Wklej zawartość pliku products.json.");
+  }
+  const data = parseProductsJson(trimmed);
+  const baseDir = path.resolve("./data");
+  return runProductsImport(prisma, data, baseDir, "(wklejony JSON)", options);
 }
 
 export function formatImportReport(stats: ImportProductsStats): string {
@@ -459,7 +690,18 @@ export function formatImportReport(stats: ImportProductsStats): string {
     `Pominięto: ${stats.skipped}`,
     `Dodano egzemplarzy: ${stats.copiesAdded}`,
     `Rekordów z błędnym EAN/barcode: ${stats.invalidEan}`,
+    `Okładki lokalne (plik): ${stats.coversResolved}`,
+    `Okładki pobrane z internetu: ${stats.coversFetchedRemote}`,
+    `Okładki w JSON bez pliku na dysku: ${stats.coversMissing}`,
   ];
+  if (stats.coversMissing > 0) {
+    lines.push(
+      "",
+      "Brak plików okładek? Skopiuj folder covers (data/covers/)",
+      "lub: npm run backfill:covers (wymaga BGG_TOKEN w .env)",
+      "lub ustaw IMPORT_FETCH_COVERS=true przy imporcie.",
+    );
+  }
   if (stats.issues.length > 0) {
     lines.push("", "Pierwsze problemy:");
     for (const issue of stats.issues) lines.push(`  - ${issue}`);

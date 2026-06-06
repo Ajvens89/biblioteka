@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "exportedAt": "2026-06-04T12:00:00.000Z",
+  "source": "biblioteka-export",
+  "games": [
+    {
+      "title": "Catan",
+      "slug": "catan",
+      "ean": "4002051696309",
+      "collectionType": "BOARD_GAME",
+      "description": "Gra o osadnictwie na wyspie.",
+      "minPlayers": 3,
+      "maxPlayers": 4,
+      "minAge": 10,
+      "minPlayTime": 60,
+      "maxPlayTime": 120,
+      "difficulty": "MEDIUM",
+      "type": "BOARD",
+      "publisher": "Kosmos",
+      "categories": ["Strategia"],
+      "tags": ["klasyk"],
+      "copies": [
+        {
+          "inventoryNumber": "ZF-EGZ-000001",
+          "barcode": null,
+          "status": "AVAILABLE",
+          "condition": "GOOD",
+          "location": "Regał A"
+        }
+      ]
+    }
+  ]
+}

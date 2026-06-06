@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Suspense } from "react";
 import { ExternalLink, Plus } from "lucide-react";
 import { requireAdmin } from "@/lib/auth/guards";
@@ -51,10 +50,13 @@ export default async function AdminGamesPage({ searchParams }: PageProps) {
         actions={
           <>
             <Button variant="outline" asChild>
+              <a href="/api/admin/games/export-json">Eksport JSON</a>
+            </Button>
+            <Button variant="outline" asChild>
               <a href="/api/admin/games/export">Eksport CSV</a>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/admin/import">Import JSON</Link>
+              <Link href="/admin/import">Import / eksport</Link>
             </Button>
             <Button asChild>
               <Link href="/admin/gry/nowa" data-testid="admin-new-game-link">
@@ -99,13 +101,14 @@ export default async function AdminGamesPage({ searchParams }: PageProps) {
                   return (
                     <tr key={g.id} className="border-t">
                       <td className="p-3">
-                        <div className="relative h-12 w-10 overflow-hidden rounded">
-                          {g.coverImageUrl ? (
-                            <Image src={g.coverImageUrl} alt="" fill className="object-cover" sizes="40px" />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-muted text-xs">—</div>
-                          )}
-                        </div>
+                        <GameCover
+                          src={g.coverImageUrl}
+                          alt={g.title}
+                          aspect="square"
+                          className="h-12 w-10 shrink-0 rounded"
+                          sizes="40px"
+                          collectionType={g.collectionType}
+                        />
                       </td>
                       <td className="p-3">
                         <p className="font-medium">{g.title}</p>

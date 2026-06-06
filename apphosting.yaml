@@ -1,0 +1,16 @@
+# Firebase App Hosting — Biblioteka Zakątka Fantastyki
+# Dokumentacja: docs/FIREBASE-WDROZENIE.md
+#
+# Zmienne (hasła, DATABASE_URL, klucze API) ustaw w:
+# Firebase Console → Hosting & Serverless → App Hosting → Twój backend → Settings → Environment
+# Wartości z konsoli mają pierwszeństwo przed tym plikiem.
+
+runConfig:
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 1024
+
+scripts:
+  buildCommand: npm run build

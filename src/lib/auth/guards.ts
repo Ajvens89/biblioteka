@@ -1,9 +1,13 @@
 import type { UserRole } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { getActorFromDb } from "@/lib/auth/actor";
+import { isDatabaseAvailable } from "@/lib/db";
 import { isAdmin, isStaff } from "@/lib/auth/session";
 
 export async function requireUser() {
+  const dbOk = await isDatabaseAvailable();
+  if (!dbOk) redirect("/?error=baza-niedostepna");
+
   const user = await getActorFromDb();
   if (!user) redirect("/login");
   return user;
