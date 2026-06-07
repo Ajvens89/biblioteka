@@ -14,10 +14,10 @@ export function SearchPanel() {
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary/80">
                 Katalog online
               </p>
-              <h2 id="search-panel-title" className="font-display text-h2 mt-1 text-foreground">
+              <h2 id="search-panel-title" className="font-display text-h2 mt-1 text-[#1a1528]">
                 Szybkie wyszukiwanie
               </h2>
-              <p className="text-small mt-1 max-w-md text-muted-foreground">
+              <p className="text-small mt-1 max-w-md text-[#4a4458]">
                 Tytuł, autor, wydawca lub kod EAN z pudełka — od razu przejdziesz do katalogu.
               </p>
             </div>

@@ -35,7 +35,7 @@ export function HomeHeroSearch() {
             id="home-search"
             data-testid="home-search-input"
             className="zf-search-input h-14 rounded-2xl border-2 border-border/80 bg-background pl-12 pr-4 text-base shadow-sm"
-            placeholder="Np. Azul, Catan lub kod EAN…"
+            placeholder="Wpisz tytuł gry lub kod EAN z pudełka…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && search()}

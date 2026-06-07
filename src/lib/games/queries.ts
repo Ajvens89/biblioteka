@@ -174,16 +174,48 @@ export async function fetchRpgGames(limit = 6) {
   });
 }
 
+const showcaseCoverWhere = {
+  coverImageUrl: { not: null },
+  NOT: { coverImageUrl: "" },
+} satisfies Prisma.GameWhereInput;
+
+/** Gry do podglądu w hero — tylko z okładką i wolnym egzemplarzem w bibliotece. */
 export async function fetchShowcaseGames(
   collectionType: "BOARD_GAME" | "RPG",
   limit = 4,
 ) {
-  return prisma.game.findMany({
-    where: { isActive: true, deletedAt: null, collectionType },
+  const baseWhere: Prisma.GameWhereInput = {
+    isActive: true,
+    deletedAt: null,
+    collectionType,
+    ...showcaseCoverWhere,
+  };
+
+  const withAvailable = await prisma.game.findMany({
+    where: {
+      ...baseWhere,
+      copies: { some: { status: "AVAILABLE" } },
+    },
     include: gameListInclude,
-    orderBy: [{ popularityCount: "desc" }, { title: "asc" }],
+    orderBy: [{ isFeatured: "desc" }, { title: "asc" }],
     take: limit,
   });
+
+  if (withAvailable.length >= limit) return withAvailable;
+
+  const exclude = withAvailable.map((g) => g.id);
+  const rest = await prisma.game.findMany({
+    where: {
+      ...baseWhere,
+      id: exclude.length ? { notIn: exclude } : undefined,
+      copies: { some: {} },
+    },
+    include: gameListInclude,
+    orderBy: [{ isFeatured: "desc" }, { title: "asc" }],
+    take: limit - withAvailable.length,
+  });
+
+  return [...withAvailable, ...rest];
 }
 
 export async function fetchSimilarGames(

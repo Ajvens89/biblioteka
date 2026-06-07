@@ -33,20 +33,20 @@ export function GamePreviewCard({ game, featured = false, className }: Props) {
       <div className="zf-preview-card-scrim absolute inset-0" aria-hidden />
       <div className="relative flex h-full min-h-[inherit] flex-col justify-end p-3 md:p-3.5">
         {game.categoryLabel && (
-          <span className="mb-1.5 w-fit rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/90 backdrop-blur-sm">
+          <span className="mb-1.5 w-fit rounded-full bg-black/45 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
             {game.categoryLabel}
           </span>
         )}
         <h3
           className={cn(
-            "font-display font-semibold leading-tight text-white drop-shadow-sm",
+            "zf-preview-card-title font-display font-semibold leading-tight text-white",
             featured ? "line-clamp-3 text-base md:text-lg" : "line-clamp-2 text-sm",
           )}
         >
           {game.title}
         </h3>
         {isBoard && (
-          <ul className="mt-1.5 flex flex-wrap gap-2 text-[11px] font-medium text-white/85">
+          <ul className="zf-preview-card-meta mt-1.5 flex flex-wrap gap-2 text-[11px] font-medium text-white">
             <li className="inline-flex items-center gap-1">
               <Users className="h-3 w-3" aria-hidden />
               {game.minPlayers}–{game.maxPlayers}

@@ -391,22 +391,45 @@ body {
 .zf-preview-card-scrim {
   background: linear-gradient(
     180deg,
-    rgb(18 16 28 / 0.05) 0%,
-    rgb(18 16 28 / 0.35) 45%,
-    rgb(18 16 28 / 0.88) 100%
+    rgb(18 16 28 / 0.2) 0%,
+    rgb(18 16 28 / 0.5) 40%,
+    rgb(18 16 28 / 0.94) 100%
   );
+}
+
+.zf-preview-card-title,
+.zf-preview-card-meta {
+  text-shadow:
+    0 1px 2px rgb(0 0 0 / 0.9),
+    0 2px 10px rgb(0 0 0 / 0.55);
 }
 
 /* Search panel */
 
 .zf-search-panel {
-  background: var(--zf-cream);
+  /* Zawsze jasna karta — niezależnie od trybu ciemnego systemu */
+  background: #fffdf8;
+  color: #1a1528;
+  color-scheme: light;
   border-radius: 1.5rem;
-  border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border));
+  border: 1px solid #ddd4c8;
   box-shadow:
-    var(--shadow-card),
+    0 10px 36px -10px rgb(44 32 72 / 0.18),
     0 0 0 1px rgb(255 255 255 / 0.6) inset;
   padding: 1.75rem;
+}
+
+.zf-search-panel h2 {
+  color: #1a1528;
+}
+
+.zf-search-panel .text-muted-foreground,
+.zf-search-panel p.text-small {
+  color: #4a4458;
+}
+
+.zf-search-panel .text-primary\/80 {
+  color: #5c4a8a;
 }
 
 @media (min-width: 768px) {
@@ -416,14 +439,31 @@ body {
 }
 
 .zf-search-icon {
-  background: color-mix(in srgb, var(--primary) 12%, var(--card));
-  color: var(--primary);
-  box-shadow: var(--shadow-soft);
+  background: #ebe3f5;
+  color: #5c4a8a;
+  box-shadow: 0 4px 20px -4px rgb(44 32 72 / 0.12);
+}
+
+.zf-search-panel .zf-search-input {
+  background: #ffffff !important;
+  color: #1a1528 !important;
+  border-color: #c9c0b4 !important;
+}
+
+.zf-search-panel .zf-search-input::placeholder {
+  color: #5c5668;
+  opacity: 1;
+}
+
+.zf-search-panel .zf-btn-secondary {
+  background: #ebe3f5 !important;
+  color: #1a1528 !important;
+  border-color: #ddd4c8 !important;
 }
 
 .zf-search-input:focus-visible {
-  border-color: var(--primary) !important;
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 14%, transparent);
+  border-color: #5c4a8a !important;
+  box-shadow: 0 0 0 4px rgb(92 74 138 / 0.18);
 }
 
 .zf-link-cta:hover {
