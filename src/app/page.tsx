@@ -8,10 +8,7 @@ import { DbUnavailableBanner } from "@/components/db-unavailable-banner";
 import { isDatabaseAvailable } from "@/lib/db";
 import {
   fetchAvailableNow,
-  fetchNewestGames,
-  fetchPopularGames,
   fetchPublicStats,
-  fetchRpgGames,
   fetchShowcaseGames,
   type GameListItem,
 } from "@/lib/games/queries";
@@ -30,17 +27,14 @@ function toShowcase(games: GameListItem[]): HeroShowcaseGame[] {
 export default async function HomePage() {
   const empty: GameListItem[] = [];
   const dbOk = await isDatabaseAvailable();
-  const [available, newest, rpg, popular, stats, boardShowcase, rpgShowcase] = dbOk
+  const [available, stats, boardShowcase, rpgShowcase] = dbOk
     ? await Promise.all([
         fetchAvailableNow(6),
-        fetchNewestGames(6),
-        fetchRpgGames(6),
-        fetchPopularGames(6),
         fetchPublicStats(),
         fetchShowcaseGames("BOARD_GAME", 4),
         fetchShowcaseGames("RPG", 4),
       ])
-    : [empty, empty, empty, empty, { games: 447, copies: 0, available: 0, rpg: 0 }, empty, empty];
+    : [empty, { games: 447, copies: 0, available: 0, rpg: 0 }, empty, empty];
 
   return (
     <div className="overflow-x-hidden">
@@ -87,27 +81,6 @@ export default async function HomePage() {
             description="Gry, które możesz od razu zarezerwować."
             href="/katalog?availability=available"
             games={available}
-            showReserve
-          />
-          <GameSection
-            title="Nowości"
-            description="Ostatnio dodane do biblioteki."
-            href="/katalog?sort=newest"
-            games={newest}
-            showReserve
-          />
-          <GameSection
-            title="Gry RPG"
-            description="Podręczniki i światy fabularne."
-            href="/katalog?collectionType=RPG"
-            games={rpg}
-            showReserve
-          />
-          <GameSection
-            title="Najpopularniejsze"
-            description="Często wybierane przez graczy."
-            href="/katalog?sort=popular"
-            games={popular}
             showReserve
           />
         </div>
