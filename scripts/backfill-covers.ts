@@ -6,6 +6,7 @@
  *   npm run backfill:covers -- --all
  *   npm run backfill:covers -- --dry-run
  *   npm run backfill:covers -- --force --q=Monopoly
+ *   npm run backfill:covers -- --fix-flagged --all
  *
  * Po backfillu na Firebase: ponowny deploy (pliki w public/covers/ trafiają do builda).
  */
@@ -22,6 +23,7 @@ import {
   isGoogleCseConfigured,
   isGoogleCseHealthy,
 } from "../src/lib/services/ean-providers/google-cse-provider";
+import { gameNeedsCoverFixFromAudit } from "../src/lib/services/cover-audit";
 
 function createPrisma() {
   const url = process.env.DATABASE_URL?.replace(/[?&]pgbouncer=true/gi, "") ?? process.env.DATABASE_URL;
@@ -60,7 +62,8 @@ function sleep(ms: number) {
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const fetchAll = args.includes("--all");
-const force = args.includes("--force");
+const force = args.includes("--force") || args.includes("--fix-flagged");
+const fixFlagged = args.includes("--fix-flagged");
 const qArg = args.find((a) => a.startsWith("--q="));
 const titleQuery = qArg ? qArg.split("=")[1]?.trim().toLowerCase() : "";
 const limitArg = args.find((a) => a.startsWith("--limit="));
@@ -108,15 +111,20 @@ async function main() {
     }),
   );
 
-  const filtered = titleQuery
+  let filtered = titleQuery
     ? games.filter((g) => g.title.toLowerCase().includes(titleQuery))
     : games;
+
+  if (fixFlagged) {
+    filtered = filtered.filter((g) => gameNeedsCoverFixFromAudit(g));
+  }
 
   const targets = filtered.filter((g) => gameNeedsCoverFetch(g.coverImageUrl, { force }));
   const mode = force ? " (wymuszone nadpisanie)" : "";
   const qLabel = titleQuery ? `, filtr „${titleQuery}”` : "";
+  const flaggedLabel = fixFlagged ? ", tylko błędne z audytu" : "";
   console.log(
-    `Gier w katalogu: ${games.length}${qLabel}, do pobrania okładek: ${targets.length}${mode}`,
+    `Gier w katalogu: ${games.length}${qLabel}${flaggedLabel}, do pobrania okładek: ${targets.length}${mode}`,
   );
 
   const stats = await backfillMissingCovers(filtered, {
