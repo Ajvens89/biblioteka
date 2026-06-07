@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { CoverCandidate, EanLookupResult } from "@/lib/services/ean-providers";
+import type { CoverCandidate, EanLookupResult } from "@/lib/services/ean-providers/types";
+import type { TitleToEanCandidate, TitleToEanResult } from "@/lib/services/ean-providers/title-to-ean-types";
+import { TITLE_EAN_SOURCE_LABELS } from "@/lib/services/ean-providers/title-to-ean-types";
 import {
   bggSearchUrl,
   googleImagesSearchUrl,
   planszeoSearchUrl,
-} from "@/lib/services/ean-providers";
+} from "@/lib/services/ean-providers/image-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +18,8 @@ import { COLLECTION_TYPE_LABELS } from "@/lib/constants";
 const SOURCE_LABEL: Record<string, string> = {
   local: "Biblioteka lokalna",
   planszeo: "Planszeo (serwer)",
+  rebel: "Rebel images.csv (serwer)",
+  hurt: "hurt.csv (katalog lokalny)",
   google_books: "Google Books",
   open_library: "Open Library",
   bgg: "BoardGameGeek",
@@ -42,6 +46,9 @@ type Props = {
   skipChecksum: boolean;
   setSkipChecksum: (v: boolean) => void;
   onLookup: () => void;
+  onLookupEanByTitle: () => void;
+  onSelectTitleEan: (c: TitleToEanCandidate) => void;
+  titleToEanResult: TitleToEanResult | null;
   onScanOpen: () => void;
   pending: boolean;
   gameTitle: string;
@@ -65,6 +72,9 @@ export function EanCoverLookupPanel({
   skipChecksum,
   setSkipChecksum,
   onLookup,
+  onLookupEanByTitle,
+  onSelectTitleEan,
+  titleToEanResult,
   onScanOpen,
   pending,
   gameTitle,
@@ -98,6 +108,56 @@ export function EanCoverLookupPanel({
         <Button type="button" data-testid="ean-lookup-button" variant="secondary" onClick={onLookup} disabled={pending}>
           Sprawdź kod
         </Button>
+      </div>
+
+      <div className="space-y-2 rounded-md border border-dashed p-3">
+        <p className="text-sm font-medium">Znam tytuł — szukam EAN</p>
+        <p className="text-xs text-muted-foreground">
+          hurt.csv → Planszeo → UPCitemdb → Gemini (jeśli skonfigurowany).
+        </p>
+        <div className="space-y-2">
+          <Label htmlFor="titleEanSearch">Tytuł gry</Label>
+          <Input
+            id="titleEanSearch"
+            data-testid="title-ean-search-input"
+            value={titleHint}
+            onChange={(e) => setTitleHint(e.target.value)}
+            placeholder="np. Messina 1347"
+          />
+        </div>
+        <Button
+          type="button"
+          data-testid="title-ean-lookup-button"
+          variant="outline"
+          onClick={onLookupEanByTitle}
+          disabled={pending}
+        >
+          Znajdź EAN po tytule
+        </Button>
+        {titleToEanResult && (
+          <div className="space-y-2" data-testid="title-ean-results">
+            <p className="text-sm text-muted-foreground">{titleToEanResult.message}</p>
+            {titleToEanResult.candidates.map((c) => (
+              <div
+                key={`${c.source}-${c.ean}`}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/30 p-2 text-sm"
+                data-testid="title-ean-candidate"
+              >
+                <div>
+                  <p className="font-mono font-medium">{c.ean}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {TITLE_EAN_SOURCE_LABELS[c.source]}
+                    {c.title ? ` — ${c.title}` : ""}
+                    {!c.checksumValid && " · nieprawidłowa suma kontrolna"}
+                  </p>
+                </div>
+                <Button type="button" size="sm" onClick={() => onSelectTitleEan(c)}>
+                  Użyj tego EAN
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">

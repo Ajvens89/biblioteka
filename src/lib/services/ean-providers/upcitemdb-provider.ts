@@ -133,6 +133,42 @@ export async function lookupUpcitemdbByEan(ean: string): Promise<CoverCandidate[
   return out;
 }
 
+/** EAN po tytule (bez wymagania okładki). */
+export async function lookupUpcitemdbEanByTitle(title: string): Promise<{
+  ean: string;
+  title?: string;
+  publisher?: string;
+  score: number;
+} | null> {
+  const q = title.trim();
+  if (!q) return null;
+
+  const data = await fetchUpcJson("/search", { s: q });
+  if (!data?.items?.length) return null;
+
+  const ranked = data.items
+    .map((item) => ({
+      item,
+      score: scoreTitleMatch(q, item.title ?? ""),
+    }))
+    .filter((row) => row.score >= 35 && (row.item.ean || row.item.upc))
+    .sort((a, b) => b.score - a.score);
+
+  const best = ranked[0];
+  if (!best) return null;
+
+  const raw = best.item.ean ?? best.item.upc ?? "";
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length !== 13 && digits.length !== 8) return null;
+
+  return {
+    ean: digits,
+    title: best.item.title,
+    publisher: best.item.brand,
+    score: best.score,
+  };
+}
+
 /** Plan C — wyszukiwanie po tytule (gdy lookup po EAN nie ma zdjęcia). */
 export async function lookupUpcitemdbByTitle(title: string): Promise<CoverCandidate[]> {
   const q = title.trim();

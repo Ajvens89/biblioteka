@@ -10,11 +10,20 @@ import {
   assertEanNotDuplicate,
   createGameFromEan,
   lookupByEan,
+  lookupEanByTitle,
   type EanLookupResult,
+  type TitleToEanResult,
 } from "@/lib/services/games";
 import { isServiceError } from "@/lib/services/errors";
 import { normalizeEan, validateEanChecksum } from "@/lib/services/ean";
-import { gameSchema, copySchema, lookupEanSchema, type GameInput, type CopyInput } from "@/lib/validations/game";
+import {
+  gameSchema,
+  copySchema,
+  lookupEanSchema,
+  lookupEanByTitleSchema,
+  type GameInput,
+  type CopyInput,
+} from "@/lib/validations/game";
 import { gameIdSchema, uuidSchema } from "@/lib/validations/ids";
 import { z } from "zod";
 import { fail, ok, type ActionResult } from "@/lib/actions/utils";
@@ -38,6 +47,19 @@ export async function lookupEanAction(
     titleHint: parsed.data.titleHint,
     collectionType: parsed.data.collectionType,
   });
+  return ok(result);
+}
+
+export async function lookupEanByTitleAction(
+  title: string,
+): Promise<ActionResult<TitleToEanResult>> {
+  const actorResult = await requireActorStaff();
+  if (!isActorResult(actorResult)) return actorResult;
+
+  const parsed = lookupEanByTitleSchema.safeParse({ title });
+  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
+
+  const result = await lookupEanByTitle(prisma, parsed.data.title);
   return ok(result);
 }
 

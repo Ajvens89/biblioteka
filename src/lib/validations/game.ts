@@ -89,6 +89,10 @@ export const lookupEanSchema = z.object({
   collectionType: collectionTypeEnum.optional(),
 });
 
+export const lookupEanByTitleSchema = z.object({
+  title: z.string().min(2, "Podaj tytuł gry (min. 2 znaki)").max(200),
+});
+
 export const copySchema = z.object({
   gameId: z.string().uuid(),
   inventoryNumber: z.string().min(1, "Numer inwentarzowy jest wymagany"),

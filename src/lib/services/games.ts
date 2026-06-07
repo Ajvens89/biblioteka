@@ -13,6 +13,8 @@ import { ServiceError } from "@/lib/services/errors";
 import type { GameInput } from "@/lib/validations/game";
 
 export type { EanLookupResult } from "@/lib/services/ean-providers";
+export { lookupEanByTitle } from "@/lib/services/ean-providers/title-to-ean";
+export type { TitleToEanResult, TitleToEanCandidate } from "@/lib/services/ean-providers/title-to-ean-types";
 export { findGameByEan } from "@/lib/services/game-by-ean";
 
 /** Wyszukiwanie EAN — deleguje do providerów (kolejność w ean-providers/index). */

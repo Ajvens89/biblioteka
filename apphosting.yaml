@@ -54,3 +54,11 @@ env:
     secret: DIRECT_URL
     availability:
       - RUNTIME
+  - variable: GOOGLE_GEMINI_MODEL
+    value: gemini-flash-latest
+    availability:
+      - RUNTIME
+  - variable: GOOGLE_GEMINI_API_KEY
+    secret: GOOGLE_GEMINI_API_KEY
+    availability:
+      - RUNTIME

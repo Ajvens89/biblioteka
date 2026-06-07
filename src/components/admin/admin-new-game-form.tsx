@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { Category, Designer, Publisher, Tag } from "@prisma/client";
-import type { CoverCandidate, EanLookupResult } from "@/lib/services/ean-providers";
-import { createGame, lookupEanAction } from "@/lib/actions/games";
+import type { CoverCandidate, EanLookupResult } from "@/lib/services/ean-providers/types";
+import type { TitleToEanCandidate, TitleToEanResult } from "@/lib/services/ean-providers/title-to-ean-types";
+import { createGame, lookupEanAction, lookupEanByTitleAction } from "@/lib/actions/games";
 import { EanScanner } from "@/components/barcode/ean-scanner";
 import { EanCoverLookupPanel } from "@/components/admin/ean-cover-lookup-panel";
 import { Button } from "@/components/ui/button";
@@ -78,6 +79,7 @@ export function AdminGameWizard({
   const [titleHint, setTitleHint] = useState("");
   const [collectionType, setCollectionType] = useState<"BOARD_GAME" | "RPG">("BOARD_GAME");
   const [lookupResult, setLookupResult] = useState<EanLookupResult | null>(null);
+  const [titleToEanResult, setTitleToEanResult] = useState<TitleToEanResult | null>(null);
   const [existingGame, setExistingGame] = useState<{ id: string; title: string; slug: string } | null>(null);
   const [selectedCover, setSelectedCover] = useState<CoverCandidate | null>(null);
   const [checksumWarning, setChecksumWarning] = useState(false);
@@ -151,6 +153,46 @@ export function AdminGameWizard({
       }
       if (result.data.normalizedEan) setEan(result.data.normalizedEan);
       handleLookupResult(result.data);
+    });
+  };
+
+  const lookupEanByTitle = () => {
+    const searchTitle = titleHint.trim() || title.trim();
+    if (!searchTitle) {
+      toast.error("Wpisz tytuł gry.");
+      return;
+    }
+    if (!titleHint.trim()) setTitleHint(searchTitle);
+    start(async () => {
+      const result = await lookupEanByTitleAction(searchTitle);
+      if (!result.success || !result.data) {
+        toast.error(result.success ? "Brak danych." : result.error);
+        return;
+      }
+      setTitleToEanResult(result.data);
+      if (result.data.status === "exists" && result.data.game) {
+        setExistingGame({
+          id: result.data.game.id,
+          title: result.data.game.title,
+          slug: result.data.game.slug,
+        });
+      }
+      toast.message(result.data.message);
+    });
+  };
+
+  const applyTitleEan = (candidate: TitleToEanCandidate) => {
+    setEan(candidate.ean);
+    if (candidate.title && !title.trim()) setTitle(candidate.title);
+    start(async () => {
+      const result = await lookupEanAction(candidate.ean, candidate.title ?? titleHint, collectionType);
+      if (!result.success || !result.data) {
+        toast.error(result.success ? "Brak danych." : result.error);
+        return;
+      }
+      if (result.data.normalizedEan) setEan(result.data.normalizedEan);
+      handleLookupResult(result.data);
+      toast.success(`Ustawiono EAN ${candidate.ean} — sprawdź dane przed zapisem.`);
     });
   };
 
@@ -312,6 +354,9 @@ export function AdminGameWizard({
           skipChecksum={skipChecksum}
           setSkipChecksum={setSkipChecksum}
           onLookup={lookup}
+          onLookupEanByTitle={lookupEanByTitle}
+          onSelectTitleEan={applyTitleEan}
+          titleToEanResult={titleToEanResult}
           onScanOpen={() => setScannerOpen(true)}
           pending={pending}
           gameTitle={title}
@@ -410,6 +455,9 @@ export function AdminGameWizard({
                 skipChecksum={skipChecksum}
                 setSkipChecksum={setSkipChecksum}
                 onLookup={lookup}
+                onLookupEanByTitle={lookupEanByTitle}
+                onSelectTitleEan={applyTitleEan}
+                titleToEanResult={titleToEanResult}
                 onScanOpen={() => setScannerOpen(true)}
                 pending={pending}
                 gameTitle={title}

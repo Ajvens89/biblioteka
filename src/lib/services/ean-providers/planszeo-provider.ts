@@ -40,7 +40,7 @@ export function pickBestPlanszeoSlug(title: string, slugs: string[]): string | n
   return bestScore >= 40 ? best : slugs[0];
 }
 
-async function fetchPlanszeoHtml(path: string): Promise<string | null> {
+export async function fetchPlanszeoHtml(path: string): Promise<string | null> {
   const url = `${PLANSZEO_ORIGIN}${path}`;
   try {
     const res = await fetchWithTimeout(
