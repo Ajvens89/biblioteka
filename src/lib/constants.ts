@@ -24,6 +24,12 @@ export const COLLECTION_TYPE_LABELS: Record<GameCollectionType, string> = {
   RPG: "Gry fabularne",
 };
 
+/** Etykiety filtrów i hero — krótkie, jednoznaczne. */
+export const CATALOG_COLLECTION_LABELS: Record<GameCollectionType, string> = {
+  BOARD_GAME: "Planszówki",
+  RPG: "RPG podręczniki",
+};
+
 export const GAME_TYPE_LABELS: Record<GameType, string> = {
   BOARD: "Planszowa",
   CARD: "Karciana",

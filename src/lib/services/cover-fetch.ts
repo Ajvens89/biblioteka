@@ -11,11 +11,16 @@ import {
   lookupGoogleCseCoverImages,
 } from "@/lib/services/ean-providers/google-cse-provider";
 import { lookupGoogleBooksProvider } from "@/lib/services/ean-providers/google-books-provider";
+import { downloadCoverToPublic } from "@/lib/services/cover-download";
 import {
   probeImageUrl,
   resolveOpenLibraryCover,
   validateCoverImageUrl,
 } from "@/lib/services/ean-providers/image-utils";
+import {
+  isPlanszeoCoversEnabled,
+  lookupPlanszeoCoverUrl,
+} from "@/lib/services/ean-providers/planszeo-provider";
 import type { CoverSource } from "@/lib/services/ean-providers/types";
 import { isPublicCoverAvailable, normalizeProductBarcode } from "@/lib/services/import-products";
 
@@ -77,6 +82,37 @@ async function fromGoogleImages(
   return null;
 }
 
+async function persistCoverOnServer(
+  result: CoverFetchResult,
+  fileBaseName: string,
+): Promise<CoverFetchResult> {
+  if (!result.coverImageUrl || !result.coverImageSource) return result;
+  if (!/^https?:\/\//i.test(result.coverImageUrl)) return result;
+
+  const local = await downloadCoverToPublic(result.coverImageUrl, fileBaseName);
+  if (!local) return result;
+
+  return { ...result, coverImageUrl: local };
+}
+
+async function fromPlanszeo(title: string): Promise<CoverFetchResult | null> {
+  if (!isPlanszeoCoversEnabled()) return null;
+
+  const hit = await lookupPlanszeoCoverUrl(title);
+  if (!hit) return null;
+
+  const local = await downloadCoverToPublic(hit.coverUrl, hit.slug);
+  if (!local) {
+    return {
+      coverImageUrl: null,
+      coverImageSource: null,
+      message: "Planszeo: znaleziono okładkę, ale zapis na serwer się nie powiódł.",
+    };
+  }
+
+  return { coverImageUrl: local, coverImageSource: "planszeo" };
+}
+
 async function fromBgg(title: string): Promise<CoverFetchResult | null> {
   if (!isBggConfigured()) return null;
 
@@ -104,11 +140,8 @@ async function fromBgg(title: string): Promise<CoverFetchResult | null> {
 }
 
 /**
- * Pobiera okładkę z zewnętrznych źródeł (bez BGG, jeśli nie ma tokenu):
- * ISBN → Open Library, Google Books
- * EAN/tytuł → UPCitemdb (darmowe — limit 100/dzień)
- * tytuł → Google Custom Search Grafika (GOOGLE_CSE_API_KEY + GOOGLE_CSE_CX)
- * opcjonalnie BGG (BGG_TOKEN)
+ * Pobiera okładkę i zapisuje plik w public/covers/ (gdy źródło zwraca URL http/https).
+ * Kolejność: Planszeo → ISBN (OL/Books) → UPCitemdb → Google CSE → BGG.
  */
 export async function fetchCoverForGame(input: CoverFetchInput): Promise<CoverFetchResult> {
   const title = input.title?.trim();
@@ -118,10 +151,16 @@ export async function fetchCoverForGame(input: CoverFetchInput): Promise<CoverFe
 
   const ean = normalizeProductBarcode(input.ean);
 
+  const planszeo = await fromPlanszeo(title);
+  if (planszeo?.coverImageUrl) return planszeo;
+
   if (ean && isIsbn13(ean)) {
     const openLib = await resolveOpenLibraryCover(ean);
     if (openLib) {
-      return { coverImageUrl: openLib, coverImageSource: "open_library" };
+      return persistCoverOnServer(
+        { coverImageUrl: openLib, coverImageSource: "open_library" },
+        title,
+      );
     }
 
     const google = await lookupGoogleBooksProvider(ean);
@@ -129,18 +168,21 @@ export async function fetchCoverForGame(input: CoverFetchInput): Promise<CoverFe
       google.map((c) => c.coverImageUrl ?? c.thumbnailUrl),
     );
     if (googleCover) {
-      return { coverImageUrl: googleCover, coverImageSource: "google_books" };
+      return persistCoverOnServer(
+        { coverImageUrl: googleCover, coverImageSource: "google_books" },
+        title,
+      );
     }
   }
 
   const upc = await fromUpcitemdb(title, ean);
-  if (upc?.coverImageUrl) return upc;
+  if (upc?.coverImageUrl) return persistCoverOnServer(upc, title);
 
   const googleImg = await fromGoogleImages(title, ean);
-  if (googleImg?.coverImageUrl) return googleImg;
+  if (googleImg?.coverImageUrl) return persistCoverOnServer(googleImg, title);
 
   const bgg = await fromBgg(title);
-  if (bgg?.coverImageUrl) return bgg;
+  if (bgg?.coverImageUrl) return persistCoverOnServer(bgg, title);
   if (bgg?.message && !isBggConfigured()) {
     /* fall through to final message */
   } else if (bgg?.message) {
@@ -150,9 +192,9 @@ export async function fetchCoverForGame(input: CoverFetchInput): Promise<CoverFe
   return {
     coverImageUrl: null,
     coverImageSource: null,
-    message: isBggConfigured() || isGoogleCseConfigured()
+    message: isPlanszeoCoversEnabled()
       ? `Nie znaleziono okładki dla: ${title}`
-      : `Nie znaleziono okładki. Dodaj GOOGLE_CSE_* lub BGG_TOKEN w .env.`,
+      : `Nie znaleziono okładki. Włącz Planszeo (domyślnie) lub dodaj BGG_TOKEN / GOOGLE_CSE_*.`,
   };
 }
 
@@ -164,7 +206,7 @@ export type CoverBackfillStats = {
   issues: string[];
 };
 
-const DEFAULT_BACKFILL_DELAY_MS = 700;
+const DEFAULT_BACKFILL_DELAY_MS = 1500;
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
@@ -180,8 +222,11 @@ export function formatCoverBackfillReport(stats: CoverBackfillStats, dryRun: boo
   ];
   lines.push(
     "",
-    "Źródła: UPCitemdb, Google CSE (Grafika), Open Library, BGG.",
-    isGoogleCseConfigured() ? "Google Grafika: skonfigurowane." : "Google: ustaw GOOGLE_CSE_API_KEY + GOOGLE_CSE_CX.",
+    "Źródła: Planszeo (zapis do public/covers/), UPCitemdb, Google CSE, Open Library, BGG.",
+    isPlanszeoCoversEnabled()
+      ? "Planszeo: włączone — okładki pobierane na serwer."
+      : "Planszeo: wyłączone (PLANSZEO_COVERS=false).",
+    isGoogleCseConfigured() ? "Google Grafika: skonfigurowane." : "Google CSE: opcjonalnie.",
     isBggConfigured() ? "BGG: skonfigurowane." : "BGG: opcjonalnie BGG_TOKEN.",
   );
   if (stats.issues.length > 0) {
@@ -222,11 +267,25 @@ export async function backfillMissingCovers(
 
   for (let i = 0; i < targets.length; i++) {
     const game = targets[i];
-    const result = await fetchCoverForGame({
-      title: game.title,
-      ean: game.ean,
-      collectionType: game.collectionType,
-    });
+    let result: CoverFetchResult;
+    try {
+      result = await fetchCoverForGame({
+        title: game.title,
+        ean: game.ean,
+        collectionType: game.collectionType,
+      });
+    } catch (error) {
+      stats.notFound += 1;
+      const msg = error instanceof Error ? error.message : String(error);
+      if (stats.issues.length < 10) {
+        stats.issues.push(`${game.title}: błąd pobierania (${msg})`);
+      }
+      if (options?.onProgress) {
+        options.onProgress(i + 1, targets.length, game.title, false);
+      }
+      await sleep(delayMs);
+      continue;
+    }
 
     if (!result.coverImageUrl || !result.coverImageSource) {
       stats.notFound += 1;
@@ -256,7 +315,7 @@ export async function backfillMissingCovers(
 export function gameNeedsCoverFetch(coverImageUrl: string | null | undefined): boolean {
   if (!coverImageUrl?.trim()) return true;
   const url = coverImageUrl.trim();
-  if (/^https?:\/\//i.test(url)) return false;
   if (url.startsWith("/")) return !isPublicCoverAvailable(url);
+  if (/^https?:\/\//i.test(url)) return true;
   return true;
 }

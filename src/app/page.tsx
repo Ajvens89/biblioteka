@@ -10,25 +10,45 @@ import {
   fetchAvailableNow,
   fetchNewestGames,
   fetchPopularGames,
+  fetchPublicStats,
   fetchRpgGames,
+  fetchShowcaseGames,
   type GameListItem,
 } from "@/lib/games/queries";
+import type { HeroShowcaseGame } from "@/components/home/landing-category-showcase";
+
+function toShowcase(games: GameListItem[]): HeroShowcaseGame[] {
+  return games.map((g) => ({
+    id: g.id,
+    title: g.title,
+    slug: g.slug,
+    coverImageUrl: g.coverImageUrl,
+    collectionType: g.collectionType,
+  }));
+}
 
 export default async function HomePage() {
   const empty: GameListItem[] = [];
   const dbOk = await isDatabaseAvailable();
-  const [available, newest, rpg, popular] = dbOk
+  const [available, newest, rpg, popular, stats, boardShowcase, rpgShowcase] = dbOk
     ? await Promise.all([
         fetchAvailableNow(6),
         fetchNewestGames(6),
         fetchRpgGames(6),
         fetchPopularGames(6),
+        fetchPublicStats(),
+        fetchShowcaseGames("BOARD_GAME", 4),
+        fetchShowcaseGames("RPG", 4),
       ])
-    : [empty, empty, empty, empty];
+    : [empty, empty, empty, empty, { games: 447, copies: 0, available: 0, rpg: 0 }, empty, empty];
 
   return (
     <div className="overflow-x-hidden">
-      <LandingHero />
+      <LandingHero
+        totalGames={stats.games}
+        boardGames={toShowcase(boardShowcase)}
+        rpgGames={toShowcase(rpgShowcase)}
+      />
 
       <div className="landing-section-search relative z-10 mx-auto max-w-6xl px-4">
         {!dbOk && (

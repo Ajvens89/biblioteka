@@ -1,12 +1,12 @@
 /**
- * Uzupełnia brakujące okładki (BGG / Open Library / Google Books).
+ * Uzupełnia brakujące okładki — Planszeo (zapis do public/covers/), potem UPC/BGG/Google.
  *
  *   npm run backfill:covers
  *   npm run backfill:covers -- --limit=20
  *   npm run backfill:covers -- --all
  *   npm run backfill:covers -- --dry-run
  *
- * Wymaga BGG_TOKEN w .env dla gier planszowych (boardgamegeek.com/applications).
+ * Po backfillu na Firebase: ponowny deploy (pliki w public/covers/ trafiają do builda).
  */
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
@@ -66,9 +66,10 @@ const limit = fetchAll
     : 50;
 
 async function main() {
+  console.log("✓ Planszeo: okładki pobierane na serwer (public/covers/).\n");
+
   if (!isBggConfigured()) {
-    console.warn("ℹ️  Bez BGG_TOKEN — używany UPCitemdb + Open Library (darmowe).");
-    console.warn("   Opcjonalnie BGG: https://boardgamegeek.com/applications\n");
+    console.warn("ℹ️  Bez BGG_TOKEN — po Planszeo: UPCitemdb + Open Library.\n");
   }
 
   if (isGoogleCseConfigured()) {

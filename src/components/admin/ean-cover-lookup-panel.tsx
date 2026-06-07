@@ -15,9 +15,12 @@ import { COLLECTION_TYPE_LABELS } from "@/lib/constants";
 
 const SOURCE_LABEL: Record<string, string> = {
   local: "Biblioteka lokalna",
+  planszeo: "Planszeo (serwer)",
   google_books: "Google Books",
   open_library: "Open Library",
   bgg: "BoardGameGeek",
+  upcitemdb: "UPCitemdb",
+  google_images: "Google Grafika",
   manual: "Ręcznie",
 };
 

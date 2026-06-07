@@ -162,7 +162,7 @@ export function CatalogSidebarFilters({
       )}
 
       <div className="space-y-2">
-        <Label htmlFor={`${idPrefix}type`}>Rodzaj gry</Label>
+        <Label htmlFor={`${idPrefix}type`}>Typ gry planszowej</Label>
         <select
           id={`${idPrefix}type`}
           className={selectClass}

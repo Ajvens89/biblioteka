@@ -6,6 +6,7 @@ export type CoverSource =
   | "google_images"
   | "open_library"
   | "upcitemdb"
+  | "planszeo"
   | "bgg"
   | "manual";
 
@@ -66,6 +67,7 @@ export const COVER_SOURCE_LABELS: Record<CoverSource, string> = {
   google_images: "Okładka z Google (Custom Search — Grafika) — sprawdź przed zapisem.",
   open_library: "Okładka pobrana z Open Library — sprawdź przed zapisem.",
   upcitemdb: "Okładka z katalogu produktów (UPCitemdb) — sprawdź przed zapisem.",
+  planszeo: "Okładka pobrana z Planszeo i zapisana lokalnie na serwerze.",
   bgg: "Propozycja z BoardGameGeek — wybierz poprawną okładkę.",
   manual:
     "Nie znaleziono okładki automatycznie. Możesz wkleić własny URL albo skorzystać z ręcznego wyszukiwania w Planszeo/BGG.",

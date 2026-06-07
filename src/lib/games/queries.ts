@@ -174,6 +174,18 @@ export async function fetchRpgGames(limit = 6) {
   });
 }
 
+export async function fetchShowcaseGames(
+  collectionType: "BOARD_GAME" | "RPG",
+  limit = 4,
+) {
+  return prisma.game.findMany({
+    where: { isActive: true, deletedAt: null, collectionType },
+    include: gameListInclude,
+    orderBy: [{ popularityCount: "desc" }, { title: "asc" }],
+    take: limit,
+  });
+}
+
 export async function fetchSimilarGames(
   gameId: string,
   categoryIds: string[],

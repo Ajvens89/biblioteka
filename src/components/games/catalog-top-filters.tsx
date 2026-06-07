@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { COLLECTION_TYPE_LABELS } from "@/lib/constants";
 import type { GameFilterInput } from "@/lib/validations/game";
 import { Label } from "@/components/ui/label";
 
@@ -22,31 +21,12 @@ export function CatalogTopFilters({ current }: { current: GameFilterInput }) {
 
   return (
     <div
-      className="grid gap-3 sm:grid-cols-3"
+      className="grid gap-3 sm:grid-cols-2"
       data-testid="catalog-top-filters"
     >
       <div className="min-w-0 space-y-1">
-        <Label htmlFor="top-collectionType" className="text-xs">
-          Typ zbioru
-        </Label>
-        <select
-          id="top-collectionType"
-          data-testid="collection-type-filter"
-          className={selectClass}
-          value={current.collectionType ?? ""}
-          onChange={(e) => update("collectionType", e.target.value)}
-        >
-          <option value="">Wszystkie</option>
-          {Object.entries(COLLECTION_TYPE_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="min-w-0 space-y-1">
-        <Label htmlFor="top-availability" className="text-xs">
-          Dostępność
+        <Label htmlFor="top-availability" className="text-xs font-medium">
+          Dostępność egzemplarza
         </Label>
         <select
           id="top-availability"
@@ -62,8 +42,8 @@ export function CatalogTopFilters({ current }: { current: GameFilterInput }) {
         </select>
       </div>
       <div className="min-w-0 space-y-1">
-        <Label htmlFor="top-sort" className="text-xs">
-          Sortowanie
+        <Label htmlFor="top-sort" className="text-xs font-medium">
+          Kolejność wyników
         </Label>
         <select
           id="top-sort"

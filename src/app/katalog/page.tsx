@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Search } from "lucide-react";
 import { GameCard } from "@/components/games/game-card";
 import { CatalogToolbar } from "@/components/games/catalog-toolbar";
+import { CatalogCategoryTabs } from "@/components/games/catalog-category-tabs";
 import { CatalogTopFilters } from "@/components/games/catalog-top-filters";
 import { CatalogSidebarFilters } from "@/components/games/catalog-sidebar-filters";
 import { CatalogMobileFilters } from "@/components/games/catalog-mobile-filters";
@@ -76,6 +77,13 @@ export default async function CatalogPage({ searchParams }: PageProps) {
           <Suspense>
             <CatalogToolbar defaultQ={filters.q} defaultEan={filters.ean} />
           </Suspense>
+
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-foreground">Kategoria gry</p>
+            <Suspense>
+              <CatalogCategoryTabs />
+            </Suspense>
+          </div>
 
           <Suspense>
             <CatalogTopFilters current={filters} />

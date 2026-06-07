@@ -26,8 +26,8 @@ describe("bgg-auth", () => {
 });
 
 describe("cover-fetch — gameNeedsCoverFetch", () => {
-  it("https nie wymaga pobrania", () => {
-    assert.equal(gameNeedsCoverFetch("https://cf.geekdo-static.com/x.jpg"), false);
+  it("https wymaga pobrania na serwer", () => {
+    assert.equal(gameNeedsCoverFetch("https://cf.geekdo-static.com/x.jpg"), true);
   });
 
   it("pusta wymaga pobrania", () => {

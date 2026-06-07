@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import {
-  COLLECTION_TYPE_LABELS,
+  CATALOG_COLLECTION_LABELS,
   DIFFICULTY_LABELS,
   GAME_TYPE_LABELS,
 } from "@/lib/constants";
@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 const LABELS: Record<string, (v: string) => string> = {
   q: (v) => `Szukaj: ${v}`,
   ean: (v) => `EAN: ${v}`,
-  collectionType: (v) => COLLECTION_TYPE_LABELS[v as keyof typeof COLLECTION_TYPE_LABELS] ?? v,
+  collectionType: (v) =>
+    CATALOG_COLLECTION_LABELS[v as keyof typeof CATALOG_COLLECTION_LABELS] ?? v,
   availability: (v) => (v === "available" ? "Tylko dostępne" : v),
   category: (v) => `Kategoria: ${v}`,
   tag: (v) => `Tag: ${v}`,

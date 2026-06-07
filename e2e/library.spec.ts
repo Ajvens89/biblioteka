@@ -167,7 +167,7 @@ test.describe("Biblioteka — E2E", () => {
 
   test("katalog: filtr RPG działa", async ({ page }) => {
     await page.goto("/katalog");
-    await page.getByTestId("collection-type-filter").selectOption("RPG");
+    await page.getByTestId("collection-type-tab-rpg").click();
     await expect(page).toHaveURL(/collectionType=RPG/);
     const badges = page.getByTestId("game-type-badge");
     const count = await badges.count();
