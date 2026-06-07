@@ -72,7 +72,8 @@ Pole ean musi mieć dokładnie 13 cyfr. Jeśli nie znajdziesz pewnego EAN, ustaw
     if (!groundedText) return null;
 
     const parsed = parseGeminiTitleEanResponse(groundedText);
-    const ean = parsed?.ean?.replace(/\D/g, "");
+    if (!parsed) return null;
+    const ean = parsed.ean?.replace(/\D/g, "");
     if (!ean || ean.length !== 13) return null;
 
     const usedGrounding = Boolean(text);
