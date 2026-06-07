@@ -1,0 +1,18 @@
+---
+description: Po dodaniu gier do bazy — commit okładek i deploy bez pytania
+alwaysApply: true
+---
+
+# Workflow dodawania gier
+
+Gdy użytkownik prosi o dodanie gier do bazy (po EAN, hurt.csv, ręcznie itp.):
+
+1. Uruchom import (`scripts/add-games-by-ean.ts` lub odpowiedni skrypt).
+2. Upewnij się, że każda gra ma opis i okładkę (hurt → Rebel → Planszeo → BGG).
+3. **Bez pytania** po zakończeniu importu:
+   - Zcommituj nowe pliki z `public/covers/`.
+   - Wypchnij na remote (`git push`).
+   - Zdeployuj produkcję: `firebase deploy --only apphosting:bookshelf`.
+4. Podsumuj użytkownikowi: ile gier dodano, skąd opisy/okładki, linki do slugów.
+
+Nie pytaj „czy commitować/deployować?” — rób to zawsze automatycznie po dodaniu gier.
