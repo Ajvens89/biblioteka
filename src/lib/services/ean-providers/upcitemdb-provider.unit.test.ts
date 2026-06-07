@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { scoreTitleMatch } from "./upcitemdb-provider";
+import { scoreTitleMatch, isStrictTitleCoverMatch } from "./upcitemdb-provider";
 
 describe("upcitemdb-provider", () => {
   it("scoreTitleMatch preferuje pełne dopasowanie", () => {
@@ -10,5 +10,21 @@ describe("upcitemdb-provider", () => {
 
   it("scoreTitleMatch odrzuca zupełnie obce tytuły", () => {
     assert.ok(scoreTitleMatch("Azul", "Monopoly Classic") < 35);
+  });
+
+  it("isStrictTitleCoverMatch odrzuca złe Monopoly", () => {
+    assert.equal(
+      isStrictTitleCoverMatch("Monopoly Konie i kucyki", "Quiz Konie i kucyki Kapitan Nauka"),
+      false,
+    );
+    assert.equal(
+      isStrictTitleCoverMatch("Monopoly DC Universe", "Monopoly Singapore Edition"),
+      false,
+    );
+    assert.equal(
+      isStrictTitleCoverMatch("Monopoly Transformers", "Robo Rally Transformers"),
+      false,
+    );
+    assert.ok(isStrictTitleCoverMatch("Monopoly Marvel Avengers", "Monopoly Marvel Avengers"));
   });
 });

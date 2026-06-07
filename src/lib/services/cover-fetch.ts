@@ -21,6 +21,16 @@ import {
   isPlanszeoCoversEnabled,
   lookupPlanszeoCoverUrl,
 } from "@/lib/services/ean-providers/planszeo-provider";
+import {
+  isRebelImagesEnabled,
+  lookupRebelCoverUrl,
+} from "@/lib/services/ean-providers/rebel-images-provider";
+import {
+  findHurtProductByEan,
+  findHurtProductByTitle,
+  mapHurtProductToGameData,
+} from "@/lib/hurt-catalog";
+import { isHurtCatalogEnabled } from "@/lib/services/ean-providers/hurt-catalog-config";
 import type { CoverSource } from "@/lib/services/ean-providers/types";
 import { isPublicCoverAvailable, normalizeProductBarcode } from "@/lib/services/import-products";
 
@@ -28,6 +38,8 @@ export type CoverFetchInput = {
   title: string;
   ean?: string | null;
   collectionType?: GameCollectionType;
+  /** IDProduct z Rebel (images.csv) — przyspiesza dopasowanie. */
+  rebelProductId?: string | null;
 };
 
 export type CoverFetchResult = {
@@ -57,6 +69,8 @@ async function fromUpcitemdb(
     if (eanCover) {
       return { coverImageUrl: eanCover, coverImageSource: "upcitemdb" };
     }
+    /* Przy podanym EAN nie szukamy po tytule — łatwo o złą okładkę (np. inna edycja Monopoly). */
+    return null;
   }
 
   const byTitle = await lookupUpcitemdbByTitle(title);
@@ -95,10 +109,65 @@ async function persistCoverOnServer(
   return { ...result, coverImageUrl: local };
 }
 
-async function fromPlanszeo(title: string): Promise<CoverFetchResult | null> {
+async function fromHurtCatalog(
+  title: string,
+  ean: string | null,
+): Promise<CoverFetchResult | null> {
+  if (!isHurtCatalogEnabled()) return null;
+
+  const { loadHurtCatalog } = await import("@/lib/hurt-catalog-loader");
+  const catalog = await loadHurtCatalog();
+  if (!catalog) return null;
+
+  let product = ean ? findHurtProductByEan(ean, catalog) : null;
+  if (!product && !ean) {
+    const byTitle = findHurtProductByTitle(title, catalog);
+    product = byTitle?.product ?? null;
+  }
+  if (!product) return null;
+
+  const mapped = mapHurtProductToGameData(product);
+  const remote = mapped.imageUrl ?? mapped.thumbnailUrl;
+  if (!remote) return null;
+
+  const local = await downloadCoverToPublic(remote, title);
+  if (!local) {
+    return {
+      coverImageUrl: null,
+      coverImageSource: null,
+      message: "hurt.csv: znaleziono okładkę, ale zapis na serwer się nie powiódł.",
+    };
+  }
+
+  return { coverImageUrl: local, coverImageSource: "hurt" };
+}
+
+async function fromRebel(
+  title: string,
+  ean: string | null,
+  rebelProductId?: string | null,
+): Promise<CoverFetchResult | null> {
+  if (!isRebelImagesEnabled()) return null;
+
+  const hit = await lookupRebelCoverUrl(title, ean, rebelProductId);
+  if (!hit) return null;
+
+  const local = await downloadCoverToPublic(hit.coverUrl, title);
+  if (!local) {
+    return {
+      coverImageUrl: null,
+      coverImageSource: null,
+      message: "Rebel: znaleziono okładkę w images.csv, ale zapis na serwer się nie powiódł.",
+    };
+  }
+
+  return { coverImageUrl: local, coverImageSource: "rebel" };
+}
+
+async function fromPlanszeo(title: string, ean?: string | null): Promise<CoverFetchResult | null> {
   if (!isPlanszeoCoversEnabled()) return null;
 
-  const hit = await lookupPlanszeoCoverUrl(title);
+  const hit = await lookupPlanszeoCoverUrl(title, ean);
   if (!hit) return null;
 
   const local = await downloadCoverToPublic(hit.coverUrl, hit.slug);
@@ -141,7 +210,7 @@ async function fromBgg(title: string): Promise<CoverFetchResult | null> {
 
 /**
  * Pobiera okładkę i zapisuje plik w public/covers/ (gdy źródło zwraca URL http/https).
- * Kolejność: Planszeo → ISBN (OL/Books) → UPCitemdb → Google CSE → BGG.
+ * Kolejność: hurt.csv → Rebel (images.csv) → Planszeo → ISBN → UPC → Google CSE → BGG.
  */
 export async function fetchCoverForGame(input: CoverFetchInput): Promise<CoverFetchResult> {
   const title = input.title?.trim();
@@ -151,7 +220,13 @@ export async function fetchCoverForGame(input: CoverFetchInput): Promise<CoverFe
 
   const ean = normalizeProductBarcode(input.ean);
 
-  const planszeo = await fromPlanszeo(title);
+  const hurt = await fromHurtCatalog(title, ean);
+  if (hurt?.coverImageUrl) return hurt;
+
+  const rebel = await fromRebel(title, ean, input.rebelProductId);
+  if (rebel?.coverImageUrl) return rebel;
+
+  const planszeo = await fromPlanszeo(title, ean);
   if (planszeo?.coverImageUrl) return planszeo;
 
   if (ean && isIsbn13(ean)) {
@@ -192,9 +267,10 @@ export async function fetchCoverForGame(input: CoverFetchInput): Promise<CoverFe
   return {
     coverImageUrl: null,
     coverImageSource: null,
-    message: isPlanszeoCoversEnabled()
-      ? `Nie znaleziono okładki dla: ${title}`
-      : `Nie znaleziono okładki. Włącz Planszeo (domyślnie) lub dodaj BGG_TOKEN / GOOGLE_CSE_*.`,
+    message:
+      isRebelImagesEnabled() || isPlanszeoCoversEnabled()
+        ? `Nie znaleziono okładki dla: ${title}`
+        : `Nie znaleziono okładki. Dodaj images.csv (Rebel) lub włącz Planszeo / BGG_TOKEN.`,
   };
 }
 
@@ -222,9 +298,12 @@ export function formatCoverBackfillReport(stats: CoverBackfillStats, dryRun: boo
   ];
   lines.push(
     "",
-    "Źródła: Planszeo (zapis do public/covers/), UPCitemdb, Google CSE, Open Library, BGG.",
+    "Źródła: hurt.csv, Rebel images.csv, Planszeo, UPCitemdb, Google CSE, Open Library, BGG.",
+    isRebelImagesEnabled()
+      ? "Rebel images.csv: włączone — okładki z licencjonowanego katalogu."
+      : "Rebel: brak pliku (data/rebel-images.csv lub REBEL_IMAGES_CSV).",
     isPlanszeoCoversEnabled()
-      ? "Planszeo: włączone — okładki pobierane na serwer."
+      ? "Planszeo: włączone."
       : "Planszeo: wyłączone (PLANSZEO_COVERS=false).",
     isGoogleCseConfigured() ? "Google Grafika: skonfigurowane." : "Google CSE: opcjonalnie.",
     isBggConfigured() ? "BGG: skonfigurowane." : "BGG: opcjonalnie BGG_TOKEN.",
@@ -241,14 +320,17 @@ export async function backfillMissingCovers(
     id: string;
     title: string;
     coverImageUrl: string | null;
+    coverImageSource?: string | null;
+    coverImageExternalId?: string | null;
     ean: string | null;
     collectionType: GameCollectionType;
   }>,
   options?: {
     limit?: number;
     dryRun?: boolean;
+    force?: boolean;
     delayMs?: number;
-    update?: (id: string, coverImageUrl: string, source: CoverSource) => Promise<void>;
+    update?: (id: string, coverImageUrl: string, source: CoverSource | null) => Promise<void>;
     onProgress?: (current: number, total: number, title: string, ok: boolean) => void;
   },
 ): Promise<CoverBackfillStats> {
@@ -256,7 +338,9 @@ export async function backfillMissingCovers(
   const dryRun = options?.dryRun ?? false;
   const delayMs = options?.delayMs ?? DEFAULT_BACKFILL_DELAY_MS;
 
-  const targets = games.filter((g) => gameNeedsCoverFetch(g.coverImageUrl)).slice(0, limit);
+  const targets = games
+    .filter((g) => gameNeedsCoverFetch(g.coverImageUrl, { force: options?.force }))
+    .slice(0, limit);
   const stats: CoverBackfillStats = {
     checked: targets.length,
     updated: 0,
@@ -273,6 +357,8 @@ export async function backfillMissingCovers(
         title: game.title,
         ean: game.ean,
         collectionType: game.collectionType,
+        rebelProductId:
+          game.coverImageSource === "rebel" ? game.coverImageExternalId : undefined,
       });
     } catch (error) {
       stats.notFound += 1;
@@ -289,6 +375,9 @@ export async function backfillMissingCovers(
 
     if (!result.coverImageUrl || !result.coverImageSource) {
       stats.notFound += 1;
+      if (options?.force && game.coverImageUrl?.trim() && !dryRun && options?.update) {
+        await options.update(game.id, "", null);
+      }
       if (stats.issues.length < 10) {
         stats.issues.push(`${game.title}: ${result.message ?? "brak okładki"}`);
       }
@@ -312,7 +401,11 @@ export async function backfillMissingCovers(
   return stats;
 }
 
-export function gameNeedsCoverFetch(coverImageUrl: string | null | undefined): boolean {
+export function gameNeedsCoverFetch(
+  coverImageUrl: string | null | undefined,
+  options?: { force?: boolean },
+): boolean {
+  if (options?.force) return true;
   if (!coverImageUrl?.trim()) return true;
   const url = coverImageUrl.trim();
   if (url.startsWith("/")) return !isPublicCoverAvailable(url);

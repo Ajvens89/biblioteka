@@ -1,10 +1,11 @@
 /**
- * Uzupełnia brakujące okładki — Planszeo (zapis do public/covers/), potem UPC/BGG/Google.
+ * Uzupełnia brakujące okładki — Rebel images.csv, Planszeo, potem UPC/BGG/Google.
  *
  *   npm run backfill:covers
  *   npm run backfill:covers -- --limit=20
  *   npm run backfill:covers -- --all
  *   npm run backfill:covers -- --dry-run
+ *   npm run backfill:covers -- --force --q=Monopoly
  *
  * Po backfillu na Firebase: ponowny deploy (pliki w public/covers/ trafiają do builda).
  */
@@ -16,6 +17,7 @@ import {
   gameNeedsCoverFetch,
   isBggConfigured,
 } from "../src/lib/services/cover-fetch";
+import { isRebelImagesEnabled } from "../src/lib/services/ean-providers/rebel-images-provider";
 import {
   isGoogleCseConfigured,
   isGoogleCseHealthy,
@@ -58,6 +60,9 @@ function sleep(ms: number) {
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const fetchAll = args.includes("--all");
+const force = args.includes("--force");
+const qArg = args.find((a) => a.startsWith("--q="));
+const titleQuery = qArg ? qArg.split("=")[1]?.trim().toLowerCase() : "";
 const limitArg = args.find((a) => a.startsWith("--limit="));
 const limit = fetchAll
   ? Number.MAX_SAFE_INTEGER
@@ -66,7 +71,12 @@ const limit = fetchAll
     : 50;
 
 async function main() {
-  console.log("✓ Planszeo: okładki pobierane na serwer (public/covers/).\n");
+  if (isRebelImagesEnabled()) {
+    console.log("✓ Rebel images.csv: okładki z licencjonowanego katalogu.\n");
+  } else {
+    console.warn("ℹ️  Brak data/rebel-images.csv — pomijam Rebel (ustaw REBEL_IMAGES_CSV).\n");
+  }
+  console.log("✓ Okładki zapisywane na serwer (public/covers/).\n");
 
   if (!isBggConfigured()) {
     console.warn("ℹ️  Bez BGG_TOKEN — po Planszeo: UPCitemdb + Open Library.\n");
@@ -85,17 +95,34 @@ async function main() {
   const games = await withRetry(() =>
     prisma.game.findMany({
       where: { deletedAt: null, isActive: true },
-      select: { id: true, title: true, coverImageUrl: true, ean: true, collectionType: true },
+      select: {
+        id: true,
+        title: true,
+        coverImageUrl: true,
+        coverImageSource: true,
+        coverImageExternalId: true,
+        ean: true,
+        collectionType: true,
+      },
       orderBy: { title: "asc" },
     }),
   );
 
-  const targets = games.filter((g) => gameNeedsCoverFetch(g.coverImageUrl));
-  console.log(`Gier w katalogu: ${games.length}, do pobrania okładek: ${targets.length}`);
+  const filtered = titleQuery
+    ? games.filter((g) => g.title.toLowerCase().includes(titleQuery))
+    : games;
 
-  const stats = await backfillMissingCovers(games, {
+  const targets = filtered.filter((g) => gameNeedsCoverFetch(g.coverImageUrl, { force }));
+  const mode = force ? " (wymuszone nadpisanie)" : "";
+  const qLabel = titleQuery ? `, filtr „${titleQuery}”` : "";
+  console.log(
+    `Gier w katalogu: ${games.length}${qLabel}, do pobrania okładek: ${targets.length}${mode}`,
+  );
+
+  const stats = await backfillMissingCovers(filtered, {
     limit,
     dryRun,
+    force,
     onProgress: (current, total, title, ok) => {
       const mark = ok ? "+" : "—";
       console.log(`[${current}/${total}] ${mark} ${title}`);
@@ -104,7 +131,10 @@ async function main() {
       await withRetry(() =>
         prisma.game.update({
           where: { id },
-          data: { coverImageUrl, coverImageSource: source },
+          data: {
+            coverImageUrl: coverImageUrl?.trim() ? coverImageUrl : null,
+            coverImageSource: coverImageUrl?.trim() ? source : null,
+          },
         }),
       );
     },

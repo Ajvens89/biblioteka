@@ -78,6 +78,45 @@ export function scoreTitleMatch(query: string, candidate: string): number {
   return Math.round((matched / qWords.length) * 75);
 }
 
+const TITLE_STOP_WORDS = new Set([
+  "monopoly",
+  "gra",
+  "planszowa",
+  "planszowe",
+  "edycja",
+  "polska",
+  "the",
+  "and",
+  "for",
+  "game",
+  "board",
+]);
+
+/**
+ * Okładka po tytule tylko gdy kandydat naprawdę pasuje (np. nie „Quiz Konie” dla „Monopoly Konie”).
+ */
+export function isStrictTitleCoverMatch(
+  query: string,
+  candidate: string,
+  minScore = 80,
+): boolean {
+  const score = scoreTitleMatch(query, candidate);
+  if (score < minScore) return false;
+
+  const q = normalizeTitle(query);
+  const c = normalizeTitle(candidate);
+  if (!q || !c) return false;
+
+  if (q.includes("monopoly") && !c.includes("monopoly")) return false;
+
+  const keyWords = q.split(" ").filter((w) => w.length > 3 && !TITLE_STOP_WORDS.has(w));
+  for (const word of keyWords) {
+    if (!c.includes(word)) return false;
+  }
+
+  return true;
+}
+
 function pickImages(item: UpcItem): string[] {
   const out: string[] = [];
   for (const raw of item.images ?? []) {
@@ -183,7 +222,12 @@ export async function lookupUpcitemdbByTitle(title: string): Promise<CoverCandid
       score: scoreTitleMatch(q, item.title ?? ""),
       candidate: itemToCandidate(item, scoreTitleMatch(q, item.title ?? "")),
     }))
-    .filter((row) => row.candidate && row.score >= 35)
+    .filter(
+      (row) =>
+        row.candidate &&
+        row.score >= 35 &&
+        isStrictTitleCoverMatch(q, row.item.title ?? "", 80),
+    )
     .sort((a, b) => b.score - a.score);
 
   return ranked.slice(0, 3).map((row) => row.candidate!);

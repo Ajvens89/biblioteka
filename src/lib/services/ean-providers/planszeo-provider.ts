@@ -1,5 +1,6 @@
 import { fetchWithTimeout, validateCoverImageUrl } from "./image-utils";
-import { scoreTitleMatch } from "./upcitemdb-provider";
+import { scoreTitleMatch, isStrictTitleCoverMatch } from "./upcitemdb-provider";
+import { extractGtinFromHtml } from "./planszeo-ean";
 
 const PLANSZEO_ORIGIN = "https://planszeo.pl";
 const USER_AGENT = "BibliotekaZakatki/1.0 (+cover-backfill; planszeo-licensed)";
@@ -37,7 +38,9 @@ export function pickBestPlanszeoSlug(title: string, slugs: string[]): string | n
       bestScore = score;
     }
   }
-  return bestScore >= 40 ? best : slugs[0];
+  const candidateTitle = slugToTitle(best);
+  if (!isStrictTitleCoverMatch(title, candidateTitle, 70)) return null;
+  return bestScore >= 55 ? best : null;
 }
 
 export async function fetchPlanszeoHtml(path: string): Promise<string | null> {
@@ -55,7 +58,10 @@ export async function fetchPlanszeoHtml(path: string): Promise<string | null> {
   }
 }
 
-export async function lookupPlanszeoCoverUrl(title: string): Promise<{
+export async function lookupPlanszeoCoverUrl(
+  title: string,
+  ean?: string | null,
+): Promise<{
   coverUrl: string;
   slug: string;
 } | null> {
@@ -70,6 +76,12 @@ export async function lookupPlanszeoCoverUrl(title: string): Promise<{
 
   const gameHtml = await fetchPlanszeoHtml(`/gry-planszowe/${slug}/oferty`);
   if (!gameHtml) return null;
+
+  const pageEan = extractGtinFromHtml(gameHtml);
+  const normalizedQueryEan = ean?.replace(/\D/g, "") ?? "";
+  if (normalizedQueryEan.length === 13 && pageEan && pageEan !== normalizedQueryEan) {
+    return null;
+  }
 
   const ogMatch = OG_IMAGE_RE.exec(gameHtml);
   const coverUrl = ogMatch?.[1] ? validateCoverImageUrl(ogMatch[1]) : null;
