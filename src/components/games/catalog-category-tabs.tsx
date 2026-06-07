@@ -50,10 +50,10 @@ export function CatalogCategoryTabs() {
                   : "collection-type-tab-all"
             }
             className={cn(
-              "inline-flex min-h-10 items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors",
+              "zf-catalog-tab inline-flex min-h-11 items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-semibold",
               active
-                ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-secondary/60",
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card text-foreground hover:border-primary/35 hover:bg-secondary/50",
             )}
             onClick={() => select(value)}
           >

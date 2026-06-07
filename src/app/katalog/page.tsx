@@ -52,16 +52,18 @@ export default async function CatalogPage({ searchParams }: PageProps) {
 
   return (
     <PageShell className="overflow-x-hidden" width="wide">
-      <header className="mb-6 space-y-2">
+      <header className="zf-catalog-hero mb-8 space-y-3 p-6 md:p-8">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Katalog online</p>
         <h1 className="text-display">Katalog gier</h1>
         <p className="text-body max-w-2xl text-muted-foreground">
-          Przeglądaj planszówki i gry fabularne. Wyszukaj po tytule, autorze, wydawcy lub zeskanuj kod EAN z pudełka.
+          Przeglądaj planszówki i podręczniki RPG. Wyszukaj po tytule, autorze, wydawcy lub zeskanuj kod
+          EAN z pudełka.
         </p>
       </header>
 
       <div className="lg:grid lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-8">
         <aside className="hidden lg:block">
-          <div className="card-elevated sticky top-20 p-5">
+          <div className="zf-catalog-filters sticky top-20 p-5">
             <h2 className="text-h3 mb-4">Filtry</h2>
             <CatalogSidebarFilters
               categories={categories}
@@ -132,7 +134,7 @@ export default async function CatalogPage({ searchParams }: PageProps) {
               data-testid="catalog-grid"
             >
               {result.items.map((game) => (
-                <GameCard key={game.id} game={game} showReserve />
+                <GameCard key={game.id} game={game} showReserve variant="catalog" />
               ))}
             </div>
           )}

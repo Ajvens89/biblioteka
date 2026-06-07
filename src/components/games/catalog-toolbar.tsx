@@ -47,29 +47,35 @@ export function CatalogToolbar({
 
   return (
     <div
-      className="sticky top-16 z-30 -mx-4 border-b border-border/80 bg-background/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:rounded-xl md:border md:p-4"
+      className="zf-catalog-toolbar sticky top-16 z-30 -mx-4 px-4 py-4 md:static md:mx-0 md:p-5"
       data-testid="catalog-toolbar"
     >
-      <div className="flex flex-col gap-3">
-        <label htmlFor="catalog-search-input" className="text-sm font-medium">
-          Szukaj w katalogu
-        </label>
-        <div className="flex flex-col gap-2 sm:flex-row">
+      <div className="flex flex-col gap-4">
+        <div>
+          <label htmlFor="catalog-search-input" className="font-display text-base font-semibold text-foreground">
+            Szukaj w katalogu
+          </label>
+          <p className="text-small mt-0.5 text-muted-foreground">
+            Tytuł, tag, autor, wydawca lub kod EAN
+          </p>
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative min-w-0 flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" aria-hidden />
             <Input
               id="catalog-search-input"
               data-testid="catalog-search-input"
-              className="h-11 pl-10"
+              className="zf-search-input h-12 rounded-2xl pl-11"
               placeholder="Tytuł, opis, tag, autor, wydawca, EAN…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submit()}
             />
           </div>
-          <div className="flex gap-2">
-            <ScannerButton onClick={() => setScannerOpen(true)} className="h-11" />
-            <Button type="button" className="h-11 flex-1 sm:flex-none" onClick={() => submit()}>
+          <div className="grid grid-cols-2 gap-2 sm:flex">
+            <ScannerButton onClick={() => setScannerOpen(true)} className="zf-btn-secondary h-12 rounded-2xl" />
+            <Button type="button" className="zf-btn-primary h-12 flex-1 rounded-2xl sm:min-w-[7rem]" onClick={() => submit()}>
+              <Search className="h-4 w-4" aria-hidden />
               Szukaj
             </Button>
           </div>

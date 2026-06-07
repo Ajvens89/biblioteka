@@ -29,10 +29,12 @@ type GameWithRelations = Game & {
 export function GameCard({
   game,
   showReserve = false,
+  variant = "default",
   className,
 }: {
   game: GameWithRelations;
   showReserve?: boolean;
+  variant?: "default" | "catalog";
   className?: string;
 }) {
   const available = countAvailableCopies(game.copies);
@@ -44,7 +46,8 @@ export function GameCard({
   return (
     <article
       className={cn(
-        "card-elevated flex h-full max-w-full flex-col overflow-hidden transition-shadow hover:shadow-md",
+        "flex h-full max-w-full flex-col overflow-hidden",
+        variant === "catalog" ? "zf-game-card" : "card-elevated transition-shadow hover:shadow-md",
         className,
       )}
       data-testid="game-card"
