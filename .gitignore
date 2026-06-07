@@ -55,8 +55,13 @@ firebase-debug.*.log
 *.sqlite
 *.sqlite3
 
-# okładki skopiowane lokalnie przy imporcie
-/public/covers/
+# okładki: public/covers/ MUSI być w repo — Firebase App Hosting serwuje je z builda (public/)
+
+# licencjonowany katalog Rebel (skopiuj z Pulpit/images.csv → data/rebel-images.csv)
+/data/rebel-images.csv
+
+# hurtownia — dane handlowe / prywatny katalog (zostaw hurt.example.csv)
+/data/hurt.csv
 
 # vercel
 .vercel
