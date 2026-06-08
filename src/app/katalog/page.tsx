@@ -128,10 +128,7 @@ export default async function CatalogPage({ searchParams }: PageProps) {
               action={{ label: "Wyczyść filtry", href: "/katalog" }}
             />
           ) : (
-            <div
-              className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
-              data-testid="catalog-grid"
-            >
+            <div className="flex flex-col gap-3" data-testid="catalog-grid">
               {result.items.map((game) => (
                 <GameCard key={game.id} game={game} showReserve variant="catalog" />
               ))}

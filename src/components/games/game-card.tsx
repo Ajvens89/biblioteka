@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, Users } from "lucide-react";
+import { CheckCircle2, Clock, QrCode, Users, UserRound } from "lucide-react";
 import type {
   Game,
   GameCopy,
@@ -26,6 +26,12 @@ type GameWithRelations = Game & {
   designer: Designer | null;
 };
 
+function catalogDescription(game: GameWithRelations): string | null {
+  const raw = game.shortDescription?.trim() || game.description?.trim();
+  if (!raw) return null;
+  return raw.length > 140 ? `${raw.slice(0, 137).trim()}…` : raw;
+}
+
 export function GameCard({
   game,
   showReserve = false,
@@ -43,67 +49,101 @@ export function GameCard({
   const isBoard = game.collectionType !== "RPG";
   const collectionType = game.collectionType as GameCollectionType;
   const isCatalog = variant === "catalog";
+  const description = catalogDescription(game);
+  const publisherLabel = game.publisher?.name ?? game.designer?.name ?? null;
 
   if (isCatalog) {
+    const isAvailable = available > 0;
+
     return (
       <article
-        className={cn("zf-game-card group flex h-full flex-col overflow-hidden", className)}
+        className={cn(
+          "zf-game-row group",
+          isAvailable ? "zf-game-row--available" : "zf-game-row--unavailable",
+          className,
+        )}
         data-testid="game-card"
         data-available={available > 0 ? "true" : "false"}
       >
-        <Link href={`/gry/${game.slug}`} className="relative block">
-          <GameCover
-            src={game.coverImageUrl}
-            alt={`Okładka: ${game.title}`}
-            collectionType={collectionType}
-            aspect="portrait"
-            className="rounded-none"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
-          />
-          <Badge
-            variant={avail.variant}
-            className="absolute right-2.5 top-2.5 text-[0.6875rem] shadow-none"
-            aria-label={`Status: ${avail.label}`}
-          >
-            {avail.label}
-          </Badge>
-        </Link>
-
-        <div className="flex flex-1 flex-col gap-2.5 p-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-3 py-1">
           <div className="space-y-1.5">
-            <h3 className="font-display line-clamp-2 text-base leading-snug">
+            <h3 className="font-display text-base font-medium leading-snug md:text-lg">
               <Link
                 href={`/gry/${game.slug}`}
-                className="text-foreground transition-colors group-hover:text-primary"
+                className="text-primary transition-colors hover:text-accent"
               >
                 {game.title}
               </Link>
             </h3>
-            <GameTypeBadge collectionType={collectionType} />
+            {description && (
+              <p className="text-small line-clamp-2 text-muted-foreground">{description}</p>
+            )}
           </div>
 
-          {isBoard && (
-            <p className="text-small flex flex-wrap gap-x-3 gap-y-1 text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <Users className="h-3.5 w-3.5" aria-hidden />
-                {game.minPlayers}–{game.maxPlayers}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" aria-hidden />
-                {game.minPlayTime}–{game.maxPlayTime} min
-              </span>
-            </p>
-          )}
+          <ul className="text-small space-y-1 text-muted-foreground">
+            {publisherLabel && (
+              <li className="flex items-center gap-2">
+                <UserRound className="h-4 w-4 shrink-0 opacity-60" aria-hidden />
+                <span className="truncate uppercase tracking-wide">{publisherLabel}</span>
+              </li>
+            )}
+            {game.ean && (
+              <li className="flex items-center gap-2 font-mono text-xs">
+                <QrCode className="h-4 w-4 shrink-0 opacity-60" aria-hidden />
+                <span>{game.ean}</span>
+              </li>
+            )}
+            {isBoard && (
+              <li className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span className="inline-flex items-center gap-1">
+                  <Users className="h-3.5 w-3.5 opacity-60" aria-hidden />
+                  {game.minPlayers}–{game.maxPlayers} os.
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5 opacity-60" aria-hidden />
+                  {game.minPlayTime}–{game.maxPlayTime} min
+                </span>
+              </li>
+            )}
+          </ul>
 
-          {showReserve && available > 0 && (
-            <Link
-              href={`/gry/${game.slug}#rezerwacja`}
-              className="text-small mt-auto font-semibold text-accent transition-colors hover:text-primary"
+          <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
+            <p
+              className={cn(
+                "inline-flex items-center gap-1.5 text-sm font-medium",
+                isAvailable ? "text-success" : "text-muted-foreground",
+              )}
             >
-              Zarezerwuj →
-            </Link>
-          )}
+              {isAvailable ? (
+                <CheckCircle2 className="h-4 w-4" aria-hidden />
+              ) : null}
+              {avail.label}
+            </p>
+            {showReserve && isAvailable && (
+              <Link
+                href={`/gry/${game.slug}#rezerwacja`}
+                className="text-small font-semibold text-accent hover:text-primary"
+              >
+                Zarezerwuj →
+              </Link>
+            )}
+          </div>
         </div>
+
+        <Link
+          href={`/gry/${game.slug}`}
+          className="zf-game-row-cover shrink-0 self-center"
+          aria-label={`Okładka: ${game.title}`}
+        >
+          <GameCover
+            src={game.coverImageUrl}
+            alt=""
+            collectionType={collectionType}
+            fill
+            className="rounded-sm"
+            sizes="96px"
+          />
+        </Link>
       </article>
     );
   }

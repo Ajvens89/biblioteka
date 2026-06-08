@@ -481,7 +481,64 @@ body {
   border-color: color-mix(in srgb, var(--primary) 20%, var(--border));
 }
 
-/* Game cards */
+/* Game cards — horizontal row (catalog list) */
+
+.zf-game-row {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+  padding: 1rem 1.125rem;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.zf-game-row:hover {
+  box-shadow: var(--shadow-soft);
+}
+
+.zf-game-row--available {
+  border-color: color-mix(in srgb, var(--success) 35%, var(--border));
+}
+
+.zf-game-row--available:hover {
+  border-color: color-mix(in srgb, var(--success) 55%, var(--border));
+}
+
+.zf-game-row-cover {
+  position: relative;
+  width: 5.5rem;
+  height: 5.5rem;
+  padding: 0.25rem;
+  border-radius: calc(var(--radius) - 2px);
+  border: 2px solid color-mix(in srgb, var(--success) 40%, var(--border));
+  background: var(--background);
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.zf-game-row--available .zf-game-row-cover {
+  border-color: color-mix(in srgb, var(--success) 50%, var(--border));
+}
+
+.zf-game-row:hover .zf-game-row-cover {
+  border-color: color-mix(in srgb, var(--success) 65%, var(--border));
+}
+
+@media (min-width: 640px) {
+  .zf-game-row {
+    gap: 1.25rem;
+    padding: 1.125rem 1.25rem;
+  }
+
+  .zf-game-row-cover {
+    width: 6.5rem;
+    height: 6.5rem;
+  }
+}
+
+/* Legacy vertical card (detail pages) */
 
 .zf-game-card {
   background: var(--card);
