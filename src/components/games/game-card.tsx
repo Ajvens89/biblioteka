@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2, Clock, QrCode, Users, UserRound } from "lucide-react";
+import { Clock, Users } from "lucide-react";
 import type {
   Game,
   GameCopy,
@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GameCover } from "@/components/ui/game-cover";
 import { GameTypeBadge } from "@/components/ui/game-type-badge";
+import { CatalogGameCard } from "@/components/games/catalog-game-card";
 import { cn } from "@/lib/utils";
 
 type GameWithRelations = Game & {
@@ -25,12 +26,6 @@ type GameWithRelations = Game & {
   publisher: Publisher | null;
   designer: Designer | null;
 };
-
-function catalogDescription(game: GameWithRelations): string | null {
-  const raw = game.shortDescription?.trim() || game.description?.trim();
-  if (!raw) return null;
-  return raw.length > 140 ? `${raw.slice(0, 137).trim()}…` : raw;
-}
 
 export function GameCard({
   game,
@@ -48,103 +43,30 @@ export function GameCard({
   const avail = getAvailabilityLabel(available, total);
   const isBoard = game.collectionType !== "RPG";
   const collectionType = game.collectionType as GameCollectionType;
-  const isCatalog = variant === "catalog";
-  const description = catalogDescription(game);
-  const publisherLabel = game.publisher?.name ?? game.designer?.name ?? null;
 
-  if (isCatalog) {
-    const isAvailable = available > 0;
+  if (variant === "catalog") {
+    const description = game.shortDescription?.trim() || game.description?.trim() || null;
+    const publisherLabel = game.publisher?.name ?? game.designer?.name ?? null;
 
     return (
-      <article
-        className={cn(
-          "zf-game-row group",
-          isAvailable ? "zf-game-row--available" : "zf-game-row--unavailable",
-          className,
-        )}
-        data-testid="game-card"
-        data-available={available > 0 ? "true" : "false"}
-      >
-        <div className="flex min-w-0 flex-1 flex-col gap-3 py-1">
-          <div className="space-y-1.5">
-            <h3 className="font-display text-base font-medium leading-snug md:text-lg">
-              <Link
-                href={`/gry/${game.slug}`}
-                className="text-primary transition-colors hover:text-accent"
-              >
-                {game.title}
-              </Link>
-            </h3>
-            {description && (
-              <p className="text-small line-clamp-2 text-muted-foreground">{description}</p>
-            )}
-          </div>
-
-          <ul className="text-small space-y-1 text-muted-foreground">
-            {publisherLabel && (
-              <li className="flex items-center gap-2">
-                <UserRound className="h-4 w-4 shrink-0 opacity-60" aria-hidden />
-                <span className="truncate uppercase tracking-wide">{publisherLabel}</span>
-              </li>
-            )}
-            {game.ean && (
-              <li className="flex items-center gap-2 font-mono text-xs">
-                <QrCode className="h-4 w-4 shrink-0 opacity-60" aria-hidden />
-                <span>{game.ean}</span>
-              </li>
-            )}
-            {isBoard && (
-              <li className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span className="inline-flex items-center gap-1">
-                  <Users className="h-3.5 w-3.5 opacity-60" aria-hidden />
-                  {game.minPlayers}–{game.maxPlayers} os.
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5 opacity-60" aria-hidden />
-                  {game.minPlayTime}–{game.maxPlayTime} min
-                </span>
-              </li>
-            )}
-          </ul>
-
-          <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
-            <p
-              className={cn(
-                "inline-flex items-center gap-1.5 text-sm font-medium",
-                isAvailable ? "text-success" : "text-muted-foreground",
-              )}
-            >
-              {isAvailable ? (
-                <CheckCircle2 className="h-4 w-4" aria-hidden />
-              ) : null}
-              {avail.label}
-            </p>
-            {showReserve && isAvailable && (
-              <Link
-                href={`/gry/${game.slug}#rezerwacja`}
-                className="text-small font-semibold text-accent hover:text-primary"
-              >
-                Zarezerwuj →
-              </Link>
-            )}
-          </div>
-        </div>
-
-        <Link
-          href={`/gry/${game.slug}`}
-          className="zf-game-row-cover shrink-0 self-center"
-          aria-label={`Okładka: ${game.title}`}
-        >
-          <GameCover
-            src={game.coverImageUrl}
-            alt=""
-            collectionType={collectionType}
-            fill
-            className="rounded-sm"
-            sizes="96px"
-          />
-        </Link>
-      </article>
+      <CatalogGameCard
+        slug={game.slug}
+        title={game.title}
+        description={description}
+        publisherLabel={publisherLabel}
+        ean={game.ean}
+        isBoard={isBoard}
+        minPlayers={game.minPlayers}
+        maxPlayers={game.maxPlayers}
+        minPlayTime={game.minPlayTime}
+        maxPlayTime={game.maxPlayTime}
+        coverImageUrl={game.coverImageUrl}
+        collectionType={collectionType}
+        isAvailable={available > 0}
+        availLabel={avail.label}
+        showReserve={showReserve}
+        className={className}
+      />
     );
   }
 

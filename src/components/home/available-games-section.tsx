@@ -34,7 +34,7 @@ export function AvailableGamesSection({ games }: Props) {
         </Link>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {games.map((game) => (
           <GameCard key={game.id} game={game} showReserve variant="catalog" />
         ))}
