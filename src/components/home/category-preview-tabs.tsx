@@ -30,7 +30,7 @@ export function CategoryPreviewTabs({ boardGames, rpgGames, className }: Props) 
 
   return (
     <div className={cn("w-full", className)} data-testid="hero-category-showcase">
-      <div className="zf-showcase-panel relative overflow-hidden rounded-3xl">
+      <div className="zf-showcase-panel relative overflow-hidden rounded-xl">
         <div className="zf-showcase-glow pointer-events-none absolute inset-0" aria-hidden />
 
         <div

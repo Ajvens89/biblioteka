@@ -52,12 +52,11 @@ export default async function CatalogPage({ searchParams }: PageProps) {
 
   return (
     <PageShell className="overflow-x-hidden" width="wide">
-      <header className="zf-catalog-hero mb-8 space-y-3 p-6 md:p-8">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Katalog online</p>
+      <header className="zf-catalog-hero mb-10 space-y-3">
+        <p className="text-eyebrow">Katalog online</p>
         <h1 className="text-display">Katalog gier</h1>
-        <p className="text-body max-w-2xl text-muted-foreground">
-          Przeglądaj planszówki i podręczniki RPG. Wyszukaj po tytule, autorze, wydawcy lub zeskanuj kod
-          EAN z pudełka.
+        <p className="text-body max-w-xl text-muted-foreground">
+          {result.total} pozycji w bibliotece. Szukaj po tytule, autorze, wydawcy lub zeskanuj kod EAN.
         </p>
       </header>
 
@@ -130,7 +129,7 @@ export default async function CatalogPage({ searchParams }: PageProps) {
             />
           ) : (
             <div
-              className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3"
+              className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
               data-testid="catalog-grid"
             >
               {result.items.map((game) => (

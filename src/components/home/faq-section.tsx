@@ -22,29 +22,26 @@ const faq = [
 
 export function FAQSection() {
   return (
-    <section className="zf-section-faq py-16 md:py-20" aria-labelledby="faq-heading">
-      <div className="mx-auto max-w-3xl px-4">
+    <section className="zf-section-faq py-16 md:py-24" aria-labelledby="faq-heading">
+      <div className="mx-auto max-w-2xl px-4">
         <div className="mb-10 text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Pomoc</p>
-          <h2 id="faq-heading" className="font-display text-h2 mt-2 text-foreground">
+          <p className="text-eyebrow">Pomoc</p>
+          <h2 id="faq-heading" className="text-h2 mt-2 text-foreground">
             Najczęstsze pytania
           </h2>
-          <p className="text-body mt-2 text-muted-foreground">
-            Odpowiedzi na to, o co pytacie najczęściej przed pierwszą rezerwacją.
-          </p>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {faq.map(({ q, a }) => (
             <details key={q} className="zf-faq-item group">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-display text-base font-semibold text-foreground marker:content-none [&::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-display text-base font-medium text-foreground marker:content-none [&::-webkit-details-marker]:hidden">
                 {q}
                 <ChevronDown
-                  className="h-5 w-5 shrink-0 text-primary transition-transform duration-200 group-open:rotate-180"
+                  className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180"
                   aria-hidden
                 />
               </summary>
-              <p className="text-body border-t border-border/40 px-5 pb-4 pt-3 leading-relaxed text-muted-foreground">
+              <p className="text-body border-t border-border/60 px-5 pb-4 pt-3 leading-relaxed text-muted-foreground">
                 {a}
               </p>
             </details>
@@ -53,11 +50,11 @@ export function FAQSection() {
 
         <p className="text-small mt-10 text-center text-muted-foreground">
           Więcej w{" "}
-          <Link href="/regulamin" className="font-semibold text-primary underline-offset-2 hover:underline">
+          <Link href="/regulamin" className="font-medium text-primary underline-offset-2 hover:underline">
             regulaminie
           </Link>{" "}
           i na stronie{" "}
-          <Link href="/kontakt" className="font-semibold text-primary underline-offset-2 hover:underline">
+          <Link href="/kontakt" className="font-medium text-primary underline-offset-2 hover:underline">
             kontakt
           </Link>
           .

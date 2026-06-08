@@ -42,14 +42,75 @@ export function GameCard({
   const avail = getAvailabilityLabel(available, total);
   const isBoard = game.collectionType !== "RPG";
   const collectionType = game.collectionType as GameCollectionType;
+  const isCatalog = variant === "catalog";
+
+  if (isCatalog) {
+    return (
+      <article
+        className={cn("zf-game-card group flex h-full flex-col overflow-hidden", className)}
+        data-testid="game-card"
+        data-available={available > 0 ? "true" : "false"}
+      >
+        <Link href={`/gry/${game.slug}`} className="relative block">
+          <GameCover
+            src={game.coverImageUrl}
+            alt={`Okładka: ${game.title}`}
+            collectionType={collectionType}
+            aspect="portrait"
+            className="rounded-none"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
+          />
+          <Badge
+            variant={avail.variant}
+            className="absolute right-2.5 top-2.5 text-[0.6875rem] shadow-none"
+            aria-label={`Status: ${avail.label}`}
+          >
+            {avail.label}
+          </Badge>
+        </Link>
+
+        <div className="flex flex-1 flex-col gap-2.5 p-4">
+          <div className="space-y-1.5">
+            <h3 className="font-display line-clamp-2 text-base leading-snug">
+              <Link
+                href={`/gry/${game.slug}`}
+                className="text-foreground transition-colors group-hover:text-primary"
+              >
+                {game.title}
+              </Link>
+            </h3>
+            <GameTypeBadge collectionType={collectionType} />
+          </div>
+
+          {isBoard && (
+            <p className="text-small flex flex-wrap gap-x-3 gap-y-1 text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <Users className="h-3.5 w-3.5" aria-hidden />
+                {game.minPlayers}–{game.maxPlayers}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" aria-hidden />
+                {game.minPlayTime}–{game.maxPlayTime} min
+              </span>
+            </p>
+          )}
+
+          {showReserve && available > 0 && (
+            <Link
+              href={`/gry/${game.slug}#rezerwacja`}
+              className="text-small mt-auto font-semibold text-accent transition-colors hover:text-primary"
+            >
+              Zarezerwuj →
+            </Link>
+          )}
+        </div>
+      </article>
+    );
+  }
 
   return (
     <article
-      className={cn(
-        "flex h-full max-w-full flex-col overflow-hidden",
-        variant === "catalog" ? "zf-game-card" : "card-elevated transition-shadow hover:shadow-md",
-        className,
-      )}
+      className={cn("card-elevated flex h-full max-w-full flex-col overflow-hidden", className)}
       data-testid="game-card"
       data-available={available > 0 ? "true" : "false"}
     >

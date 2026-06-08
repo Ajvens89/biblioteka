@@ -10,7 +10,8 @@ type Props = {
   src?: string | null;
   alt: string;
   className?: string;
-  aspect?: "square" | "card";
+  aspect?: "square" | "card" | "portrait";
+  fill?: boolean;
   priority?: boolean;
   sizes?: string;
   collectionType?: GameCollectionType;
@@ -21,6 +22,7 @@ export function GameCover({
   alt,
   className,
   aspect = "card",
+  fill = false,
   priority,
   sizes = "(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 280px",
   collectionType = "BOARD_GAME",
@@ -32,6 +34,13 @@ export function GameCover({
   const isRpg = collectionType === "RPG";
   const isExternal = /^https?:\/\//i.test(trimmed);
 
+  const aspectClass =
+    aspect === "square"
+      ? "aspect-square"
+      : aspect === "portrait"
+        ? "aspect-[3/4]"
+        : "aspect-[4/3]";
+
   return (
     <div
       className={cn(
@@ -39,7 +48,7 @@ export function GameCover({
         isRpg
           ? "bg-gradient-to-br from-primary/15 via-secondary to-accent/10"
           : "bg-gradient-to-br from-accent/15 via-secondary to-primary/10",
-        aspect === "square" ? "aspect-square" : "aspect-[4/3]",
+        fill ? "absolute inset-0 h-full w-full rounded-none" : aspectClass,
         className,
       )}
     >

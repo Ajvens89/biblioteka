@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Inter, Poppins } from "next/font/google";
+import { DM_Sans, Fraunces } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -9,13 +9,14 @@ import { parseTheme, THEME_COOKIE, themeHtmlClasses } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600", "700"],
 });
@@ -35,7 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang="pl"
       suppressHydrationWarning
-      className={cn(inter.variable, poppins.variable, ...themeHtmlClasses(initialTheme))}
+      className={cn(dmSans.variable, fraunces.variable, ...themeHtmlClasses(initialTheme))}
     >
       <body className="min-h-screen flex flex-col antialiased">
         <Providers initialTheme={initialTheme}>

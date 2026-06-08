@@ -1,5 +1,4 @@
 import { HeroSection } from "@/components/home/hero-section";
-import { SearchPanel } from "@/components/home/search-panel";
 import { AvailableGamesSection } from "@/components/home/available-games-section";
 import { HowItWorksSection } from "@/components/home/how-it-works-section";
 import { FAQSection } from "@/components/home/faq-section";
@@ -29,7 +28,6 @@ function toShowcase(games: GameListItem[]): ShowcaseGame[] {
   }));
 }
 
-/** Statystyki gdy baza niedostępna — jawny fallback (nie udajemy live danych). */
 const FALLBACK_STATS = { games: 0, copies: 0, available: 0, rpg: 0 };
 
 export default async function HomePage() {
@@ -54,14 +52,12 @@ export default async function HomePage() {
       />
 
       {!dbOk && (
-        <div className="relative z-20 mx-auto max-w-7xl px-4 pt-4">
+        <div className="mx-auto max-w-7xl px-4 pt-6">
           <DbUnavailableBanner />
         </div>
       )}
 
-      <SearchPanel />
-
-      <div className="zf-section-catalog px-4 py-16 md:py-20">
+      <div className="zf-section-catalog px-4 py-16 md:py-24">
         <div className="mx-auto max-w-7xl">
           <AvailableGamesSection games={available} />
         </div>
