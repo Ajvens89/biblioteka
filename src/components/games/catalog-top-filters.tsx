@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import type { GameFilterInput } from "@/lib/validations/game";
+import { GAME_SORT_LABELS } from "@/lib/constants";
 import { Label } from "@/components/ui/label";
 
 const selectClass =
@@ -52,10 +53,11 @@ export function CatalogTopFilters({ current }: { current: GameFilterInput }) {
           value={current.sort ?? "title"}
           onChange={(e) => update("sort", e.target.value)}
         >
-          <option value="title">Tytuł A–Z</option>
-          <option value="newest">Najnowsze</option>
-          <option value="popular">Najpopularniejsze</option>
-          <option value="available">Dostępne najpierw</option>
+          {Object.entries(GAME_SORT_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
         </select>
       </div>
     </div>

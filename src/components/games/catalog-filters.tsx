@@ -2,7 +2,12 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Category, Tag } from "@prisma/client";
-import { COLLECTION_TYPE_LABELS, DIFFICULTY_LABELS, GAME_TYPE_LABELS } from "@/lib/constants";
+import {
+  COLLECTION_TYPE_LABELS,
+  DIFFICULTY_LABELS,
+  GAME_SORT_LABELS,
+  GAME_TYPE_LABELS,
+} from "@/lib/constants";
 import type { GameFilterInput } from "@/lib/validations/game";
 
 export function CatalogFilters({
@@ -36,10 +41,11 @@ export function CatalogFilters({
         value={current.sort ?? "title"}
         onChange={(e) => update("sort", e.target.value)}
       >
-        <option value="title">Tytuł A–Z</option>
-        <option value="newest">Najnowsze</option>
-        <option value="popular">Najpopularniejsze</option>
-        <option value="available">Dostępne najpierw</option>
+        {Object.entries(GAME_SORT_LABELS).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
       </select>
 
       <select

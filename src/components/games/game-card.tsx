@@ -11,7 +11,11 @@ import type {
   GameTag,
   GameCollectionType,
 } from "@prisma/client";
-import { countAvailableCopies, getAvailabilityLabel } from "@/lib/games/availability";
+import {
+  countAvailableCopies,
+  formatCopyAvailability,
+  getAvailabilityLabel,
+} from "@/lib/games/availability";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GameCover } from "@/components/ui/game-cover";
@@ -63,7 +67,7 @@ export function GameCard({
         coverImageUrl={game.coverImageUrl}
         collectionType={collectionType}
         isAvailable={available > 0}
-        availLabel={avail.label}
+        availLabel={formatCopyAvailability(available, total)}
         showReserve={showReserve}
         className={className}
       />

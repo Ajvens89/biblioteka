@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useId, useState } from "react";
+import { GameSearchSuggestions } from "@/components/games/game-search-suggestions";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,8 @@ export function HomeHeroSearch({ variant = "panel" }: Props) {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const suggestListId = useId();
   const isHero = variant === "hero";
 
   const search = (ean?: string) => {
@@ -51,15 +54,36 @@ export function HomeHeroSearch({ variant = "panel" }: Props) {
             placeholder="Tytuł, autor, wydawca lub EAN z pudełka…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && search()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setSuggestOpen(false);
+                search();
+              }
+              if (e.key === "Escape") setSuggestOpen(false);
+            }}
+            onFocus={() => {
+              if (q.trim().length >= 2) setSuggestOpen(true);
+            }}
+            aria-autocomplete="list"
+            aria-controls={suggestListId}
+            aria-expanded={suggestOpen}
+          />
+          <GameSearchSuggestions
+            query={q}
+            open={suggestOpen}
+            onOpenChange={setSuggestOpen}
+            onSelect={(title) => setQ(title)}
+            listId={suggestListId}
           />
         </div>
         <div className="grid grid-cols-2 gap-3 sm:flex sm:shrink-0">
           <ScannerButton
+            prominent={isHero}
             onClick={() => setScannerOpen(true)}
             className={cn(
               "h-12 min-w-[8.5rem] rounded-lg font-semibold",
-              isHero ? "zf-btn-ghost border-white/20!" : "zf-btn-secondary",
+              !isHero && "zf-btn-secondary",
+              isHero && "border-white/30! bg-white/15! text-white hover:bg-white/25!",
             )}
             variant={isHero ? "outline" : "secondary"}
           />

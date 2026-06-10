@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Clock, QrCode, Users, UserRound } from "lucide-react";
 import type { GameCollectionType } from "@prisma/client";
+import { Button } from "@/components/ui/button";
 import { GameCover } from "@/components/ui/game-cover";
 import { GameTypeBadge } from "@/components/ui/game-type-badge";
 import { cn } from "@/lib/utils";
@@ -136,7 +137,7 @@ export function CatalogGameCard({
           )}
         </ul>
 
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
+        <div className="mt-auto flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-between">
           <p
             className={cn(
               "inline-flex items-center gap-1.5 text-xs font-medium",
@@ -147,12 +148,9 @@ export function CatalogGameCard({
             {availLabel}
           </p>
           {showReserve && isAvailable && (
-            <Link
-              href={`/gry/${slug}#rezerwacja`}
-              className="text-xs font-semibold text-accent hover:text-primary"
-            >
-              Zarezerwuj →
-            </Link>
+            <Button size="sm" className="zf-btn-primary h-9 w-full shrink-0 px-4 text-xs font-semibold sm:w-auto" asChild>
+              <Link href={`/gry/${slug}#rezerwacja`}>Zarezerwuj</Link>
+            </Button>
           )}
         </div>
       </div>

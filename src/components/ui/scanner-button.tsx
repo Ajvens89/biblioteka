@@ -1,6 +1,6 @@
 "use client";
 
-import { ScanLine } from "lucide-react";
+import { Camera, ScanLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,7 @@ type Props = {
   className?: string;
   testId?: string;
   variant?: "default" | "outline" | "secondary";
+  prominent?: boolean;
 };
 
 export function ScannerButton({
@@ -18,7 +19,29 @@ export function ScannerButton({
   className,
   testId = "ean-scan-button",
   variant = "outline",
+  prominent = false,
 }: Props) {
+  if (prominent) {
+    return (
+      <Button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          "gap-2 border-2 border-accent/40 bg-accent/15 font-semibold text-accent-foreground shadow-sm",
+          "hover:bg-accent/25 hover:border-accent/60",
+          "h-12 min-h-12 rounded-2xl px-4",
+          className,
+        )}
+        data-testid={testId}
+        aria-label={label}
+      >
+        <Camera className="h-5 w-5 shrink-0 text-accent" aria-hidden />
+        <span className="hidden sm:inline">{label}</span>
+        <span className="sm:hidden">Skanuj</span>
+      </Button>
+    );
+  }
+
   return (
     <Button
       type="button"

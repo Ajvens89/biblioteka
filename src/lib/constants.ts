@@ -24,6 +24,15 @@ export const COLLECTION_TYPE_LABELS: Record<GameCollectionType, string> = {
   RPG: "Gry fabularne",
 };
 
+export const GAME_SORT_LABELS: Record<string, string> = {
+  title: "Tytuł A–Z",
+  newest: "Od najnowszych",
+  popular: "Najczęściej rezerwowane",
+  available: "Dostępne najpierw",
+  playtime_asc: "Czas rozgrywki (krótsze)",
+  playtime_desc: "Czas rozgrywki (dłuższe)",
+};
+
 /** Etykiety filtrów i hero — krótkie, jednoznaczne. */
 export const CATALOG_COLLECTION_LABELS: Record<GameCollectionType, string> = {
   BOARD_GAME: "Planszówki",

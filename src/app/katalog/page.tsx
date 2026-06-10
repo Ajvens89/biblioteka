@@ -12,6 +12,7 @@ import { PageShell } from "@/components/ui/page-shell";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { DbUnavailableBanner } from "@/components/db-unavailable-banner";
+import { buildCatalogEmptyState } from "@/lib/games/catalog-empty";
 import { fetchGames } from "@/lib/games/queries";
 import { gameFilterSchema } from "@/lib/validations/game";
 import { isDatabaseAvailable, prisma } from "@/lib/db";
@@ -60,6 +61,7 @@ export default async function CatalogPage({ searchParams }: PageProps) {
       ];
 
   const totalPages = Math.ceil(result.total / filters.pageSize);
+  const emptyState = buildCatalogEmptyState(filters, params);
 
   return (
     <PageShell className="overflow-x-hidden" width="wide">
@@ -137,14 +139,10 @@ export default async function CatalogPage({ searchParams }: PageProps) {
           {!dbOk ? null : result.items.length === 0 ? (
             <EmptyState
               testId="catalog-empty"
-              title={filters.ean ? "Nie znaleziono gry o tym EAN" : "Nie znaleziono gry"}
-              description={
-                filters.ean
-                  ? "Sprawdź, czy zeskanowałeś kod z pudełka produktu (nie kod naklejki egzemplarza w bibliotece)."
-                  : "Zmień wyszukiwanie lub usuń filtry — w katalogu na pewno jest coś ciekawego."
-              }
+              title={emptyState.title}
+              description={emptyState.description}
               icon={<Search className="h-7 w-7" />}
-              action={{ label: "Wyczyść filtry", href: "/katalog" }}
+              action={emptyState.action}
             />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" data-testid="catalog-grid">

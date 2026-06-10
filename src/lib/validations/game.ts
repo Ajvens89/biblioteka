@@ -127,7 +127,14 @@ export const gameFilterSchema = z.object({
   publisher: z.string().optional(),
   designer: z.string().optional(),
   sort: z
-    .enum(["title", "newest", "popular", "available"])
+    .enum([
+      "title",
+      "newest",
+      "popular",
+      "available",
+      "playtime_asc",
+      "playtime_desc",
+    ])
     .optional()
     .default("title"),
   page: z.coerce.number().int().min(1).optional().default(1),

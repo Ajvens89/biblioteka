@@ -80,9 +80,13 @@ export function buildGameOrderBy(
     case "newest":
       return [{ createdAt: "desc" }];
     case "popular":
-      return [{ popularityCount: "desc" }];
+      return [{ popularityCount: "desc" }, { title: "asc" }];
     case "available":
-      return [{ popularityCount: "desc" }];
+      return [{ popularityCount: "desc" }, { title: "asc" }];
+    case "playtime_asc":
+      return [{ minPlayTime: "asc" }, { title: "asc" }];
+    case "playtime_desc":
+      return [{ maxPlayTime: "desc" }, { title: "asc" }];
     default:
       return [{ title: "asc" }];
   }

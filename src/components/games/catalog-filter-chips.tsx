@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import {
   CATALOG_COLLECTION_LABELS,
   DIFFICULTY_LABELS,
+  GAME_SORT_LABELS,
   GAME_TYPE_LABELS,
 } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ const LABELS: Record<string, (v: string) => string> = {
   maxPlayTime: (v) => `Do ${v} min`,
   publisher: (v) => `Wydawca: ${v}`,
   designer: (v) => `Autor: ${v}`,
-  sort: (v) => `Sort: ${v}`,
+  sort: (v) => GAME_SORT_LABELS[v] ?? `Sort: ${v}`,
 };
 
 const SKIP = new Set(["page", "pageSize"]);

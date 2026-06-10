@@ -10,6 +10,13 @@ export function getAvailabilityLabel(available: number, total: number) {
   return { label: "Niedostępna", variant: "destructive" as const };
 }
 
+/** Szczegółowy opis dostępności na kartach katalogu (np. „2 z 3 dostępne”). */
+export function formatCopyAvailability(available: number, total: number): string {
+  if (total === 0) return "Brak egzemplarzy w systemie";
+  if (available > 0) return `${available} z ${total} dostępne`;
+  return `0 z ${total} — niedostępna`;
+}
+
 export const ACTIVE_COPY_STATUSES: CopyStatus[] = [
   "AVAILABLE",
   "RESERVED",

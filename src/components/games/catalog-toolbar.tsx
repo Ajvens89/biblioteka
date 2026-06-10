@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useId, useState } from "react";
+import { GameSearchSuggestions } from "@/components/games/game-search-suggestions";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,8 @@ export function CatalogToolbar({
   const searchParams = useSearchParams();
   const [q, setQ] = useState(defaultQ || searchParams.get("q") || defaultEan || "");
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const suggestListId = useId();
 
   const submit = useCallback(
     (opts?: { ean?: string; query?: string }) => {
@@ -69,11 +72,34 @@ export function CatalogToolbar({
               placeholder="Tytuł, opis, tag, autor, wydawca, EAN…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && submit()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setSuggestOpen(false);
+                  submit();
+                }
+                if (e.key === "Escape") setSuggestOpen(false);
+              }}
+              onFocus={() => {
+                if (q.trim().length >= 2) setSuggestOpen(true);
+              }}
+              aria-autocomplete="list"
+              aria-controls={suggestListId}
+              aria-expanded={suggestOpen}
+            />
+            <GameSearchSuggestions
+              query={q}
+              open={suggestOpen}
+              onOpenChange={setSuggestOpen}
+              onSelect={(title) => setQ(title)}
+              listId={suggestListId}
             />
           </div>
           <div className="grid grid-cols-2 gap-2 sm:flex">
-            <ScannerButton onClick={() => setScannerOpen(true)} className="zf-btn-secondary h-12 rounded-2xl" />
+            <ScannerButton
+              prominent
+              onClick={() => setScannerOpen(true)}
+              className="sm:min-w-[9.5rem]"
+            />
             <Button type="button" className="zf-btn-primary h-12 flex-1 rounded-2xl sm:min-w-[7rem]" onClick={() => submit()}>
               <Search className="h-4 w-4" aria-hidden />
               Szukaj
