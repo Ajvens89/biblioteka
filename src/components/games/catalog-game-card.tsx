@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Clock, QrCode, Users, UserRound } from "lucide-react";
 import type { GameCollectionType } from "@prisma/client";
 import { GameCover } from "@/components/ui/game-cover";
+import { GameTypeBadge } from "@/components/ui/game-type-badge";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -28,10 +29,23 @@ type Props = {
 
 function ExpandableDescription({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
-  const canExpand = text.length > 110;
+  const [canExpand, setCanExpand] = useState(false);
+  const measureRef = useRef<HTMLParagraphElement>(null);
+
+  useLayoutEffect(() => {
+    const el = measureRef.current;
+    if (!el) return;
+    setCanExpand(el.scrollHeight > el.clientHeight + 1);
+  }, [text]);
+
+  const clampClass = !expanded ? "line-clamp-3" : undefined;
 
   if (!canExpand) {
-    return <p className="text-small text-muted-foreground">{text}</p>;
+    return (
+      <p ref={measureRef} className={cn("text-small text-muted-foreground", clampClass)}>
+        {text}
+      </p>
+    );
   }
 
   return (
@@ -40,10 +54,11 @@ function ExpandableDescription({ text }: { text: string }) {
       className={cn(
         "text-small w-full text-left text-muted-foreground transition-colors",
         "hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        !expanded && "line-clamp-3",
+        clampClass,
       )}
       onClick={() => setExpanded((v) => !v)}
       aria-expanded={expanded}
+      aria-label={expanded ? "Zwiń opis" : "Rozwiń opis"}
     >
       {text}
     </button>
@@ -80,14 +95,17 @@ export function CatalogGameCard({
     >
       <div className="flex min-w-0 flex-1 flex-col gap-2.5 py-0.5">
         <div className="space-y-1.5">
-          <h3 className="font-display text-base font-medium leading-snug">
-            <Link
-              href={`/gry/${slug}`}
-              className="text-primary transition-colors hover:text-accent"
-            >
-              {title}
-            </Link>
-          </h3>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-display text-base font-medium leading-snug">
+              <Link
+                href={`/gry/${slug}`}
+                className="text-primary transition-colors hover:text-accent"
+              >
+                {title}
+              </Link>
+            </h3>
+            <GameTypeBadge collectionType={collectionType} />
+          </div>
           {description && <ExpandableDescription text={description} />}
         </div>
 

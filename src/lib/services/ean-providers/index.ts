@@ -1,6 +1,7 @@
 import type { GameCollectionType, PrismaClient } from "@prisma/client";
 import { EanError, isIsbn13, normalizeEan, validateEanChecksum } from "@/lib/services/ean";
 import { lookupBggProvider } from "./bgg-provider";
+import { isHurtCatalogEnabled } from "./hurt-catalog-config";
 import { lookupGoogleBooksProvider } from "./google-books-provider";
 import { lookupLocalProvider } from "./local-provider";
 import { buildManualCandidates } from "./manual-provider";
@@ -116,6 +117,24 @@ export async function lookupGameByEanWithFallback(
     };
   }
 
+  const { lookupHurtProvider } = await import("./hurt-provider");
+  const hurt = await lookupHurtProvider(normalized, options?.titleHint);
+  if (hurt.candidate) {
+    candidates = mergeCandidates(candidates, [hurt.candidate]);
+    if (hurt.candidate.confidence === "high") {
+      return {
+        status: "found_external",
+        normalizedEan: normalized,
+        checksumValid,
+        collectionTypeSuggestion:
+          hurt.candidate.collectionTypeSuggestion ?? collectionDefault,
+        selectedCandidate: hurt.candidate,
+        candidates,
+        message: hurt.candidate.notes ?? COVER_SOURCE_LABELS.hurt,
+      };
+    }
+  }
+
   let googleHadCover = false;
 
   if (isIsbn13(normalized)) {
@@ -133,11 +152,12 @@ export async function lookupGameByEanWithFallback(
 
   const titleHint = options?.titleHint?.trim();
   const needsBgg =
-    !isIsbn13(normalized) ||
-    candidates.length === 0 ||
-    !candidates.some((c) => c.coverImageUrl);
+    !isHurtCatalogEnabled() ||
+    !candidates.some((c) => c.source === "hurt") ||
+    (!isIsbn13(normalized) &&
+      (candidates.length === 0 || !candidates.some((c) => c.coverImageUrl)));
 
-  if (titleHint && needsBgg) {
+  if (titleHint && needsBgg && !candidates.some((c) => c.source === "hurt")) {
     const bgg = await lookupBggProvider(titleHint);
     if (bgg.candidates.length > 0) {
       candidates = mergeCandidates(candidates, bgg.candidates);

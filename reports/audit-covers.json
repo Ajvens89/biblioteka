@@ -1,0 +1,2830 @@
+﻿{
+  "total": 474,
+  "missing": 15,
+  "suspicious": 174,
+  "rows": [
+    {
+      "id": "f507b712-4e22-4885-bf36-ed148ee7a6d6",
+      "title": "Amanda Black",
+      "slug": "amanda-black",
+      "ean": "9788396341679",
+      "coverImageUrl": "/covers/monopoly-marvel-avengers.ba55aea06f.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "monopoly marvel avengers",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "series_mismatch",
+        "book_game_mismatch"
+      ],
+      "severity": 23
+    },
+    {
+      "id": "67b7d95d-bb52-4774-8deb-7435fdd39b72",
+      "title": "Mini puzzle nied┼║wiedki",
+      "slug": "mini-puzzle-niedzwiedki",
+      "ean": "5902768336429",
+      "coverImageUrl": "/covers/4d696e692070757a7a6c65206e696564c5ba776965646b69.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "4d696e692070757a7a6c65206e696564c5ba776965646b69.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 23
+    },
+    {
+      "id": "7b25337a-82ec-4ef9-85b5-9a6c068174ca",
+      "title": "Puzzle progresywne pojazdy",
+      "slug": "puzzle-progresywne-pojazdy",
+      "ean": "5902983491842",
+      "coverImageUrl": "/covers/50757a7a6c652070726f6772657379776e6520706f6a617a6479.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "50757a7a6c652070726f6772657379776e6520706f6a617a6479.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 23
+    },
+    {
+      "id": "3225b2ad-6b9c-4993-8f6a-ad1cbe66e0e8",
+      "title": "Puzzle progresywne zwierz─Öta le┼Ťne",
+      "slug": "puzzle-progresywne-zwierzeta-lesne",
+      "ean": "5902983491835",
+      "coverImageUrl": "/covers/50757a7a6c652070726f6772657379776e65207a776965727ac4997461206c65c59b6e65.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "50757a7a6c652070726f6772657379776e65207a776965727ac4997461206c65c59b6e65.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 23
+    },
+    {
+      "id": "9c78bff2-945e-42cb-9651-1c3a5721ed53",
+      "title": "Puzzle z dziurk─ů maluchy",
+      "slug": "puzzle-z-dziurka-maluchy",
+      "ean": "5902983490807",
+      "coverImageUrl": "/covers/50757a7a6c65207a20647a6975726bc485206d616c75636879.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "50757a7a6c65207a20647a6975726bc485206d616c75636879.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 23
+    },
+    {
+      "id": "c655b880-3902-4f6f-971b-e5953fe94476",
+      "title": "Alias Przejdzie CI przez gard┼éo?",
+      "slug": "alias-przejdzie-ci-przez-gardlo",
+      "ean": "6416739594620",
+      "coverImageUrl": "/covers/416c6961732050727a656a647a69652043492070727a657a2067617264c5826f3f.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "416c6961732050727a656a647a69652043492070727a657a2067617264c5826f3f.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "1c22b58e-a437-4e22-9389-2d06fc4c6b0a",
+      "title": "CzuCzu Puzzle kontrastowe",
+      "slug": "czuczu-puzzle-kontrastowe",
+      "ean": "5902983491996",
+      "coverImageUrl": "/covers/poznaje-uczucia.a5d11bd0c1.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "poznaje uczucia",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "d919b50b-1e2d-4abb-a64c-1fea17dab496",
+      "title": "CzuCzu Puzzle kontrastowe tu pasuje",
+      "slug": "czuczu-puzzle-kontrastowe-tu-pasuje",
+      "ean": "5902983492009",
+      "coverImageUrl": "/covers/poznaje-uczucia.a5d11bd0c1.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "poznaje uczucia",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "f7eeb847-01b0-4ce4-b530-ceabdfce25b6",
+      "title": "Czuczu Moje puzzle",
+      "slug": "czuczu-moje-puzzle",
+      "ean": "5902983493761",
+      "coverImageUrl": "/covers/dzungla-puzzlogra.2b3b69f994.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "dzungla puzzlogra",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "e7779768-f233-4f56-920b-56aa0bd608b0",
+      "title": "Czuczulotto zakupy",
+      "slug": "czuczulotto-zakupy",
+      "ean": "5902983492207",
+      "coverImageUrl": "/covers/437a75637a756c6f74746f207a616b757079.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "437a75637a756c6f74746f207a616b757079.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "97294fd9-6192-4dbc-9df5-a21becf1efd5",
+      "title": "Elefun Skill Gamepad",
+      "slug": "elefun-skill-gamepad",
+      "ean": "5609288361183",
+      "coverImageUrl": "/covers/456c6566756e20536b696c6c2047616d65706164.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "456c6566756e20536b696c6c2047616d65706164.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "ebb8b751-9ad9-431f-a60c-2b47263a0c95",
+      "title": "GRAVITRAX ZESTAW STARTOW",
+      "slug": "gravitrax-zestaw-startow",
+      "ean": "4005556268122",
+      "coverImageUrl": "/covers/475241564954524158205a45535441572053544152544f57.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "475241564954524158205a45535441572053544152544f57.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "f2c29a3e-bc2b-451b-b419-e5af649569e5",
+      "title": "Kubu┼Ť puchatek drewniane klocki",
+      "slug": "kubus-puchatek-drewniane-klocki",
+      "ean": "8005125411658",
+      "coverImageUrl": "/covers/4b756275c59b20707563686174656b20647265776e69616e65206b6c6f636b69.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "4b756275c59b20707563686174656b20647265776e69616e65206b6c6f636b69.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "766f2d3b-5e1d-467f-9ce9-323449ecdb2a",
+      "title": "MobTown",
+      "slug": "mobtown",
+      "ean": "5904262950187",
+      "coverImageUrl": "/covers/4d6f62546f776e.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "4d6f62546f776e.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "62bb9530-ec97-4cc5-874e-552d36f67337",
+      "title": "MouseTrap",
+      "slug": "mousetrap",
+      "ean": "5010994773274",
+      "coverImageUrl": "/covers/4d6f75736554726170.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "4d6f75736554726170.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "fcec3c99-5d62-47dd-a664-718a78a8aeae",
+      "title": "Pierwsze puzzle pojazdy",
+      "slug": "pierwsze-puzzle-pojazdy",
+      "ean": "5902983493617",
+      "coverImageUrl": "/covers/the-sandcastles-of-burgundy.350e3b7515.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "the sandcastles of burgundy",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "1d84e4e4-f951-4276-b303-48116f6b7ea5",
+      "title": "Polskie g├│ry puzzle",
+      "slug": "polskie-gory-puzzle",
+      "ean": "5902983493839",
+      "coverImageUrl": "/covers/inspire-game.ffcbb51a91.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "inspire game",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "402d0ec3-0286-465c-b79d-98441313bf3f",
+      "title": "Poznaje cyfry zabawa kreatywna",
+      "slug": "poznaje-cyfry-zabawa-kreatywna",
+      "ean": "9788365773531",
+      "coverImageUrl": "/covers/506f7a6e616a65206379667279207a6162617761206b7265617479776e61.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "506f7a6e616a65206379667279207a6162617761206b7265617479776e61.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "43b06ea8-b933-4518-afb4-3ac3f9ccc1d3",
+      "title": "Qudditch tryouts HarryPotter",
+      "slug": "qudditch-tryouts-harrypotter",
+      "ean": "5411068842733",
+      "coverImageUrl": "/covers/5175646469746368207472796f757473204861727279506f74746572.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "5175646469746368207472796f757473204861727279506f74746572.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "d8eaf0c9-49f7-4496-bfe5-df7e6811581e",
+      "title": "TAOGEAM - Gry i zabawy edulkacyjne",
+      "slug": "taogeam-gry-i-zabawy-edulkacyjne",
+      "ean": "5906018013467",
+      "coverImageUrl": "/covers/54414f4745414d202d204772792069207a6162617779206564756c6b6163796a6e65.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "54414f4745414d202d204772792069207a6162617779206564756c6b6163796a6e65.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "6968385d-99e1-4d18-98fb-86e4603f2ee9",
+      "title": "Tablica sizalowa bull's",
+      "slug": "tablica-sizalowa-bulls",
+      "ean": "8719075976371",
+      "coverImageUrl": "/covers/5461626c6963612073697a616c6f77612062756c6c2773.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "5461626c6963612073697a616c6f77612062756c6c2773.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "3ddb85e1-8970-4e0a-b2a9-ee63f99dc59b",
+      "title": "Zestaw do Bitwy na Wodzie",
+      "slug": "zestaw-do-bitwy-na-wodzie",
+      "ean": "5609288361190",
+      "coverImageUrl": "/covers/5a657374617720646f204269747779206e6120576f647a6965.full.png",
+      "coverImageSource": "products_import",
+      "coverSlug": "5a657374617720646f204269747779206e6120576f647a6965.full",
+      "matchScore": 0,
+      "issues": [
+        "missing_file",
+        "hex_import_path",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "7f7a883a-aeb3-436c-aa12-9e7533925d71",
+      "title": "Puzzle myszka i przyjaciele",
+      "slug": "puzzle-myszka-i-przyjaciele",
+      "ean": "5902983493792",
+      "coverImageUrl": "/covers/match-miki-i-przyjaciele.64599fc851.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "match miki i przyjaciele",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "41648647-78db-48cd-882a-a103d9dd8b69",
+      "title": "Puzzle pojazdy ma┼ée i du┼╝e",
+      "slug": "puzzle-pojazdy-male-i-duze",
+      "ean": "5902983493785",
+      "coverImageUrl": "/covers/agricola-edycja-specjalna-wszystkie-stworzenia-duze-i-male.68edd6624b.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "agricola edycja specjalna wszystkie stworzenia duze i male",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "b49fa0a7-c225-4837-8140-50907ca256f7",
+      "title": "Puzzle ptaki polski",
+      "slug": "puzzle-ptaki-polski",
+      "ean": "5902983493204",
+      "coverImageUrl": "/covers/patchwork-polski-folklor.5de7f3d6b8.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "patchwork polski folklor",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "9a43f2b9-4e49-4f2a-a0ba-871f470e20a8",
+      "title": "Puzzle z dziurk─ů przyjaciele",
+      "slug": "puzzle-z-dziurka-przyjaciele",
+      "ean": "5902983490791",
+      "coverImageUrl": "/covers/osadnicy-narodziny-imperium-trzej-przyjaciele-z-boiska.be9f1c569d.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "osadnicy narodziny imperium trzej przyjaciele z boiska",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "9c112044-c1d4-4169-9a2f-13cd324254fd",
+      "title": "Trefl puzzle Frozen II",
+      "slug": "trefl-puzzle-frozen-ii",
+      "ean": "5900511182538",
+      "coverImageUrl": "/covers/frozen-2-home-sprint.36245bd152.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "frozen 2 home sprint",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "e644c2ab-5e9c-43d1-87be-7cd7348f745d",
+      "title": "Puzzle tak dzia┼éa stra┼╝ po┼╝arna",
+      "slug": "puzzle-tak-dziala-straz-pozarna",
+      "ean": "5902983493808",
+      "coverImageUrl": "/covers/loteryjka-straz-pozarna.066927d8e2.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "loteryjka straz pozarna",
+      "matchScore": 30,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "cfdda0e9-18f5-4c1d-be23-b876f0aff97e",
+      "title": "Puzzle logiczne",
+      "slug": "puzzle-logiczne",
+      "ean": "9788366762374",
+      "coverImageUrl": "/covers/zagadki-obrazkowe-zabawy-logiczne.32b7429a68.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "zagadki obrazkowe zabawy logiczne",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "0bc190a7-dff8-44a4-a0b7-c156d2e55e3b",
+      "title": "Puzzle uk┼éad s┼éoneczny",
+      "slug": "puzzle-uklad-sloneczny",
+      "ean": "5902983493846",
+      "coverImageUrl": "/covers/solkrig-wojna-o-uklad-sloneczny.ddd1845054.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "solkrig wojna o uklad sloneczny",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "puzzle_mismatch"
+      ],
+      "severity": 16
+    },
+    {
+      "id": "c2895073-51d3-41f7-9d96-c1baff057447",
+      "title": "BoomBoom Baloon",
+      "slug": "boomboom-baloon",
+      "ean": "5666816442127",
+      "coverImageUrl": "/covers/boom-bang-gold.3156a18825.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "boom bang gold",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch",
+        "series_mismatch"
+      ],
+      "severity": 15
+    },
+    {
+      "id": "621b7668-ce78-46ed-9914-f2f6d3aac8e8",
+      "title": "Bingo",
+      "slug": "bingo",
+      "ean": "6416739549040",
+      "coverImageUrl": "https://s4.thcdn.com/productimg/960/960/11713068-2794579671083337.jpg",
+      "coverImageSource": "upcitemdb",
+      "coverSlug": "11713068 2794579671083337",
+      "matchScore": 0,
+      "issues": [
+        "remote_url",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 11
+    },
+    {
+      "id": "978f857d-e35d-4de8-b441-880531a78282",
+      "title": "Crocodile Dentist",
+      "slug": "crocodile-dentist",
+      "ean": "5010994839567",
+      "coverImageUrl": "https://i2.adis.ws/i/Argos/4257419_R_Z001A",
+      "coverImageSource": "upcitemdb",
+      "coverSlug": "4257419_R_Z001A",
+      "matchScore": 0,
+      "issues": [
+        "remote_url",
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 11
+    },
+    {
+      "id": "7932ba96-3cb5-4ed5-9c7c-f885f759cb7b",
+      "title": "Harry Potter puzzle",
+      "slug": "harry-potter-puzzle",
+      "ean": "5036905042086",
+      "coverImageUrl": "/covers/scrabble-harry-potter-edition.651847cf77.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "scrabble harry potter edition",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch",
+        "series_mismatch"
+      ],
+      "severity": 10
+    },
+    {
+      "id": "873276b7-33b0-4cc4-accd-978b6f2e3bf3",
+      "title": "5 sekung HarryPotter",
+      "slug": "5-sekung-harrypotter",
+      "ean": "5900511022421",
+      "coverImageUrl": "/covers/5-sekund-harry-potter.ceddc9b671.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "5 sekund harry potter",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "c249c9e5-932c-4119-8cec-1c08b27977e2",
+      "title": "Battle blocks",
+      "slug": "battle-blocks",
+      "ean": "6851425286500",
+      "coverImageUrl": "/covers/unmatched-bitwa-legend-czesc-1.ce83071e11.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "unmatched bitwa legend czesc 1",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "df0c14b4-d34c-464b-88a8-7f5e18dde5fd",
+      "title": "BedBugs",
+      "slug": "bedbugs",
+      "ean": "5010993464333",
+      "coverImageUrl": "/covers/bed-bugs.f142deab68.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "bed bugs",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "115f6e49-494a-4f40-831c-0c16ebcfb59d",
+      "title": "Block Out",
+      "slug": "block-out",
+      "ean": "6416739531533",
+      "coverImageUrl": "/covers/blok-w-blok.7506c3a327.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "blok w blok",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "52954c13-d0b1-4207-a42f-54956b8e464d",
+      "title": "Bolek i lolek",
+      "slug": "bolek-i-lolek",
+      "ean": "5901911001849",
+      "coverImageUrl": "/covers/bogowie-olimpu.1727f55b87.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "bogowie olimpu",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "ef5769a4-9c2f-46f1-863d-25f55c97abfe",
+      "title": "CamelUp",
+      "slug": "camelup",
+      "ean": "5907377129295",
+      "coverImageUrl": "/covers/smart-games-kamelot-jr.f7d2d54cfb.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "smart games kamelot jr",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "35939896-ccbb-4d4b-affb-2911fcfbe969",
+      "title": "Chrza┼ä to!",
+      "slug": "chrzan-to",
+      "ean": "5904305400556",
+      "coverImageUrl": "/covers/wasabi-a-game-of-raw-skill.43115a41b3.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "wasabi a game of raw skill",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "bec7f599-d356-416d-8b79-277b18cb5e13",
+      "title": "Czaruj─ůce Kotki",
+      "slug": "czarujace-kotki",
+      "ean": "5907078167701",
+      "coverImageUrl": "/covers/wizard-kittens.a9896dd8b6.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "wizard kittens",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "272e30b1-b4d3-4f68-aced-092bb83625e0",
+      "title": "CzuCzulotto Smacznego!",
+      "slug": "czuczulotto-smacznego",
+      "ean": "5902983491514",
+      "coverImageUrl": "/covers/bon-appetit.a6c6143a0d.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "bon appetit",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "03753aad-e5a5-4e8c-9854-9dea08441622",
+      "title": "Ewaku┼éacja",
+      "slug": "ewakulacja",
+      "ean": "5902560389180",
+      "coverImageUrl": "/covers/evacuation.9948b1df10.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "evacuation",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "1b68cae4-c6e2-4bda-b647-8eca5ffa9382",
+      "title": "Fantasy Feast",
+      "slug": "fantasy-feast",
+      "ean": "5050837644019",
+      "coverImageUrl": "/covers/najemnicy-parszywa-druzyna.1ea6431684.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "najemnicy parszywa druzyna",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "30bfe2ed-1286-4023-8ef8-f7e326de9050",
+      "title": "Filmomaniak",
+      "slug": "catan",
+      "ean": "5901234123457",
+      "coverImageUrl": "/covers/kieszonkowiec-filmowy-kamera-akcja.7d8acad032.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "kieszonkowiec filmowy kamera akcja",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "bbdb7bc0-26d5-4440-afcd-a46c514f74f2",
+      "title": "Gra dla m┼éodych buntowniczek",
+      "slug": "gra-dla-mlodych-buntowniczek",
+      "ean": "5904305400242",
+      "coverImageUrl": "/covers/sogni-per-bambine-ribelli.e4c996a22b.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "sogni per bambine ribelli",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "84fbb2be-92e0-49ad-af55-73966a21ba05",
+      "title": "Grizzly Gears",
+      "slug": "grizzly-gears",
+      "ean": "0239903489234",
+      "coverImageUrl": "/covers/smart-games-misie-w-lesie.761d60f3e5.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "smart games misie w lesie",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "3b53828a-064f-4033-ba9a-d07d30e12619",
+      "title": "Hasbro Frustration Board",
+      "slug": "hasbro-frustration-board",
+      "ean": "5010994280956",
+      "coverImageUrl": "/covers/trivial-pursuit-edycja-rodzinna.93bf2a255f.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "trivial pursuit edycja rodzinna",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "2b230497-eb16-4d9d-b847-dcad7ed8c5d4",
+      "title": "Jak ocali─ç ┼Ťwiat?",
+      "slug": "jak-ocalic-swiat",
+      "ean": "5904305400822",
+      "coverImageUrl": "/covers/how-to-save-a-world.87361e83c3.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "how to save a world",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "872a4232-9a5f-4d14-8234-381c75abdaef",
+      "title": "Karty interaktywne",
+      "slug": "karty-interaktywne",
+      "ean": "5904013745512",
+      "coverImageUrl": "/covers/dziennik-wyprawa-1907-interaktywna-gra-ksiazkowa.4bb913e24f.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "dziennik wyprawa 1907 interaktywna gra ksiazkowa",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "1e2bec6e-30b1-4e48-aa0e-2608a087b0c8",
+      "title": "Kiki Ricky",
+      "slug": "kiki-ricky",
+      "ean": "4005556210442",
+      "coverImageUrl": "/covers/chuck-it-chicken.d6905b9ff9.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "chuck it chicken",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "48e2d872-43b2-4227-8743-1602746dff72",
+      "title": "Kimle",
+      "slug": "kimle",
+      "ean": "6416739565712",
+      "coverImageUrl": "/covers/dien-bien-phu-the-final-gamble-18ad2b53-96da-4e88-8302-ee1b25cc8a5a.cf53190da6.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "dien bien phu the final gamble 18ad2b53 96da 4e88 8302 ee1b25cc8a5a",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "b4f2bddb-3ca1-420e-ad3e-e9585a4a2330",
+      "title": "Klocki ma┼éych Geniuszy",
+      "slug": "klocki-malych-geniuszy",
+      "ean": "6901440116686",
+      "coverImageUrl": "/covers/dzieci-kontra-rodzice-maly-geniusz-czasownik-czy-rzeczownik.27dd5efb7c.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "dzieci kontra rodzice maly geniusz czasownik czy rzeczownik",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "843f1257-56b1-4df6-a7cd-8ae356b5e1a3",
+      "title": "Klonowa Dolina",
+      "slug": "klonowa-dolina",
+      "ean": "5904305400396",
+      "coverImageUrl": "/covers/maple-valley.df4780c5ec.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "maple valley",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "1a6cdabf-a052-459e-b837-39ce5bf16a46",
+      "title": "Kojot",
+      "slug": "kojot",
+      "ean": "5902560389258",
+      "coverImageUrl": "/covers/coyote-cfd71d56-7ce2-453f-81cd-53aaa0737b60.f714e2eb89.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "coyote cfd71d56 7ce2 453f 81cd 53aaa0737b60",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "cbda1d7a-2079-4924-b89e-68c458827560",
+      "title": "Listy z za┼Ťwiat├│w",
+      "slug": "listy-z-zaswiatow",
+      "ean": "5902560387582",
+      "coverImageUrl": "/covers/phantom-ink.cf8a4cb61e.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "phantom ink",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "4506babd-ef64-494c-be4e-78a217492137",
+      "title": "Miasta marze┼ä",
+      "slug": "miasta-marzen",
+      "ean": "5904915904635",
+      "coverImageUrl": "/covers/cities-ff990e25-ec98-4c64-8ab4-49946548b13c.756c53e9a6.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "cities ff990e25 ec98 4c64 8ab4 49946548b13c",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "37c942af-b8a3-469f-8b2d-fca06be344f2",
+      "title": "Na rozkaz",
+      "slug": "na-rozkaz",
+      "ean": "5904305400570",
+      "coverImageUrl": "/covers/general-orders-world-war-ii.28b1ee3111.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "general orders world war ii",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "481bcd6c-c4c1-4252-a0cf-ac93109575f5",
+      "title": "Nasza Ziemia",
+      "slug": "nasza-ziemia",
+      "ean": "5906749804525",
+      "coverImageUrl": "/covers/rebirth.0595bde836.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "rebirth",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "b8cd5ab9-ef9c-4548-adac-57dbd17263c5",
+      "title": "Obsesje",
+      "slug": "obsesje",
+      "ean": "5904305400440",
+      "coverImageUrl": "/covers/obsession.ae98195d07.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "obsession",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "26c8dead-cecc-4928-bbd0-41ebbb68680b",
+      "title": "Obsesje Na salonach i od kuchni",
+      "slug": "obsesje-na-salonach-i-od-kuchni",
+      "ean": "5904305400624",
+      "coverImageUrl": "/covers/obsession-upstairs-downstairs.b6a07e3eae.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "obsession upstairs downstairs",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "ad634a2a-841d-4c25-9925-f8e929da4692",
+      "title": "Obsesje: Lokalne Osobisto┼Ťci",
+      "slug": "obsesje-lokalne-osobistosci",
+      "ean": "5904305400846",
+      "coverImageUrl": "/covers/obsession-characters-expansion.861c70cbbb.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "obsession characters expansion",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "146bcd8a-ca36-42f5-a082-9edb2e2c17c6",
+      "title": "Od Zmierzchu do ┼Üwitu",
+      "slug": "od-zmierzchu-do-switu",
+      "ean": "8590228061720",
+      "coverImageUrl": "/covers/the-hunger.a6990a0e48.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "the hunger",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "9fd79210-9708-4f59-82b5-d4ca62573f0d",
+      "title": "Orzeszki na ┼Ťcie┼╝ki",
+      "slug": "orzeszki-na-sciezki",
+      "ean": "5904915903201",
+      "coverImageUrl": "/covers/savernake-forest.4ca7224619.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "savernake forest",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "a050a1c8-ef98-49fb-8605-a22eed19c254",
+      "title": "PieFace!",
+      "slug": "pieface",
+      "ean": "5010994946746",
+      "coverImageUrl": "/covers/pie-face-c8665c0e-6135-497b-bd17-47465f440a73.ee46b8de6f.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "pie face c8665c0e 6135 497b bd17 47465f440a73",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "89eac6d2-cdad-4559-bc52-240236856358",
+      "title": "Pisanie zmazywanie",
+      "slug": "pisanie-zmazywanie",
+      "ean": "5906018007398",
+      "coverImageUrl": "/covers/gra-w-pokazywanie.77eb3114e0.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "gra w pokazywanie",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "4cdfacc3-7a52-4bf4-a4b5-3a5a6cfdbb1f",
+      "title": "PixieQueen",
+      "slug": "pixiequeen",
+      "ean": "5407004490014",
+      "coverImageUrl": "/covers/pixie-queen.4ce4612711.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "pixie queen",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "7caa908d-ca3f-40fb-b764-bf8bf6e0c40d",
+      "title": "Postaw na milion",
+      "slug": "postaw-na-milion",
+      "ean": "4005556272020",
+      "coverImageUrl": "/covers/the-million-pound-drop.6f79d49c3f.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "the million pound drop",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "cec5c241-111a-43b4-a920-df01962b7634",
+      "title": "Sprytne bobry",
+      "slug": "sprytne-bobry",
+      "ean": "6416739568843",
+      "coverImageUrl": "/covers/busy-beaver.0582dfeea9.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "busy beaver",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "a3e7c0b2-de9b-44dd-804d-e3aab9e4a33b",
+      "title": "Syndykat zbrodni",
+      "slug": "syndykat-zbrodni",
+      "ean": "5902719478390",
+      "coverImageUrl": "/covers/blitzkrieg-world-war-two-in-20-minutes.60ddba366f.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "blitzkrieg world war two in 20 minutes",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "f8b6e515-0d77-4304-b807-3f276dbc796a",
+      "title": "Sztama",
+      "slug": "sztama",
+      "ean": "5900221003475",
+      "coverImageUrl": "/covers/dam-it.2d30fa8ff0.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "dam it",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "e2a95085-c608-46f3-af25-aece03e86091",
+      "title": "S┼éowo┼éaki",
+      "slug": "slowolaki",
+      "ean": "5902560384796",
+      "coverImageUrl": "/covers/werewords.a458e45136.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "werewords",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "a5f117f6-cdf7-41de-94ed-d927273382e3",
+      "title": "W oparach mi┼éo┼Ťci",
+      "slug": "w-oparach-milosci",
+      "ean": "5904305400495",
+      "coverImageUrl": "/covers/fog-of-love.1808aa29f6.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "fog of love",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "b994ccac-d73e-48d2-a5c1-87196f3f391e",
+      "title": "Zabawy kreatywne pojazdy",
+      "slug": "zabawy-kreatywne-pojazdy",
+      "ean": "9788365773562",
+      "coverImageUrl": "/covers/bajkowe-stworki.d8497f9b30.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "bajkowe stworki",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "f5575881-3b8c-4cef-8b5a-b061fb8c716f",
+      "title": "Zaginione miasta",
+      "slug": "zaginione-miasta",
+      "ean": "5904915904468",
+      "coverImageUrl": "/covers/lost-cities-pojedynek.094fbe37dc.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "lost cities pojedynek",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "b5de536c-1851-4558-b09c-6c4e2696dc98",
+      "title": "Zamiast nas",
+      "slug": "zamiast-nas",
+      "ean": "5904305400464",
+      "coverImageUrl": "/covers/after-us.2ee0255d38.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "after us",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "db10b726-4fd6-43eb-9ed9-2f94fdd495fa",
+      "title": "ZnaczkoMania",
+      "slug": "znaczkomania",
+      "ean": "5906168640094",
+      "coverImageUrl": "/covers/stamp-swap.a630caecd7.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "stamp swap",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "f5f9fa1b-73fd-4292-b2de-91969a9e38e8",
+      "title": "Z┼éote ┼Ťwi─ůtynie",
+      "slug": "zlote-swiatynie",
+      "ean": "5904915900248",
+      "coverImageUrl": "/covers/the-quest-for-el-dorado-the-golden-temples-87e887b3-6fdf-4d95-951e-bf24a4528629.c7e2033fd3.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "the quest for el dorado the golden temples 87e887b3 6fdf 4d95 951e bf24a4528629",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "ab72aa2b-501b-40a4-9a1a-3fe28045893d",
+      "title": "┼Üwietloni detektywi",
+      "slug": "swietloni-detektywi",
+      "ean": "5904915905489",
+      "coverImageUrl": "/covers/spotlight.c747ebebbc.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "spotlight",
+      "matchScore": 0,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "a49fd658-a72a-467c-8220-3c9f81fcbc6f",
+      "title": "Alias uchyl drzwi tajemnicy",
+      "slug": "alias-uchyl-drzwi-tajemnicy",
+      "ean": "6416739594576",
+      "coverImageUrl": "/covers/tajemniczy-alias.44342f3a00.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "tajemniczy alias",
+      "matchScore": 19,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "9c6a0742-6082-48e0-b850-1c3dabd567ee",
+      "title": "Trefl puzzle psi patrol",
+      "slug": "trefl-puzzle-psi-patrol",
+      "ean": "5900511182392",
+      "coverImageUrl": "/covers/2w1-paw-patrol.26d57b79c9.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "2w1 paw patrol",
+      "matchScore": 19,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "1512e102-8709-4972-8d47-fb433ed4f3fc",
+      "title": "ALEXANDER Curmudge Party",
+      "slug": "alexander-curmudge-party",
+      "ean": "5906018027655",
+      "coverImageUrl": "/covers/goracy-ziemniak-party.0b79a5811a.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "goracy ziemniak party",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "d311b0e5-9457-41d9-a44e-e1f91b098c29",
+      "title": "Akademia Czuczu Cyfry",
+      "slug": "akademia-czuczu-cyfry",
+      "ean": "9788366762282",
+      "coverImageUrl": "/covers/smart-games-akademia-jazdy-konnej.de678920e3.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "smart games akademia jazdy konnej",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "c95fb629-a292-4f9a-9f49-d057b4b4182e",
+      "title": "Classic - SCRABBLE Karty",
+      "slug": "classic-scrabble-karty",
+      "ean": "9001890784606",
+      "coverImageUrl": "/covers/scrabble-card-game.4ee42d57bf.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "scrabble card game",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "3441ea6d-6fd3-43c6-8817-c322b02b4d4c",
+      "title": "Drogi do niepodleg┼éo┼Ťci",
+      "slug": "drogi-do-niepodleglosci",
+      "ean": "5907813931703",
+      "coverImageUrl": "/covers/polska-quiz-niepodleglosc.fc9c88fbcc.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "polska quiz niepodleglosc",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "13caf153-81da-48f9-9faa-6a6608f6e2e4",
+      "title": "Mega WarsL Akademia.",
+      "slug": "mega-warsl-akademia",
+      "ean": "5906395371211",
+      "coverImageUrl": "/covers/mage-wars-akademia.57858ea7db.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "mage wars akademia",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "28278195-44c8-4908-a68e-731f3a6e2ffa",
+      "title": "Paw patroll match",
+      "slug": "paw-patroll-match",
+      "ean": "5036905037181",
+      "coverImageUrl": "/covers/match-psi-patrol.6c2e2500cb.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "match psi patrol",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "9b121841-f51a-4668-bd74-7000f6414f61",
+      "title": "Piotru┼Ť Pan Auta",
+      "slug": "piotrus-pan-auta",
+      "ean": "5906018005615",
+      "coverImageUrl": "/covers/piotrus-scooby-doo.e1c988d592.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "piotrus scooby doo",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "3efa54e7-6f01-438c-93a2-0facf215e37e",
+      "title": "Puzzle do pary cyferki",
+      "slug": "puzzle-do-pary-cyferki",
+      "ean": "5902983493686",
+      "coverImageUrl": "/covers/puzzle-party.8b60eeea0e.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "puzzle party",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "bb48bd9e-ac26-4b19-b8dc-b8b0ef2d561e",
+      "title": "Puzzle do pary literki",
+      "slug": "puzzle-do-pary-literki",
+      "ean": "5902983493679",
+      "coverImageUrl": "/covers/puzzle-party.8b60eeea0e.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "puzzle party",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "7c8f60bc-b0be-46c8-8f01-8aa8ab78c551",
+      "title": "Table hockey Set",
+      "slug": "table-hockey-set",
+      "ean": "5060376771138",
+      "coverImageUrl": "/covers/knights-of-the-dinner-table-hack.803f836076.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "knights of the dinner table hack",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "85d674ab-8d0a-477a-b3a8-871aa6d503d8",
+      "title": "litery SYLABY wyrazy",
+      "slug": "litery-sylaby-wyrazy",
+      "ean": "5902410006076",
+      "coverImageUrl": "/covers/znajdz-wyraz-sylaby.858951d486.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "znajdz wyraz sylaby",
+      "matchScore": 25,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "690c3201-11b7-4943-b463-4fbcaea8d0bb",
+      "title": "Gra planszowa Scrabble Pok├ęmon Mattel",
+      "slug": "gra-planszowa-scrabble-pokemon-mattel",
+      "ean": "1947352377536",
+      "coverImageUrl": "/covers/scrabble-pokemon-edition.19026a5653.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "scrabble pokemon edition",
+      "matchScore": 30,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "6fbe2bb5-e828-4e49-9068-d7f83378fe69",
+      "title": "Atlas Polska",
+      "slug": "atlas-polska",
+      "ean": "6416739560274",
+      "coverImageUrl": "/covers/palcem-po-mapie-polska.21a0694102.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "palcem po mapie polska",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "50ee8650-52a4-450a-9363-ae2ddbd843e9",
+      "title": "Bank Attack",
+      "slug": "bank-attack",
+      "ean": "5020674107909",
+      "coverImageUrl": "/covers/cyberpunk-attack.1fab30d687.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "cyberpunk attack",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "18d1d776-4725-4996-80f1-295295da87f1",
+      "title": "Billy B├│br",
+      "slug": "billy-bobr",
+      "ean": "4005556219513",
+      "coverImageUrl": "/covers/billy-biber.aa3c110b0a.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "billy biber",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "9b0a78f9-9025-4033-9bfe-d79d8ad499bb",
+      "title": "Bunchems Alive",
+      "slug": "bunchems-alive",
+      "ean": "7789882186318",
+      "coverImageUrl": "/covers/zombicide-undead-or-alive.33e91be6a4.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "zombicide undead or alive",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "af03b5fc-af47-4572-b38f-17157e6d4e27",
+      "title": "CamelUp Po zawodach",
+      "slug": "camelup-po-zawodach",
+      "ean": "5904305400099",
+      "coverImageUrl": "/covers/przebiegle-wielblady-po-zawodach.05998c2c42.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "przebiegle wielblady po zawodach",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "d2bf8790-a99a-4404-b5a6-c913c7382dbe",
+      "title": "DUPLO Police",
+      "slug": "duplo-police",
+      "ean": "5702016367669",
+      "coverImageUrl": "/covers/fashion-police.04fd71c4b2.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "fashion police",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "9e3e5e7f-3a5d-486e-8243-4d72393c6605",
+      "title": "Escap Rome - Ucieczka z Alcatrac",
+      "slug": "escap-rome-ucieczka-z-alcatrac",
+      "ean": "5907078168234",
+      "coverImageUrl": "/covers/escape-room-ucieczka-z-alcatraz.6141f12d0e.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "escape room ucieczka z alcatraz",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "830912c4-c4a5-4359-ba73-71d9c70474b1",
+      "title": "Four in a row",
+      "slug": "four-in-a-row",
+      "ean": "4052916389775",
+      "coverImageUrl": "/covers/ducks-in-a-row-a-game-of-deducktive-reasoning.bcceb7cd42.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "ducks in a row a game of deducktive reasoning",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "a2d1444e-060d-401e-8959-417b3564eb4a",
+      "title": "Game Bounce",
+      "slug": "game-bounce",
+      "ean": "8776958541811",
+      "coverImageUrl": "/covers/bounce-off.a75717f050.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "bounce off",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "546c5354-3ad5-47ea-ab1a-b70b5b972286",
+      "title": "Guardians call",
+      "slug": "guardians-call",
+      "ean": "7528305620592",
+      "coverImageUrl": "/covers/time-guardians-chaos-auf-dem-mond.74c98c8535.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "time guardians chaos auf dem mond",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "1a2d3d71-3dcb-44c9-8518-f67115a841de",
+      "title": "Kamienna mandalia",
+      "slug": "kamienna-mandalia",
+      "ean": "5903766419466",
+      "coverImageUrl": "/covers/kamienna-mandala.a6f45c42d3.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "kamienna mandala",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "0372c3f6-9ce8-4387-8cbb-9f56f3ad3953",
+      "title": "Magiczne Opowie┼Ťci",
+      "slug": "magiczne-opowiesci",
+      "ean": "5900511005349",
+      "coverImageUrl": "/covers/czarne-historie-mroczne-opowiesci.3a8df64373.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "czarne historie mroczne opowiesci",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "93f0caad-904d-4b56-bc6b-8322ee7cafe7",
+      "title": "Mapa Polski",
+      "slug": "mapa-polski",
+      "ean": "5904083586114",
+      "coverImageUrl": "/covers/quiz-przyroda-i-geografia-polski-mini.928859ec17.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "quiz przyroda i geografia polski mini",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "35fa30d3-d1ec-4db3-a17f-d3e7f31b1ac2",
+      "title": "Molkky Minipeli",
+      "slug": "molkky-minipeli",
+      "ean": "6416739598048",
+      "coverImageUrl": "/covers/mini-molkky.db8d1e4371.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "mini molkky",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "b9c9a3bc-3515-49d8-b493-feb65f60fa86",
+      "title": "Monopoly Psy",
+      "slug": "monopoly-psy",
+      "ean": "5036905060400",
+      "coverImageUrl": "/covers/monopoly-dog-artist.29e71d1841.jpg",
+      "coverImageSource": "rebel",
+      "coverSlug": "monopoly dog artist",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "f287e227-b777-4c87-a7f2-7392e8ed87f9",
+      "title": "Munchkin Cthulu",
+      "slug": "munchkin-cthulu",
+      "ean": "5901549119053",
+      "coverImageUrl": "/covers/munchkin-cthulhu.f8cfe05adb.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "munchkin cthulhu",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "3fbdff78-0d06-4b13-83e2-557712a06127",
+      "title": "Nowa Gniwea",
+      "slug": "nowa-gniwea",
+      "ean": "5903707560202",
+      "coverImageUrl": "/covers/nowa-gwinea.1138c15277.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "nowa gwinea",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "6797e356-f610-4f9f-99b3-1b5d813a25b1",
+      "title": "Ostatnia pr├│ba - gra kryminalna",
+      "slug": "ostatnia-proba-gra-kryminalna",
+      "ean": "4329080392390",
+      "coverImageUrl": "/covers/detektyw-kryminalna-gra-planszowa.514ce3e3ac.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "detektyw kryminalna gra planszowa",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "126fc80f-3b97-423a-b0f9-8790e7a459b4",
+      "title": "Pacjent Zero",
+      "slug": "pacjent-zero",
+      "ean": "5902719479335",
+      "coverImageUrl": "/covers/save-patient-zero.3915835ca3.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "save patient zero",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "66be0979-9ff7-4200-a5d5-46324392cf4e",
+      "title": "Pojedynek superbochater├│w",
+      "slug": "pojedynek-superbochaterow",
+      "ean": "5908215010560",
+      "coverImageUrl": "/covers/dc-pojedynek-superbohaterow-deck-building-game.d9a76fab13.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "dc pojedynek superbohaterow deck building game",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "b1e448ee-9d60-4429-b86e-9e93e76d66cd",
+      "title": "Puzzle owady",
+      "slug": "puzzle-owady",
+      "ean": "5902983493631",
+      "coverImageUrl": "/covers/game-meets-puzzle-ocean-twist.0c1c65824a.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "game meets puzzle ocean twist",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "18fcd987-b662-48b7-bdff-7f93698ac594",
+      "title": "Sweet Dreams",
+      "slug": "sweet-dreams",
+      "ean": "8033324541401",
+      "coverImageUrl": "/covers/of-dreams-shadows.6e227f2c87.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "of dreams shadows",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "a73ee12a-1de3-4b84-90de-f49bd8459657",
+      "title": "Szalone zagarki",
+      "slug": "szalone-zagarki",
+      "ean": "8903284902881",
+      "coverImageUrl": "/covers/szalone-zegarki.76c80f2515.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "szalone zegarki",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "df638a58-b5ad-4500-95de-8f98cec1d4a6",
+      "title": "Szczury z Wistar",
+      "slug": "szczury-z-wistar",
+      "ean": "5902560389135",
+      "coverImageUrl": "/covers/rats-of-wistar.d9f4d92ba5.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "rats of wistar",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "f47dc9da-4ff9-4138-b72f-c430924e56d2",
+      "title": "Tajemnica 5 minut",
+      "slug": "tajemnica-5-minut",
+      "ean": "3558380110675",
+      "coverImageUrl": "/covers/5-minute-mystery.e49c12e55c.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "5 minute mystery",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "a1d2fcf4-94eb-4524-b6a4-d058a7a62407",
+      "title": "Wielki Biznes",
+      "slug": "wielki-biznes",
+      "ean": "5900360006061",
+      "coverImageUrl": "/covers/kot-simona-wielki-balagan.7a94951147.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "kot simona wielki balagan",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "9d7bd3ca-1f13-4409-a8aa-42948372029d",
+      "title": "Zabawy na start",
+      "slug": "zabawy-na-start",
+      "ean": "9788365773951",
+      "coverImageUrl": "/covers/kapibary-na-start.e472eab7ec.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "kapibary na start",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "c1377d43-b004-4cf0-8649-e2968f48bf7c",
+      "title": "Zagadki z dziurk─ů",
+      "slug": "zagadki-z-dziurka",
+      "ean": "9788365773302",
+      "coverImageUrl": "/covers/ojciec-mateusz-tajemnicze-zagadki-sandomierza.415bd1e335.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "ojciec mateusz tajemnicze zagadki sandomierza",
+      "matchScore": 38,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "8591932d-ddb5-4b27-8f33-0b4febd09beb",
+      "title": "Puzzle auta dla najm┼éodszych",
+      "slug": "puzzle-auta-dla-najmlodszych",
+      "ean": "5902983493778",
+      "coverImageUrl": "/covers/brainbox-matematyka-dla-najmlodszych.cb43d700b3.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "brainbox matematyka dla najmlodszych",
+      "matchScore": 45,
+      "issues": [
+        "low_title_match",
+        "strict_mismatch"
+      ],
+      "severity": 9
+    },
+    {
+      "id": "feb04815-8bc6-4448-8319-068231ff0916",
+      "title": "Alicja w Kainie Czar├│w",
+      "slug": "alicja-w-kainie-czarow",
+      "ean": "5900221004571",
+      "coverImageUrl": "/covers/alicja-w-krainie-czarow.f93d69b8b2.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "alicja w krainie czarow",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "d1db33b0-e012-43dd-83dc-df61ff2be09e",
+      "title": "Azul (edycja polska)",
+      "slug": "azul-edycja-polska",
+      "ean": "5908445421662",
+      "coverImageUrl": "/covers/wieza-3w1-edycja-polska.0967973da6.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "wieza 3w1 edycja polska",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "2e509524-561b-4c23-9f6a-db581193b2b1",
+      "title": "Block building game",
+      "slug": "block-building-game",
+      "ean": "5906212016400",
+      "coverImageUrl": "/covers/dc-comics-deck-building-game-black-lightning.4f98516492.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "dc comics deck building game black lightning",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "f8a09423-e0db-4414-9c9d-04afa340181a",
+      "title": "Coatl (edycja polska)",
+      "slug": "coatl-edycja-polska",
+      "ean": "5902560383577",
+      "coverImageUrl": "/covers/checkpoint-charlie-edycja-polska.ff7d747de9.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "checkpoint charlie edycja polska",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "a145b6b9-6bea-43e2-8402-1b0ed7b065fa",
+      "title": "Gra karciana SET",
+      "slug": "gra-karciana-set",
+      "ean": "5902020445791",
+      "coverImageUrl": "/covers/star-wars-gra-karciana.ff59ffd523.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "star wars gra karciana",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "3435019c-bcb9-4073-b07d-fc89c03d0858",
+      "title": "Harry Potter puzzle 2",
+      "slug": "harry-potter-puzzle-2",
+      "ean": "5036905039567",
+      "coverImageUrl": "/covers/trivial-pursuit-harry-potter-2-edycja-polska.8d7968c7ce.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "trivial pursuit harry potter 2 edycja polska",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "0e8e2bb5-120d-4cf4-b4c7-b94b8070279f",
+      "title": "Martinans a story of civilization",
+      "slug": "martinans-a-story-of-civilization",
+      "ean": "5904730312059",
+      "coverImageUrl": "/covers/martians-a-story-of-civilization.daee8c0380.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "martians a story of civilization",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "222ac632-9c80-4b47-88fc-38ebbf5b44bf",
+      "title": "Memory Zwierzeta ┼Ťwiata",
+      "slug": "memory-zwierzeta-swiata",
+      "ean": "6416739564234",
+      "coverImageUrl": "/covers/quizy-swiata-zwierzeta-swiata.4e7db1fdba.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "quizy swiata zwierzeta swiata",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "6b513c4a-7d98-49ed-a2af-be2cbcacdfab",
+      "title": "Monopoly edycja kott",
+      "slug": "monopoly-edycja-kott",
+      "ean": "5036905060608",
+      "coverImageUrl": "/covers/monopoly-edycja-katowice.da66959233.jpg",
+      "coverImageSource": "rebel",
+      "coverSlug": "monopoly edycja katowice",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "a01122fd-def5-4d65-8833-06e1ab85a0e5",
+      "title": "Odkrywca nocnego nieba",
+      "slug": "odkrywca-nocnego-nieba",
+      "ean": "5904305400747",
+      "coverImageUrl": "/covers/odkrywcy-nocnego-nieba.5e857c6741.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "odkrywcy nocnego nieba",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "36baa2f8-8945-47b6-97c9-16f884b5a174",
+      "title": "Odkrywcy mapa ┼Ťwiata",
+      "slug": "odkrywcy-mapa-swiata",
+      "ean": "5902983493693",
+      "coverImageUrl": "/covers/warhammer-fantasy-roleplay-4-edycja-mapy-starego-swiata-mapa-wspanialego-reiklandu.515d67bfe8.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "warhammer fantasy roleplay 4 edycja mapy starego swiata mapa wspanialego reiklandu",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "5952c4ed-bc1c-4528-bbc5-fe725c77f89e",
+      "title": "Rycerstwo/Piracki skarb",
+      "slug": "rycerstwopiracki-skarb",
+      "ean": "5900511002676",
+      "coverImageUrl": "/covers/pirackie-skarby.161da4dd6a.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "pirackie skarby",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "374d63f3-5154-48ec-b353-98f3a5f5d77e",
+      "title": "Stick drawing game",
+      "slug": "stick-drawing-game",
+      "ean": "4456041079004",
+      "coverImageUrl": "/covers/the-pipnetic-book-of-cut-and-play-party-games-drawing-edition.d11df9cdda.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "the pipnetic book of cut and play party games drawing edition",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "b4cd6a97-d075-4045-a94e-c8f95e792b6a",
+      "title": "Szachy: Star Wars",
+      "slug": "szachy-star-wars",
+      "ean": "8423599053431",
+      "coverImageUrl": "/covers/star-wars-imperium-atakuje-jezdziec-banthy.6d3e7128d1.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "star wars imperium atakuje jezdziec banthy",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "d6203685-0625-4cb3-b457-aa8280eb758a",
+      "title": "Tafl King (Tactic",
+      "slug": "tafl-king-tactic",
+      "ean": "6416739589848",
+      "coverImageUrl": "/covers/vikings-tales-tafl-king.26b17770c4.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "vikings tales tafl king",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "0bb581ab-ece1-442d-b288-fa617b43d61c",
+      "title": "Time Bomr Evolution",
+      "slug": "time-bomr-evolution",
+      "ean": "3760175516696",
+      "coverImageUrl": "/covers/time-bomb-evolution.b476aab028.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "time bomb evolution",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "5f0a978d-3988-43a2-89ef-2097448e23a9",
+      "title": "Uczymy si─Ö - PRZYRODA",
+      "slug": "uczymy-sie-przyroda",
+      "ean": "6416739582252",
+      "coverImageUrl": "/covers/uczmy-sie-przyroda.fa17f44594.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "uczmy sie przyroda",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "6449453a-499f-4a9d-b226-fd763bf7f490",
+      "title": "Verify Race Game",
+      "slug": "verify-race-game",
+      "ean": null,
+      "coverImageUrl": "/covers/indiana-jones-akator-temple-race-game.f6adb5265c.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "indiana jones akator temple race game",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "55c6623d-6082-4ccd-bd04-61fe35262bbe",
+      "title": "Vudulhu - Edycja polska",
+      "slug": "vudulhu-edycja-polska",
+      "ean": "5901549119947",
+      "coverImageUrl": "/covers/dog-pile-edycja-polska.db94ade0d0.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "dog pile edycja polska",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "d1f13223-6171-4f61-b980-b50f313a525e",
+      "title": "Worms: Gra planszowa",
+      "slug": "worms-gra-planszowa",
+      "ean": "5906954790736",
+      "coverImageUrl": "/covers/wolfenstein-gra-planszowa.d12980dca4.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "wolfenstein gra planszowa",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "ec1fd4be-2e3b-43ea-a00f-20e305e08443",
+      "title": "Zwierz─Öta z Baker Street",
+      "slug": "zwierzeta-z-baker-street",
+      "ean": "5904305400402",
+      "coverImageUrl": "/covers/the-animals-of-baker-street.9aac48a3d4.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "the animals of baker street",
+      "matchScore": 50,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "d043dafc-4d48-4752-9238-b0de17832ca4",
+      "title": "Battle Man Harry Potter",
+      "slug": "battle-man-harry-potter",
+      "ean": "5036905040952",
+      "coverImageUrl": "/covers/top-trumps-harry-potter-battle-mat.b976e2cd63.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "top trumps harry potter battle mat",
+      "matchScore": 56,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "604e96f7-2ec6-4f07-8681-13a2d852fb91",
+      "title": "Jakub W─Ödrowicz - Upiorne wczasy",
+      "slug": "jakub-wedrowicz-upiorne-wczasy",
+      "ean": "5905794220137",
+      "coverImageUrl": "/covers/jakub-wedrowycz-upiorne-wczasy.376231643e.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "jakub wedrowycz upiorne wczasy",
+      "matchScore": 56,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "8d016b3f-dec2-4249-8842-a6907419d1df",
+      "title": "Master Chef: Uczta Vege",
+      "slug": "master-chef-uczta-vege",
+      "ean": "6416739582399",
+      "coverImageUrl": "/covers/masterchef-uczta-wege.d93dcad837.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "masterchef uczta wege",
+      "matchScore": 56,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "8e4ebec0-cb57-4fcd-91d5-f3fc68367d0e",
+      "title": "Talisman Disney i Kingdom Hearts",
+      "slug": "talisman-disney-i-kingdom-hearts",
+      "ean": "5902259206682",
+      "coverImageUrl": "/covers/talisman-kingdom-hearts-48705acd-7955-4870-a07d-e00c838c6307.79e3aba3d2.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "talisman kingdom hearts 48705acd 7955 4870 a07d e00c838c6307",
+      "matchScore": 56,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "0e5b696b-469c-4cb1-a9e8-1bd2e653ac57",
+      "title": "7 Cud├│w ┼Üwiata (nowa edycja)",
+      "slug": "7-cudow-swiata-nowa-edycja",
+      "ean": "5902650615052",
+      "coverImageUrl": "/covers/7-cudow-swiata.5019dd2cde.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "7 cudow swiata",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "68fad1ed-c04c-48ea-99c6-17a3f5d6ddfd",
+      "title": "Activity Orginal",
+      "slug": "activity-orginal",
+      "ean": "9001890784026",
+      "coverImageUrl": "/covers/activity.a427734253.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "activity",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "23b476f9-ff95-41e0-b783-adfb8f35317c",
+      "title": "Czarna Bandera- Droga do nies┼éawy",
+      "slug": "czarna-bandera-droga-do-nieslawy",
+      "ean": "5907377129288",
+      "coverImageUrl": "/covers/czarna-bandera.d42a676059.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "czarna bandera",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "e110c8d8-9a2d-4b7a-a98a-abfc032cb426",
+      "title": "CzuCzuDomino Dinozaury",
+      "slug": "czuczudomino-dinozaury",
+      "ean": "5902983491620",
+      "coverImageUrl": "/covers/dinozaury.55d606f8fe.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "dinozaury",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "bf2d0b52-0b24-4dba-9c7d-9dc11bc76332",
+      "title": "Darkest Dungeon + Skarbies",
+      "slug": "darkest-dungeon-skarbies",
+      "ean": "5904305400525",
+      "coverImageUrl": "/covers/darkest-dungeon.00e2eec612.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "darkest dungeon",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "08cae638-290a-43ba-aebf-8c1c11a9816c",
+      "title": "Darkest Dungeon: Muszkieterka",
+      "slug": "darkest-dungeon-muszkieterka",
+      "ean": "5904305400891",
+      "coverImageUrl": "/covers/darkest-dungeon.00e2eec612.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "darkest dungeon",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "b1d382ab-3542-4211-8bdc-0743cc5648cb",
+      "title": "Darkest Dungeon: Podstawa",
+      "slug": "darkest-dungeon-podstawa",
+      "ean": "5904305400501",
+      "coverImageUrl": "/covers/darkest-dungeon.00e2eec612.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "darkest dungeon",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "dc85226d-0205-44b5-b46d-280d37312549",
+      "title": "Gon za przygod─ů - bursztynowa komnata",
+      "slug": "gon-za-przygoda-bursztynowa-komnata",
+      "ean": "5906018022704",
+      "coverImageUrl": "/covers/bursztynowa-komnata.60490b2c08.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "bursztynowa komnata",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "78985554-c0e3-4428-b290-fc09d3fc1f09",
+      "title": "Gra o m├│zg - odm├│┼╝d┼╝ajaca imprez├│wka",
+      "slug": "gra-o-mozg-odmozdzajaca-imprezowka",
+      "ean": "5904262956936",
+      "coverImageUrl": "/covers/gra-o-mozg.51ac6a6719.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "gra o mozg",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "e6c928a4-9baa-4e23-ac6d-9938389732fd",
+      "title": "Gra rodzinna Kapibary",
+      "slug": "gra-rodzinna-kapibary",
+      "ean": "5900511027372",
+      "coverImageUrl": "/covers/kapibary.3ad6c22342.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "kapibary",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "ebd3e88a-2406-430a-8282-cd29ce9a49ac",
+      "title": "Kurzy Wy┼Ťcig",
+      "slug": "kurzy-wyscig",
+      "ean": "6416739533995",
+      "coverImageUrl": "/covers/wyscig.912ffc3699.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "wyscig",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "d9775240-14f9-4b74-84fe-0bc45c5d43b7",
+      "title": "Labirynt Z┼éoczy┼äcy",
+      "slug": "labirynt-zloczyncy",
+      "ean": "4005556273560",
+      "coverImageUrl": "/covers/labirynt.58096e229a.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "labirynt",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "80617dd8-dd0e-48ce-893b-627b0c7cf442",
+      "title": "Labirynth",
+      "slug": "labirynth",
+      "ean": "4005556270781",
+      "coverImageUrl": "/covers/labirynt.58096e229a.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "labirynt",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "930ed455-0231-4ee3-a256-00d32d4bcbe0",
+      "title": "Metro Domino",
+      "slug": "metro-domino",
+      "ean": "6416739589305",
+      "coverImageUrl": "/covers/metro.608b660bde.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "metro",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "3531bf86-cfbf-4f68-aed1-06225e30b42c",
+      "title": "Monopoly Polska jest Pi─Ökna",
+      "slug": "monopoly-polska-jest-piekna",
+      "ean": "5036905058995",
+      "coverImageUrl": "/covers/monopoly-polska.dde7ee1545.jpg",
+      "coverImageSource": "rebel",
+      "coverSlug": "monopoly polska",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "e2f88df4-5566-40e6-8534-5b92c12ad64b",
+      "title": "NieParki",
+      "slug": "nieparki",
+      "ean": "3218921892193",
+      "coverImageUrl": "/covers/parki.6a50395177.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "parki",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "78dcd983-1360-4380-8cbc-a659d7dbc307",
+      "title": "Podw├│jni agenci",
+      "slug": "podwojni-agenci",
+      "ean": "5902560389739",
+      "coverImageUrl": "/covers/agenci.6c139a1417.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "agenci",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "37e34d46-bf1f-4585-851e-814cc9519c7f",
+      "title": "Puzzle motyle",
+      "slug": "puzzle-motyle",
+      "ean": "5902983493648",
+      "coverImageUrl": "/covers/motyle.0c06343d46.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "motyle",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "92b5d78d-d524-4631-abbf-e03668ce04fb",
+      "title": "Skato",
+      "slug": "skato",
+      "ean": "6901440118345",
+      "coverImageUrl": "/covers/skat.1d3907719b.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "skat",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "266e4b50-c620-4be4-b4c1-1f8e0bbe2a39",
+      "title": "Star Realms: Akademia",
+      "slug": "star-realms-akademia",
+      "ean": "5906700248115",
+      "coverImageUrl": "/covers/star-realms.1a28470053.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "star realms",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "476d8723-ffb0-4be4-9151-260ee8538cbb",
+      "title": "Super QUIZ: Kosmos",
+      "slug": "super-quiz-kosmos",
+      "ean": "9788366053120",
+      "coverImageUrl": "/covers/quiz-kosmos.22602eae4b.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "quiz kosmos",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "7dc97714-1bf4-4bc3-804c-ed187d66a070",
+      "title": "Tactic Loopin' Louie",
+      "slug": "tactic-loopin-louie",
+      "ean": "6416739409573",
+      "coverImageUrl": "/covers/loopin-louie.892ac280a4.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "loopin louie",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "362cbe70-0d04-4e90-878b-af251e195e8e",
+      "title": "Warhammer Age of Sigmar Starter",
+      "slug": "warhammer-age-of-sigmar-starter",
+      "ean": null,
+      "coverImageUrl": "/covers/warhammer-age-of-sigmar.059bb24903.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "warhammer age of sigmar",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "7124f6fd-678f-4543-a3ff-0e1ac5d1b7b4",
+      "title": "Wednesday Nevermore",
+      "slug": "wednesday-nevermore",
+      "ean": "5904305400877",
+      "coverImageUrl": "/covers/nevermore.ddf82a0c65.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "nevermore",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "5ed862df-e41b-4b39-9014-5261db9b31a0",
+      "title": "Wojownicy Podziemi - Zamek zajad┼éej zimy",
+      "slug": "wojownicy-podziemi-zamek-zajadlej-zimy",
+      "ean": "5904305400204",
+      "coverImageUrl": "/covers/wojownicy-podziemi.9e60a8c830.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "wojownicy podziemi",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "35ccc826-4250-436c-acca-857729328599",
+      "title": "Wyspa przygd",
+      "slug": "wyspa-przygd",
+      "ean": "5902560383164",
+      "coverImageUrl": "/covers/wyspa.dc71ad0c29.jpg",
+      "coverImageSource": "planszeo",
+      "coverSlug": "wyspa",
+      "matchScore": 90,
+      "issues": [
+        "strict_mismatch"
+      ],
+      "severity": 4
+    },
+    {
+      "id": "4418d5bb-b2a3-4edc-9e96-1300a3e1c7a0",
+      "title": "Circadians: Nowy ┼Üwit - Specjali┼Ťci",
+      "slug": "circadians-nowy-swit-specjalisci",
+      "ean": "5902560387629",
+      "coverImageUrl": null,
+      "coverImageSource": "hurt",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "0d870d3f-7ed8-4de8-b7c3-13ceb783b159",
+      "title": "Circadians: ┼üad Chaosu",
+      "slug": "circadians-lad-chaosu",
+      "ean": "5902560384857",
+      "coverImageUrl": null,
+      "coverImageSource": "hurt",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "ce67b3b0-5530-4f77-9f9d-2a2a8cd5a255",
+      "title": "Circadians: ┼üad Chaosu - Heroldowie",
+      "slug": "circadians-lad-chaosu-heroldowie",
+      "ean": "5902560388121",
+      "coverImageUrl": null,
+      "coverImageSource": "hurt",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "e4657c84-9619-48b3-9a5e-79801b1d57d2",
+      "title": "Dead by Daylight",
+      "slug": "dead-by-daylight",
+      "ean": "5902560387278",
+      "coverImageUrl": null,
+      "coverImageSource": "hurt",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "8e260fea-f283-4415-ab32-6d9e3484e3c5",
+      "title": "Eleven: Edycja Polska",
+      "slug": "eleven-edycja-polska",
+      "ean": "5902560386981",
+      "coverImageUrl": null,
+      "coverImageSource": "planszeo",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "21ab00ed-0668-45fe-a544-76a04b1a891a",
+      "title": "Monolith Arena",
+      "slug": "monolith-arena",
+      "ean": "5902560381580",
+      "coverImageUrl": null,
+      "coverImageSource": "planszeo",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "058f3c6a-ab2a-49b8-9737-1a7841de9bab",
+      "title": "Niezbadana Planeta",
+      "slug": "niezbadana-planeta",
+      "ean": "5902560387322",
+      "coverImageUrl": null,
+      "coverImageSource": "rebel",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "5c3ee48e-5b8d-4d25-91ca-67d9b0749bdf",
+      "title": "Niezbadana Planeta: Superksi─Ö┼╝yc",
+      "slug": "niezbadana-planeta-superksiezyc",
+      "ean": "5905794220151",
+      "coverImageUrl": null,
+      "coverImageSource": "planszeo",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "1f661c2c-87d1-4b7a-86be-c72c7dbb0d1f",
+      "title": "Niezbadana planeta: Zestaw ulepsze┼ä",
+      "slug": "niezbadana-planeta-zestaw-ulepszen",
+      "ean": "5902560387599",
+      "coverImageUrl": null,
+      "coverImageSource": "hurt",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "042724c3-ef45-4ddf-8654-e60bf11ab6bf",
+      "title": "Nowy ┼Ťwit",
+      "slug": "nowy-swit",
+      "ean": "5905965251502",
+      "coverImageUrl": null,
+      "coverImageSource": "hurt",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "7135a7a4-b35e-498b-b509-7ff09fe69ec0",
+      "title": "Potwory w Tokio",
+      "slug": "potwory-w-tokio",
+      "ean": "5902560384079",
+      "coverImageUrl": null,
+      "coverImageSource": "hurt",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "7bb84e44-be55-4417-b150-cc0a3dece4ea",
+      "title": "Potwory w Tokio: Halloween",
+      "slug": "potwory-w-tokio-halloween",
+      "ean": "5902560384529",
+      "coverImageUrl": null,
+      "coverImageSource": "planszeo",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "98ec64e6-42e7-4ab0-b2bd-2490756b5a26",
+      "title": "Prosz─Ö wsiada─ç! Nowy Jork i Londyn",
+      "slug": "prosze-wsiadac-nowy-jork-i-londyn",
+      "ean": "3760175518263",
+      "coverImageUrl": null,
+      "coverImageSource": "planszeo",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "fe588602-e0a1-41f4-a996-e2c776bdee50",
+      "title": "Resurgence (edycja polska)",
+      "slug": "resurgence-edycja-polska",
+      "ean": "5902560387681",
+      "coverImageUrl": null,
+      "coverImageSource": "hurt",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    },
+    {
+      "id": "f9b1055d-c0df-4578-bfe1-fb52fc6da05f",
+      "title": "Wyprawa Darwina",
+      "slug": "wyprawa-darwina",
+      "ean": "5902560384338",
+      "coverImageUrl": null,
+      "coverImageSource": "hurt",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1
+    }
+  ]
+}

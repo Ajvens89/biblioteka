@@ -22,10 +22,14 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  # Placeholder na build; produkcyjny sekret → Secret Manager (scripts/set-firebase-auth-secret.ps1)
   - variable: AUTH_SECRET
-    value: bibl-prod-auth-secret-change-me-32chars-min!!
+    value: build-time-auth-secret-placeholder-32chars!!
     availability:
       - BUILD
+  - variable: AUTH_SECRET
+    secret: AUTH_SECRET
+    availability:
       - RUNTIME
   - variable: APP_URL
     value: https://bookshelf--bibl-2c364.europe-west4.hosted.app

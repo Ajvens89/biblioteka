@@ -1,0 +1,517 @@
+﻿{
+  "total": 474,
+  "missing": 34,
+  "suspicious": 0,
+  "rows": [
+    {
+      "id": "c655b880-3902-4f6f-971b-e5953fe94476",
+      "title": "Alias Przejdzie CI przez gard┼éo?",
+      "slug": "alias-przejdzie-ci-przez-gardlo",
+      "ean": "6416739594620",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "f507b712-4e22-4885-bf36-ed148ee7a6d6",
+      "title": "Amanda Black",
+      "slug": "amanda-black",
+      "ean": "9788396341679",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "c2895073-51d3-41f7-9d96-c1baff057447",
+      "title": "BoomBoom Baloon",
+      "slug": "boomboom-baloon",
+      "ean": "5666816442127",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "1c22b58e-a437-4e22-9389-2d06fc4c6b0a",
+      "title": "CzuCzu Puzzle kontrastowe",
+      "slug": "czuczu-puzzle-kontrastowe",
+      "ean": "5902983491996",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "d919b50b-1e2d-4abb-a64c-1fea17dab496",
+      "title": "CzuCzu Puzzle kontrastowe tu pasuje",
+      "slug": "czuczu-puzzle-kontrastowe-tu-pasuje",
+      "ean": "5902983492009",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "f7eeb847-01b0-4ce4-b530-ceabdfce25b6",
+      "title": "Czuczu Moje puzzle",
+      "slug": "czuczu-moje-puzzle",
+      "ean": "5902983493761",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "e7779768-f233-4f56-920b-56aa0bd608b0",
+      "title": "Czuczulotto zakupy",
+      "slug": "czuczulotto-zakupy",
+      "ean": "5902983492207",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "97294fd9-6192-4dbc-9df5-a21becf1efd5",
+      "title": "Elefun Skill Gamepad",
+      "slug": "elefun-skill-gamepad",
+      "ean": "5609288361183",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "8e260fea-f283-4415-ab32-6d9e3484e3c5",
+      "title": "Eleven: Edycja Polska",
+      "slug": "eleven-edycja-polska",
+      "ean": "5902560386981",
+      "coverImageUrl": null,
+      "coverImageSource": "planszeo",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "ebb8b751-9ad9-431f-a60c-2b47263a0c95",
+      "title": "GRAVITRAX ZESTAW STARTOW",
+      "slug": "gravitrax-zestaw-startow",
+      "ean": "4005556268122",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "7932ba96-3cb5-4ed5-9c7c-f885f759cb7b",
+      "title": "Harry Potter puzzle",
+      "slug": "harry-potter-puzzle",
+      "ean": "5036905042086",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "f2c29a3e-bc2b-451b-b419-e5af649569e5",
+      "title": "Kubu┼Ť puchatek drewniane klocki",
+      "slug": "kubus-puchatek-drewniane-klocki",
+      "ean": "8005125411658",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "67b7d95d-bb52-4774-8deb-7435fdd39b72",
+      "title": "Mini puzzle nied┼║wiedki",
+      "slug": "mini-puzzle-niedzwiedki",
+      "ean": "5902768336429",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "766f2d3b-5e1d-467f-9ce9-323449ecdb2a",
+      "title": "MobTown",
+      "slug": "mobtown",
+      "ean": "5904262950187",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "5c3ee48e-5b8d-4d25-91ca-67d9b0749bdf",
+      "title": "Niezbadana Planeta: Superksi─Ö┼╝yc",
+      "slug": "niezbadana-planeta-superksiezyc",
+      "ean": "5905794220151",
+      "coverImageUrl": null,
+      "coverImageSource": "planszeo",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "fcec3c99-5d62-47dd-a664-718a78a8aeae",
+      "title": "Pierwsze puzzle pojazdy",
+      "slug": "pierwsze-puzzle-pojazdy",
+      "ean": "5902983493617",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "1d84e4e4-f951-4276-b303-48116f6b7ea5",
+      "title": "Polskie g├│ry puzzle",
+      "slug": "polskie-gory-puzzle",
+      "ean": "5902983493839",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "402d0ec3-0286-465c-b79d-98441313bf3f",
+      "title": "Poznaje cyfry zabawa kreatywna",
+      "slug": "poznaje-cyfry-zabawa-kreatywna",
+      "ean": "9788365773531",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "98ec64e6-42e7-4ab0-b2bd-2490756b5a26",
+      "title": "Prosz─Ö wsiada─ç! Nowy Jork i Londyn",
+      "slug": "prosze-wsiadac-nowy-jork-i-londyn",
+      "ean": "3760175518263",
+      "coverImageUrl": null,
+      "coverImageSource": "planszeo",
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "cfdda0e9-18f5-4c1d-be23-b876f0aff97e",
+      "title": "Puzzle logiczne",
+      "slug": "puzzle-logiczne",
+      "ean": "9788366762374",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "7f7a883a-aeb3-436c-aa12-9e7533925d71",
+      "title": "Puzzle myszka i przyjaciele",
+      "slug": "puzzle-myszka-i-przyjaciele",
+      "ean": "5902983493792",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "41648647-78db-48cd-882a-a103d9dd8b69",
+      "title": "Puzzle pojazdy ma┼ée i du┼╝e",
+      "slug": "puzzle-pojazdy-male-i-duze",
+      "ean": "5902983493785",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "7b25337a-82ec-4ef9-85b5-9a6c068174ca",
+      "title": "Puzzle progresywne pojazdy",
+      "slug": "puzzle-progresywne-pojazdy",
+      "ean": "5902983491842",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "3225b2ad-6b9c-4993-8f6a-ad1cbe66e0e8",
+      "title": "Puzzle progresywne zwierz─Öta le┼Ťne",
+      "slug": "puzzle-progresywne-zwierzeta-lesne",
+      "ean": "5902983491835",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "b49fa0a7-c225-4837-8140-50907ca256f7",
+      "title": "Puzzle ptaki polski",
+      "slug": "puzzle-ptaki-polski",
+      "ean": "5902983493204",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "e644c2ab-5e9c-43d1-87be-7cd7348f745d",
+      "title": "Puzzle tak dzia┼éa stra┼╝ po┼╝arna",
+      "slug": "puzzle-tak-dziala-straz-pozarna",
+      "ean": "5902983493808",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "0bc190a7-dff8-44a4-a0b7-c156d2e55e3b",
+      "title": "Puzzle uk┼éad s┼éoneczny",
+      "slug": "puzzle-uklad-sloneczny",
+      "ean": "5902983493846",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "9c78bff2-945e-42cb-9651-1c3a5721ed53",
+      "title": "Puzzle z dziurk─ů maluchy",
+      "slug": "puzzle-z-dziurka-maluchy",
+      "ean": "5902983490807",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "9a43f2b9-4e49-4f2a-a0ba-871f470e20a8",
+      "title": "Puzzle z dziurk─ů przyjaciele",
+      "slug": "puzzle-z-dziurka-przyjaciele",
+      "ean": "5902983490791",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "43b06ea8-b933-4518-afb4-3ac3f9ccc1d3",
+      "title": "Qudditch tryouts HarryPotter",
+      "slug": "qudditch-tryouts-harrypotter",
+      "ean": "5411068842733",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "d8eaf0c9-49f7-4496-bfe5-df7e6811581e",
+      "title": "TAOGEAM - Gry i zabawy edulkacyjne",
+      "slug": "taogeam-gry-i-zabawy-edulkacyjne",
+      "ean": "5906018013467",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "6968385d-99e1-4d18-98fb-86e4603f2ee9",
+      "title": "Tablica sizalowa bull's",
+      "slug": "tablica-sizalowa-bulls",
+      "ean": "8719075976371",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "9c112044-c1d4-4169-9a2f-13cd324254fd",
+      "title": "Trefl puzzle Frozen II",
+      "slug": "trefl-puzzle-frozen-ii",
+      "ean": "5900511182538",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    },
+    {
+      "id": "3ddb85e1-8970-4e0a-b2a9-ee63f99dc59b",
+      "title": "Zestaw do Bitwy na Wodzie",
+      "slug": "zestaw-do-bitwy-na-wodzie",
+      "ean": "5609288361190",
+      "coverImageUrl": null,
+      "coverImageSource": null,
+      "coverSlug": "",
+      "matchScore": 0,
+      "issues": [
+        "missing_cover"
+      ],
+      "severity": 1,
+      "needsFix": true
+    }
+  ]
+}

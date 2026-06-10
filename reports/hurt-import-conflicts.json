@@ -1,0 +1,32 @@
+[
+  {
+    "gameId": "1a2d3d71-3dcb-44c9-8518-f67115a841de",
+    "gameTitle": "Kamienna mandalia",
+    "gameEan": "5903766419466",
+    "hurtTitle": "Kamienna mandala",
+    "hurtEan": "5903766419466",
+    "hurtIdProduct": "2004520",
+    "titleScore": 38,
+    "reason": "EAN pasuje, ale tytuły są zbyt różne"
+  },
+  {
+    "gameId": "f287e227-b777-4c87-a7f2-7392e8ed87f9",
+    "gameTitle": "Munchkin Cthulu",
+    "gameEan": "5901549119053",
+    "hurtTitle": "Munchkin Cthulhu (edycja polska)",
+    "hurtEan": "5901549119053",
+    "hurtIdProduct": "21764",
+    "titleScore": 38,
+    "reason": "EAN pasuje, ale tytuły są zbyt różne"
+  },
+  {
+    "gameId": "ab72aa2b-501b-40a4-9a1a-3fe28045893d",
+    "gameTitle": "Świetloni detektywi",
+    "gameEan": "5904915905489",
+    "hurtTitle": "Świetlni detektywi",
+    "hurtEan": "5904915905489",
+    "hurtIdProduct": "2026906",
+    "titleScore": 38,
+    "reason": "EAN pasuje, ale tytuły są zbyt różne"
+  }
+]

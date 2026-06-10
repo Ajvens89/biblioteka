@@ -23,7 +23,8 @@ export function HomeHeroSearch({ variant = "panel" }: Props) {
     const params = new URLSearchParams();
     if (ean) params.set("ean", ean);
     else if (q.trim()) params.set("q", q.trim());
-    router.push(`/katalog?${params.toString()}`);
+    const qs = params.toString();
+    router.push(qs ? `/katalog?${qs}` : "/katalog");
   };
 
   return (

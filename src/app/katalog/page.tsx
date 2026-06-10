@@ -11,9 +11,10 @@ import { CatalogFilterChips } from "@/components/games/catalog-filter-chips";
 import { PageShell } from "@/components/ui/page-shell";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { DbUnavailableBanner } from "@/components/db-unavailable-banner";
 import { fetchGames } from "@/lib/games/queries";
 import { gameFilterSchema } from "@/lib/validations/game";
-import { prisma } from "@/lib/db";
+import { isDatabaseAvailable, prisma } from "@/lib/db";
 
 export const metadata = { title: "Katalog gier" };
 
@@ -40,13 +41,23 @@ export default async function CatalogPage({ searchParams }: PageProps) {
     page: params.page,
   });
 
-  const [result, categories, tags, publishers, designers] = await Promise.all([
-    fetchGames(filters),
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
-    prisma.tag.findMany({ orderBy: { name: "asc" }, take: 40 }),
-    prisma.publisher.findMany({ orderBy: { name: "asc" }, take: 50 }),
-    prisma.designer.findMany({ orderBy: { name: "asc" }, take: 50 }),
-  ]);
+  const dbOk = await isDatabaseAvailable();
+
+  const [result, categories, tags, publishers, designers] = dbOk
+    ? await Promise.all([
+        fetchGames(filters),
+        prisma.category.findMany({ orderBy: { name: "asc" } }),
+        prisma.tag.findMany({ orderBy: { name: "asc" }, take: 40 }),
+        prisma.publisher.findMany({ orderBy: { name: "asc" }, take: 50 }),
+        prisma.designer.findMany({ orderBy: { name: "asc" }, take: 50 }),
+      ])
+    : [
+        { items: [], total: 0 },
+        [],
+        [],
+        [],
+        [],
+      ];
 
   const totalPages = Math.ceil(result.total / filters.pageSize);
 
@@ -56,9 +67,17 @@ export default async function CatalogPage({ searchParams }: PageProps) {
         <p className="text-eyebrow">Katalog online</p>
         <h1 className="text-display">Katalog gier</h1>
         <p className="text-body max-w-xl text-muted-foreground">
-          {result.total} pozycji w bibliotece. Szukaj po tytule, autorze, wydawcy lub zeskanuj kod EAN.
+          {dbOk
+            ? `${result.total} pozycji w bibliotece. Szukaj po tytule, autorze, wydawcy lub zeskanuj kod EAN.`
+            : "Katalog jest chwilowo niedostępny — sprawdź ponownie za chwilę."}
         </p>
       </header>
+
+      {!dbOk && (
+        <div className="mb-8">
+          <DbUnavailableBanner />
+        </div>
+      )}
 
       <div className="lg:grid lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-8">
         <aside className="hidden lg:block">
@@ -115,7 +134,7 @@ export default async function CatalogPage({ searchParams }: PageProps) {
             </p>
           )}
 
-          {result.items.length === 0 ? (
+          {!dbOk ? null : result.items.length === 0 ? (
             <EmptyState
               testId="catalog-empty"
               title={filters.ean ? "Nie znaleziono gry o tym EAN" : "Nie znaleziono gry"}

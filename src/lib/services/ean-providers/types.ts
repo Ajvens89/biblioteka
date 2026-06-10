@@ -7,6 +7,8 @@ export type CoverSource =
   | "open_library"
   | "upcitemdb"
   | "planszeo"
+  | "rebel"
+  | "hurt"
   | "bgg"
   | "manual";
 
@@ -68,6 +70,8 @@ export const COVER_SOURCE_LABELS: Record<CoverSource, string> = {
   open_library: "Okładka pobrana z Open Library — sprawdź przed zapisem.",
   upcitemdb: "Okładka z katalogu produktów (UPCitemdb) — sprawdź przed zapisem.",
   planszeo: "Okładka pobrana z Planszeo i zapisana lokalnie na serwerze.",
+  rebel: "Okładka z licencjonowanego katalogu Rebel (images.csv) — zapisana na serwerze.",
+  hurt: "Dane i okładka z lokalnego katalogu hurt.csv.",
   bgg: "Propozycja z BoardGameGeek — wybierz poprawną okładkę.",
   manual:
     "Nie znaleziono okładki automatycznie. Możesz wkleić własny URL albo skorzystać z ręcznego wyszukiwania w Planszeo/BGG.",

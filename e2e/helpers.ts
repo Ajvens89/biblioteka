@@ -49,7 +49,7 @@ export async function openFirstAvailableGameFromCatalog(page: Page): Promise<str
   const card = page.locator('[data-testid="game-card"][data-available="true"]').first();
   await expect(card).toBeVisible({ timeout: 15_000 });
   const title = (await card.locator("h3").innerText()).trim();
-  await card.getByRole("link", { name: "Szczegóły" }).click();
+  await card.locator("h3 a").click();
   await page.waitForURL(/\/gry\//);
   return title;
 }
