@@ -112,6 +112,7 @@ async function fetchThing(id: string): Promise<CoverCandidate | null> {
     externalId: id,
     confidence: image ? "medium" : "low",
     collectionTypeSuggestion: "BOARD_GAME",
+    gameTypeSuggestion: "BOARD",
     notes: "Propozycja z BoardGameGeek — wybierz poprawną okładkę.",
   };
 }
@@ -166,6 +167,7 @@ export async function lookupBggProvider(titleHint: string): Promise<{
         sourceUrl: `https://boardgamegeek.com/boardgame/${hit.id}`,
         confidence: "low",
         collectionTypeSuggestion: "BOARD_GAME",
+    gameTypeSuggestion: "BOARD",
         notes: "Brak podglądu okładki — otwórz BGG.",
       });
     }

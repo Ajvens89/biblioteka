@@ -1,4 +1,4 @@
-import type { GameCollectionType } from "@prisma/client";
+import type { GameCollectionType, GameType } from "@prisma/client";
 
 export type CoverSource =
   | "local"
@@ -28,6 +28,13 @@ export type CoverCandidate = {
   confidence: CoverConfidence;
   notes?: string;
   collectionTypeSuggestion?: GameCollectionType;
+  gameTypeSuggestion?: GameType;
+  shortDescription?: string;
+  minPlayers?: number;
+  maxPlayers?: number;
+  minAge?: number;
+  minPlayTime?: number;
+  maxPlayTime?: number;
 };
 
 export type EanLookupStatus =

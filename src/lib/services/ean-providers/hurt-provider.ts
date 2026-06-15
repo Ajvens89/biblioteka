@@ -3,6 +3,7 @@ import {
   findHurtProductByTitle,
   mapHurtProductToGameData,
 } from "@/lib/hurt-catalog";
+import { inferGameType } from "@/lib/services/game-type-infer";
 import { validateCoverImageUrl } from "./image-utils";
 import type { CoverCandidate } from "./types";
 
@@ -30,12 +31,14 @@ export async function lookupHurtProvider(
 
   const mapped = mapHurtProductToGameData(product);
   const cover = validateCoverImageUrl(mapped.imageUrl ?? mapped.thumbnailUrl);
+  const categoryHint = `${product.category} ${product.label}`;
 
   return {
     candidate: {
       source: "hurt",
       title: mapped.title,
       description: mapped.description ?? mapped.shortDescription ?? undefined,
+      shortDescription: mapped.shortDescription ?? undefined,
       publisher: mapped.publisherName ?? undefined,
       year: mapped.yearPublished ?? undefined,
       coverImageUrl: cover ?? undefined,
@@ -43,6 +46,12 @@ export async function lookupHurtProvider(
       externalId: mapped.idProduct,
       confidence: "high",
       collectionTypeSuggestion: mapped.collectionType,
+      gameTypeSuggestion: inferGameType(mapped.collectionType, categoryHint),
+      minPlayers: mapped.minPlayers ?? undefined,
+      maxPlayers: mapped.maxPlayers ?? undefined,
+      minAge: mapped.minAge ?? undefined,
+      minPlayTime: mapped.minPlayTime ?? undefined,
+      maxPlayTime: mapped.maxPlayTime ?? undefined,
       notes: "Dane z lokalnego katalogu hurt.csv (bez cen i stanów magazynowych).",
     },
   };

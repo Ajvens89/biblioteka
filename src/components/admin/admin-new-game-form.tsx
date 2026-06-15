@@ -16,7 +16,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SectionCard } from "@/components/ui/section-card";
 import { GameCover } from "@/components/ui/game-cover";
-import { DIFFICULTY_LABELS, GAME_TYPE_LABELS } from "@/lib/constants";
+import { DIFFICULTY_LABELS, GAME_TYPE_LABELS, COLLECTION_TYPE_LABELS } from "@/lib/constants";
+import { applyLookupMetadata } from "@/components/admin/apply-lookup-metadata";
 
 type Props = {
   publishers: Publisher[];
@@ -38,27 +39,25 @@ const WIZARD_STEPS = [
   { id: 6, label: "Podsumowanie" },
 ] as const;
 
-function applyCandidateToForm(
-  c: CoverCandidate,
-  setters: {
-    setTitle: (v: string) => void;
-    setDescription: (v: string) => void;
-    setShortDescription: (v: string) => void;
-    setCoverImageUrl: (v: string) => void;
-    setYearPublished: (v: string) => void;
-    setCollectionType: (v: "BOARD_GAME" | "RPG") => void;
-    setCoverSource: (v: string) => void;
-    setCoverExternalId: (v: string) => void;
-  },
-) {
-  if (c.title) setters.setTitle(c.title);
-  if (c.description) setters.setDescription(c.description);
-  if (c.authors?.length) setters.setShortDescription(c.authors.join(", "));
-  if (c.coverImageUrl) setters.setCoverImageUrl(c.coverImageUrl);
-  if (c.year) setters.setYearPublished(String(c.year));
-  if (c.collectionTypeSuggestion) setters.setCollectionType(c.collectionTypeSuggestion);
-  setters.setCoverSource(c.source);
-  setters.setCoverExternalId(c.externalId ?? "");
+function normalizePublisherName(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function matchPublisherId(name: string | undefined, publishers: Publisher[]): string {
+  if (!name?.trim()) return "";
+  const norm = normalizePublisherName(name);
+  const exact = publishers.find((p) => normalizePublisherName(p.name) === norm);
+  if (exact) return exact.id;
+  const partial = publishers.find((p) => {
+    const pn = normalizePublisherName(p.name);
+    return pn.includes(norm) || norm.includes(pn);
+  });
+  return partial?.id ?? "";
 }
 
 export function AdminGameWizard({
@@ -78,6 +77,8 @@ export function AdminGameWizard({
   const [ean, setEan] = useState("");
   const [titleHint, setTitleHint] = useState("");
   const [collectionType, setCollectionType] = useState<"BOARD_GAME" | "RPG">("BOARD_GAME");
+  const [collectionTypeManual, setCollectionTypeManual] = useState(false);
+  const [metadataAutoFilled, setMetadataAutoFilled] = useState(false);
   const [lookupResult, setLookupResult] = useState<EanLookupResult | null>(null);
   const [titleToEanResult, setTitleToEanResult] = useState<TitleToEanResult | null>(null);
   const [existingGame, setExistingGame] = useState<{ id: string; title: string; slug: string } | null>(null);
@@ -137,6 +138,25 @@ export function AdminGameWizard({
     }
   };
 
+  const lookupSetters = {
+    onCollectionTypeChange,
+    setTitle,
+    setDescription,
+    setShortDescription,
+    setCoverImageUrl,
+    setYearPublished,
+    setCoverSource: setCoverImageSource,
+    setCoverExternalId: setCoverImageExternalId,
+    setGameType,
+    setMinPlayers,
+    setMaxPlayers,
+    setMinAge,
+    setMinPlayTime,
+    setMaxPlayTime,
+    setPublisherId,
+    matchPublisherId: (name?: string) => matchPublisherId(name, publishers),
+  };
+
   const handleLookupResult = (data: EanLookupResult) => {
     setLookupResult(data);
     setChecksumWarning(!data.checksumValid);
@@ -156,21 +176,14 @@ export function AdminGameWizard({
     }
 
     if (data.collectionTypeSuggestion) {
-      onCollectionTypeChange(data.collectionTypeSuggestion);
+      setMetadataAutoFilled(true);
     }
 
     if (data.selectedCandidate) {
       setSelectedCover(data.selectedCandidate);
-      applyCandidateToForm(data.selectedCandidate, {
-        setTitle,
-        setDescription,
-        setShortDescription,
-        setCoverImageUrl,
-        setYearPublished,
-        setCollectionType: onCollectionTypeChange,
-        setCoverSource: setCoverImageSource,
-        setCoverExternalId: setCoverImageExternalId,
-      });
+      applyLookupMetadata(data.selectedCandidate, lookupSetters);
+    } else if (data.collectionTypeSuggestion) {
+      onCollectionTypeChange(data.collectionTypeSuggestion);
     }
 
     toast.message(data.message);
@@ -182,7 +195,11 @@ export function AdminGameWizard({
       return;
     }
     start(async () => {
-      const result = await lookupEanAction(ean, titleHint, collectionType);
+      const result = await lookupEanAction(
+        ean,
+        titleHint,
+        collectionTypeManual ? collectionType : undefined,
+      );
       if (!result.success || !result.data) {
         toast.error(result.success ? "Brak danych." : result.error);
         return;
@@ -221,7 +238,11 @@ export function AdminGameWizard({
     setEan(candidate.ean);
     if (candidate.title && !title.trim()) setTitle(candidate.title);
     start(async () => {
-      const result = await lookupEanAction(candidate.ean, candidate.title ?? titleHint, collectionType);
+      const result = await lookupEanAction(
+        candidate.ean,
+        candidate.title ?? titleHint,
+        collectionTypeManual ? collectionType : undefined,
+      );
       if (!result.success || !result.data) {
         toast.error(result.success ? "Brak danych." : result.error);
         return;
@@ -234,17 +255,9 @@ export function AdminGameWizard({
 
   const onSelectCover = (c: CoverCandidate) => {
     setSelectedCover(c);
-    applyCandidateToForm(c, {
-      setTitle,
-      setDescription,
-      setShortDescription,
-      setCoverImageUrl,
-      setYearPublished,
-      setCollectionType,
-      setCoverSource: setCoverImageSource,
-      setCoverExternalId: setCoverImageExternalId,
-    });
-    toast.success("Wybrano okładkę — sprawdź podgląd przed zapisem.");
+    applyLookupMetadata(c, lookupSetters);
+    if (c.collectionTypeSuggestion) setMetadataAutoFilled(true);
+    toast.success("Wybrano okładkę — dane uzupełnione z katalogu.");
   };
 
   const submit = () => {
@@ -357,6 +370,13 @@ export function AdminGameWizard({
           setTitleHint={setTitleHint}
           collectionType={collectionType}
           setCollectionType={onCollectionTypeChange}
+          collectionTypeManual={collectionTypeManual}
+          onCollectionTypeManualChange={setCollectionTypeManual}
+          autoCollectionType={
+            metadataAutoFilled || lookupResult?.collectionTypeSuggestion
+              ? collectionType
+              : null
+          }
           lookupResult={lookupResult}
           existingGame={existingGame}
           selectedCover={selectedCover}
@@ -465,6 +485,13 @@ export function AdminGameWizard({
                 setTitleHint={setTitleHint}
                 collectionType={collectionType}
                 setCollectionType={onCollectionTypeChange}
+                collectionTypeManual={collectionTypeManual}
+                onCollectionTypeManualChange={setCollectionTypeManual}
+                autoCollectionType={
+                  metadataAutoFilled || lookupResult?.collectionTypeSuggestion
+                    ? collectionType
+                    : null
+                }
                 lookupResult={lookupResult}
                 existingGame={existingGame}
                 selectedCover={selectedCover}
@@ -497,6 +524,25 @@ export function AdminGameWizard({
 
         {step === 5 && (
         <>
+        {metadataAutoFilled && (
+          <p className="rounded-md bg-primary/10 px-4 py-3 text-sm text-primary">
+            Typ zbioru, rodzaj gry i parametry uzupełnione z katalogu — możesz je zmienić poniżej.
+          </p>
+        )}
+        {skipEanStep && (
+          <SectionCard title="Typ zbioru">
+            <select
+              id="manualCollectionType"
+              className="h-10 w-full max-w-md rounded-md border px-2"
+              value={collectionType}
+              onChange={(e) => onCollectionTypeChange(e.target.value as "BOARD_GAME" | "RPG")}
+            >
+              {Object.entries(COLLECTION_TYPE_LABELS).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+          </SectionCard>
+        )}
         <SectionCard title="Krok 5 — Parametry i typ">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -713,7 +759,8 @@ export function AdminGameWizard({
           <dl className="grid gap-2 text-sm sm:grid-cols-2">
             <div><dt className="text-muted-foreground">Tytuł</dt><dd className="font-medium">{title || "—"}</dd></div>
             <div><dt className="text-muted-foreground">EAN</dt><dd className="font-mono">{ean || "—"}</dd></div>
-            <div><dt className="text-muted-foreground">Typ zbioru</dt><dd>{collectionType}</dd></div>
+            <div><dt className="text-muted-foreground">Typ zbioru</dt><dd>{COLLECTION_TYPE_LABELS[collectionType]}</dd></div>
+            <div><dt className="text-muted-foreground">Rodzaj gry</dt><dd>{GAME_TYPE_LABELS[gameType]}</dd></div>
             <div><dt className="text-muted-foreground">Okładka</dt><dd>{coverImageUrl ? "Tak" : "Brak"}</dd></div>
             <div><dt className="text-muted-foreground">Egzemplarz</dt><dd>{addCopy ? copyInventory || "Tak (bez numeru)" : "Nie"}</dd></div>
           </dl>

@@ -35,6 +35,9 @@ type Props = {
   setTitleHint: (v: string) => void;
   collectionType: "BOARD_GAME" | "RPG";
   setCollectionType: (v: "BOARD_GAME" | "RPG") => void;
+  collectionTypeManual: boolean;
+  onCollectionTypeManualChange: (manual: boolean) => void;
+  autoCollectionType?: "BOARD_GAME" | "RPG" | null;
   lookupResult: EanLookupResult | null;
   existingGame: { id: string; title: string; slug: string } | null;
   selectedCover: CoverCandidate | null;
@@ -61,6 +64,9 @@ export function EanCoverLookupPanel({
   setTitleHint,
   collectionType,
   setCollectionType,
+  collectionTypeManual,
+  onCollectionTypeManualChange,
+  autoCollectionType,
   lookupResult,
   existingGame,
   selectedCover,
@@ -161,18 +167,48 @@ export function EanCoverLookupPanel({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="collectionType">Typ zbioru</Label>
-        <select
-          id="collectionType"
-          data-testid="collection-type-select"
-          className="h-10 w-full rounded-md border px-2"
-          value={collectionType}
-          onChange={(e) => setCollectionType(e.target.value as "BOARD_GAME" | "RPG")}
-        >
-          {Object.entries(COLLECTION_TYPE_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
-          ))}
-        </select>
+        <Label>Typ zbioru</Label>
+        {autoCollectionType && !collectionTypeManual ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
+              data-testid="collection-type-auto"
+            >
+              {COLLECTION_TYPE_LABELS[autoCollectionType]} — wykryto automatycznie
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={() => onCollectionTypeManualChange(true)}
+            >
+              Zmień typ
+            </Button>
+          </div>
+        ) : (
+          <>
+            <select
+              id="collectionType"
+              data-testid="collection-type-select"
+              className="h-10 w-full rounded-md border px-2"
+              value={collectionType}
+              onChange={(e) => {
+                setCollectionType(e.target.value as "BOARD_GAME" | "RPG");
+                onCollectionTypeManualChange(true);
+              }}
+            >
+              {Object.entries(COLLECTION_TYPE_LABELS).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+            {!collectionTypeManual && (
+              <p className="text-xs text-muted-foreground">
+                Zostaw domyślnie — typ ustalimy z kodu EAN i katalogu hurt.
+              </p>
+            )}
+          </>
+        )}
       </div>
 
       {(showTitleHint || lookupResult?.candidates.some((c) => c.source === "bgg")) && (

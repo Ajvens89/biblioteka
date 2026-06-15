@@ -59,6 +59,7 @@ export async function lookupGoogleBooksProvider(
         externalId: item?.id,
         confidence: cover ? "high" : "medium",
         collectionTypeSuggestion: "RPG",
+        gameTypeSuggestion: "RPG",
         notes: "Dane pobrane z Google Books — sprawdź przed zapisem.",
       },
     ];

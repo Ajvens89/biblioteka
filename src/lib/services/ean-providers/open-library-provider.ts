@@ -77,6 +77,7 @@ export async function lookupOpenLibraryProvider(
       externalId: normalizedIsbn,
       confidence: cover ? (options?.googleHadCover ? "medium" : "high") : "medium",
       collectionTypeSuggestion: "RPG",
+      gameTypeSuggestion: "RPG",
       notes: cover
         ? "Okładka pobrana z Open Library — sprawdź przed zapisem."
         : "Metadane z Open Library — uzupełnij okładkę ręcznie.",
