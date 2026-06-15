@@ -98,8 +98,44 @@ export function AdminGameWizard({
   const [copyLocation, setCopyLocation] = useState("");
   const [copyCondition, setCopyCondition] = useState<"NEW" | "GOOD" | "FAIR" | "POOR">("GOOD");
 
+  const [difficulty, setDifficulty] = useState<"EASY" | "MEDIUM" | "HARD" | "EXPERT">("MEDIUM");
+  const [gameType, setGameType] = useState<
+    "BOARD" | "CARD" | "RPG" | "WARGAME" | "EDUCATIONAL" | "PARTY" | "FAMILY"
+  >("BOARD");
+  const [minPlayers, setMinPlayers] = useState(2);
+  const [maxPlayers, setMaxPlayers] = useState(4);
+  const [minAge, setMinAge] = useState(10);
+  const [minPlayTime, setMinPlayTime] = useState(30);
+  const [maxPlayTime, setMaxPlayTime] = useState(60);
+  const [publisherId, setPublisherId] = useState("");
+  const [designerId, setDesignerId] = useState("");
+  const [instructionUrl, setInstructionUrl] = useState("");
+  const [isActive, setIsActive] = useState(true);
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+
   const isRpg = collectionType === "RPG";
   const skipEanStep = mode === "manual";
+
+  const onCollectionTypeChange = (value: "BOARD_GAME" | "RPG") => {
+    setCollectionType(value);
+    if (value === "RPG") {
+      setGameType("RPG");
+      setMinPlayers(1);
+      setMaxPlayers(6);
+      setMinAge(0);
+      setMinPlayTime(0);
+      setMaxPlayTime(0);
+    } else {
+      setGameType("BOARD");
+      setMinPlayers(2);
+      setMaxPlayers(4);
+      setMinAge(10);
+      setMinPlayTime(30);
+      setMaxPlayTime(60);
+    }
+  };
 
   const handleLookupResult = (data: EanLookupResult) => {
     setLookupResult(data);
@@ -120,7 +156,7 @@ export function AdminGameWizard({
     }
 
     if (data.collectionTypeSuggestion) {
-      setCollectionType(data.collectionTypeSuggestion);
+      onCollectionTypeChange(data.collectionTypeSuggestion);
     }
 
     if (data.selectedCandidate) {
@@ -131,7 +167,7 @@ export function AdminGameWizard({
         setShortDescription,
         setCoverImageUrl,
         setYearPublished,
-        setCollectionType,
+        setCollectionType: onCollectionTypeChange,
         setCoverSource: setCoverImageSource,
         setCoverExternalId: setCoverImageExternalId,
       });
@@ -211,50 +247,31 @@ export function AdminGameWizard({
     toast.success("Wybrano okładkę — sprawdź podgląd przed zapisem.");
   };
 
-  const submit = (formData: FormData) => {
-    const categoryIds = categories
-      .filter((c) => formData.get(`cat_${c.id}`) === "on")
-      .map((c) => c.id);
-    const tagIds = tags.filter((t) => formData.get(`tag_${t.id}`) === "on").map((t) => t.id);
-
-    const num = (name: string, fallback: number) => {
-      const v = formData.get(name);
-      if (v === null || v === "") return fallback;
-      const n = Number(v);
-      return Number.isFinite(n) ? n : fallback;
-    };
-    const defs = isRpg
-      ? { minPlayers: 1, maxPlayers: 6, minAge: 0, minPlayTime: 0, maxPlayTime: 0 }
-      : { minPlayers: 2, maxPlayers: 4, minAge: 10, minPlayTime: 30, maxPlayTime: 60 };
-
+  const submit = () => {
     const input = {
-      title: String(formData.get("title") || title),
+      title,
       ean: ean || null,
       collectionType,
-      description: String(formData.get("description") || description),
-      shortDescription: String(formData.get("shortDescription") || shortDescription),
-      minPlayers: num("minPlayers", defs.minPlayers),
-      maxPlayers: num("maxPlayers", defs.maxPlayers),
-      minAge: num("minAge", defs.minAge),
-      minPlayTime: num("minPlayTime", defs.minPlayTime),
-      maxPlayTime: num("maxPlayTime", defs.maxPlayTime),
-      difficulty: String(formData.get("difficulty")) as "EASY" | "MEDIUM" | "HARD" | "EXPERT",
-      type: String(formData.get("type")) as "BOARD",
-      publisherId: String(formData.get("publisherId") || "") || null,
-      designerId: String(formData.get("designerId") || "") || null,
-      yearPublished: formData.get("yearPublished")
-        ? Number(formData.get("yearPublished"))
-        : yearPublished
-          ? Number(yearPublished)
-          : null,
-      coverImageUrl: coverImageUrl || String(formData.get("coverImageUrl") || ""),
+      description,
+      shortDescription,
+      minPlayers,
+      maxPlayers,
+      minAge,
+      minPlayTime,
+      maxPlayTime,
+      difficulty,
+      type: gameType,
+      publisherId: publisherId || null,
+      designerId: designerId || null,
+      yearPublished: yearPublished ? Number(yearPublished) : null,
+      coverImageUrl: coverImageUrl || "",
       coverImageSource: coverImageSource || null,
       coverImageExternalId: coverImageExternalId || null,
-      instructionUrl: String(formData.get("instructionUrl") || ""),
-      isActive: formData.get("isActive") === "on",
-      isFeatured: formData.get("isFeatured") === "on",
-      categoryIds,
-      tagIds,
+      instructionUrl,
+      isActive,
+      isFeatured,
+      categoryIds: selectedCategoryIds,
+      tagIds: selectedTagIds,
       skipEanChecksum: skipChecksum,
       addCopy,
       copyInventoryNumber: addCopy ? copyInventory : undefined,
@@ -339,7 +356,7 @@ export function AdminGameWizard({
           titleHint={titleHint}
           setTitleHint={setTitleHint}
           collectionType={collectionType}
-          setCollectionType={setCollectionType}
+          setCollectionType={onCollectionTypeChange}
           lookupResult={lookupResult}
           existingGame={existingGame}
           selectedCover={selectedCover}
@@ -377,7 +394,14 @@ export function AdminGameWizard({
         }}
       />
 
-      <form action={submit} className="max-w-3xl space-y-6" data-testid="game-form">
+      <form
+        className="max-w-3xl space-y-6"
+        data-testid="game-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit();
+        }}
+      >
         {step === 3 && (
         <SectionCard title="Krok 3 — Dane gry">
         <div className="space-y-4">
@@ -440,7 +464,7 @@ export function AdminGameWizard({
                 titleHint={titleHint}
                 setTitleHint={setTitleHint}
                 collectionType={collectionType}
-                setCollectionType={setCollectionType}
+                setCollectionType={onCollectionTypeChange}
                 lookupResult={lookupResult}
                 existingGame={existingGame}
                 selectedCover={selectedCover}
@@ -477,23 +501,23 @@ export function AdminGameWizard({
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="minPlayers">Min graczy{isRpg ? " (opcj.)" : ""}</Label>
-            <Input id="minPlayers" name="minPlayers" type="number" defaultValue={isRpg ? 1 : 2} />
+            <Input id="minPlayers" name="minPlayers" type="number" value={minPlayers} onChange={(e) => setMinPlayers(Number(e.target.value))} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="maxPlayers">Max graczy{isRpg ? " (opcj.)" : ""}</Label>
-            <Input id="maxPlayers" name="maxPlayers" type="number" defaultValue={isRpg ? 6 : 4} />
+            <Input id="maxPlayers" name="maxPlayers" type="number" value={maxPlayers} onChange={(e) => setMaxPlayers(Number(e.target.value))} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="minPlayTime">Min czas{isRpg ? " (opcj.)" : ""}</Label>
-            <Input id="minPlayTime" name="minPlayTime" type="number" defaultValue={isRpg ? 0 : 30} />
+            <Input id="minPlayTime" name="minPlayTime" type="number" value={minPlayTime} onChange={(e) => setMinPlayTime(Number(e.target.value))} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="maxPlayTime">Max czas{isRpg ? " (opcj.)" : ""}</Label>
-            <Input id="maxPlayTime" name="maxPlayTime" type="number" defaultValue={isRpg ? 0 : 60} />
+            <Input id="maxPlayTime" name="maxPlayTime" type="number" value={maxPlayTime} onChange={(e) => setMaxPlayTime(Number(e.target.value))} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="minAge">Wiek{isRpg ? " (opcj.)" : ""}</Label>
-            <Input id="minAge" name="minAge" type="number" defaultValue={isRpg ? 0 : 10} />
+            <Input id="minAge" name="minAge" type="number" value={minAge} onChange={(e) => setMinAge(Number(e.target.value))} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="yearPublished">Rok wydania</Label>
@@ -512,7 +536,13 @@ export function AdminGameWizard({
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="difficulty">Trudność</Label>
-            <select id="difficulty" name="difficulty" className="h-10 w-full rounded-md border px-2" defaultValue="MEDIUM">
+            <select
+              id="difficulty"
+              name="difficulty"
+              className="h-10 w-full rounded-md border px-2"
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value as typeof difficulty)}
+            >
               {Object.entries(DIFFICULTY_LABELS).map(([k, v]) => (
                 <option key={k} value={k}>{v}</option>
               ))}
@@ -520,7 +550,13 @@ export function AdminGameWizard({
           </div>
           <div className="space-y-2">
             <Label htmlFor="type">Rodzaj gry</Label>
-            <select id="type" name="type" className="h-10 w-full rounded-md border px-2" defaultValue={isRpg ? "RPG" : "BOARD"}>
+            <select
+              id="type"
+              name="type"
+              className="h-10 w-full rounded-md border px-2"
+              value={gameType}
+              onChange={(e) => setGameType(e.target.value as typeof gameType)}
+            >
               {Object.entries(GAME_TYPE_LABELS).map(([k, v]) => (
                 <option key={k} value={k}>{v}</option>
               ))}
@@ -530,7 +566,13 @@ export function AdminGameWizard({
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="publisherId">Wydawca</Label>
-            <select id="publisherId" name="publisherId" className="h-10 w-full rounded-md border px-2" defaultValue="">
+            <select
+              id="publisherId"
+              name="publisherId"
+              className="h-10 w-full rounded-md border px-2"
+              value={publisherId}
+              onChange={(e) => setPublisherId(e.target.value)}
+            >
               <option value="">—</option>
               {publishers.map((p) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
@@ -539,7 +581,13 @@ export function AdminGameWizard({
           </div>
           <div className="space-y-2">
             <Label htmlFor="designerId">Autor</Label>
-            <select id="designerId" name="designerId" className="h-10 w-full rounded-md border px-2" defaultValue="">
+            <select
+              id="designerId"
+              name="designerId"
+              className="h-10 w-full rounded-md border px-2"
+              value={designerId}
+              onChange={(e) => setDesignerId(e.target.value)}
+            >
               <option value="">—</option>
               {designers.map((d) => (
                 <option key={d.id} value={d.id}>{d.name}</option>
@@ -549,15 +597,15 @@ export function AdminGameWizard({
         </div>
         <div className="space-y-2">
           <Label htmlFor="instructionUrl">URL instrukcji</Label>
-          <Input id="instructionUrl" name="instructionUrl" />
+          <Input id="instructionUrl" name="instructionUrl" value={instructionUrl} onChange={(e) => setInstructionUrl(e.target.value)} />
         </div>
         <div className="flex flex-wrap gap-4 pt-2">
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="isActive" defaultChecked />
+            <input type="checkbox" name="isActive" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
             Aktywna w katalogu
           </label>
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="isFeatured" />
+            <input type="checkbox" name="isFeatured" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} />
             Wyróżniona
           </label>
         </div>
@@ -566,7 +614,16 @@ export function AdminGameWizard({
           <div className="grid gap-2 sm:grid-cols-2">
             {categories.map((c) => (
               <label key={c.id} className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name={`cat_${c.id}`} />
+                <input
+                  type="checkbox"
+                  name={`cat_${c.id}`}
+                  checked={selectedCategoryIds.includes(c.id)}
+                  onChange={(e) => {
+                    setSelectedCategoryIds((prev) =>
+                      e.target.checked ? [...prev, c.id] : prev.filter((id) => id !== c.id),
+                    );
+                  }}
+                />
                 {c.name}
               </label>
             ))}
@@ -575,7 +632,16 @@ export function AdminGameWizard({
           <div className="grid gap-2 sm:grid-cols-2">
             {tags.map((t) => (
               <label key={t.id} className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name={`tag_${t.id}`} />
+                <input
+                  type="checkbox"
+                  name={`tag_${t.id}`}
+                  checked={selectedTagIds.includes(t.id)}
+                  onChange={(e) => {
+                    setSelectedTagIds((prev) =>
+                      e.target.checked ? [...prev, t.id] : prev.filter((id) => id !== t.id),
+                    );
+                  }}
+                />
                 {t.name}
               </label>
             ))}

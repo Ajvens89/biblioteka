@@ -31,7 +31,7 @@ const baseGameFields = {
   collectionType: collectionTypeEnum.optional().default("BOARD_GAME"),
   description: z.string().optional(),
   shortDescription: z.string().max(300).optional(),
-  difficulty: difficultyEnum,
+  difficulty: difficultyEnum.default("MEDIUM"),
   type: gameTypeEnum,
   publisherId: z.string().optional().nullable(),
   designerId: z.string().optional().nullable(),
