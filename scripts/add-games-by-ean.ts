@@ -9,6 +9,7 @@ import { PrismaClient } from "@prisma/client";
 import slugify from "slugify";
 import {
   findHurtProductByEan,
+  findHurtProductByTitle,
   mapHurtProductToGameData,
   canonicalHurtEan,
 } from "../src/lib/hurt-catalog";
@@ -18,7 +19,8 @@ import { fetchCoverForGame } from "../src/lib/services/cover-fetch";
 import { lookupPlanszeoCoverUrl } from "../src/lib/services/ean-providers/planszeo-provider";
 import { lookupRebelCoverUrl } from "../src/lib/services/ean-providers/rebel-images-provider";
 import { findGameByEan } from "../src/lib/services/game-by-ean";
-import { createGameFromEan } from "../src/lib/services/games";
+import { createGameFromEan, lookupByEan } from "../src/lib/services/games";
+import { inferGameType } from "../src/lib/services/game-type-infer";
 
 type GameSeed = {
   ean: string;
@@ -40,21 +42,26 @@ type GameSeed = {
 };
 
 const GAME_SEEDS: GameSeed[] = [
-  { ean: "3760175518263", title: "Proszę wsiadać! Nowy Jork i Londyn", publisher: "Days of Wonder" },
-  { ean: "5902560387629", title: "Circadians: Nowy Świt - Specjaliści" },
-  { ean: "5902560386981", title: "Eleven: Edycja Polska" },
-  { ean: "5902560387278", title: "Dead by Daylight: Gra planszowa" },
-  { ean: "5902560384338", title: "Wyprawa Darwina / Darwin's Journey" },
-  { ean: "5902560381580", title: "Monolith Arena" },
-  { ean: "5902560387322", title: "Niezbadana Planeta" },
-  { ean: "5905794220151", title: "Niezbadana Planeta: Superksiężyc" },
-  { ean: "5902560387681", title: "Resurgence" },
-  { ean: "5902560384857", title: "Circadians: Ład Chaosu" },
-  { ean: "5902560388121", title: "Circadians: Ład Chaosu - Heroldowie" },
-  { ean: "5902560384079", title: "Potwory w Tokio" },
-  { ean: "5902560384529", title: "Potwory w Tokio: Halloween" },
-  { ean: "5905965251502", title: "Nowy świt" },
-  { ean: "5902560387599", title: "Niezbadana planeta: Zestaw ulepszeń" },
+  { ean: "9788395409523", title: "Neuroshima: Bohater² (dodatek 07)", collectionType: "RPG", type: "RPG" },
+  { ean: "9788395802034", title: "Neuroshima: Miami (dodatek 08)", collectionType: "RPG", type: "RPG" },
+  { ean: "9788395409592", title: "Neuroshima: Ruiny (dodatek 16)", collectionType: "RPG", type: "RPG" },
+  { ean: "9788395802027", title: "Neuroshima: Nowy Jork (dodatek 17)", collectionType: "RPG", type: "RPG" },
+  { ean: "9788395409547", title: "Neuroshima: Bohater Maxx (dodatek 21)", collectionType: "RPG", type: "RPG" },
+  { ean: "9788396103109", title: "Neuroshima: Łowca Mutantów / Zabójca Maszyn", collectionType: "RPG", type: "RPG" },
+  { ean: "9788393057122", title: "Afterbomb Madness (Druga edycja)", collectionType: "RPG", type: "RPG" },
+  { ean: "9788364198045", title: "Zew Cthulhu: Księga Strażnika", collectionType: "RPG", type: "RPG" },
+  { ean: "9788364198175", title: "Zew Cthulhu: Podręcznik Badacza", collectionType: "RPG", type: "RPG" },
+  { ean: "9788364198342", title: "Zew Cthulhu: Pulp Cthulhu", collectionType: "RPG", type: "RPG" },
+  { ean: "9788364198892", title: "Zew Cthulhu: Horror w Orient Expressie", collectionType: "RPG", type: "RPG" },
+  { ean: "9788367619028", title: "Zew Cthulhu: Kulty Cthulhu", collectionType: "RPG", type: "RPG" },
+  { ean: "9788364198533", title: "Zew Cthulhu: Dwie z Tysiąca", collectionType: "RPG", type: "RPG" },
+  { ean: "9788364198144", title: "Zew Cthulhu: Usłysz Zew Cthulhu", collectionType: "RPG", type: "RPG" },
+  { ean: "9788364198496", title: "Zew Cthulhu: Posiadłości Szaleństwa Tom I", collectionType: "RPG", type: "RPG" },
+  { ean: "9788364198410", title: "Zew Cthulhu: Twarzą w Twarz", collectionType: "RPG", type: "RPG" },
+  { ean: "9788395672002", title: "Wampir: Maskarada (5. edycja)", collectionType: "RPG", type: "RPG" },
+  { ean: "9788397264588", title: "Wampir: Camarilla", collectionType: "RPG", type: "RPG" },
+  { ean: "9788396134837", title: "Wampir: Sabat – Czarna Ręka", collectionType: "RPG", type: "RPG" },
+  { ean: "9788396566362", title: "Wampir: Druga Inkwizycja", collectionType: "RPG", type: "RPG" },
 ];
 
 const dryRun = process.argv.includes("--dry-run");
@@ -119,22 +126,97 @@ async function resolveCover(
   return { url: null, source: null };
 }
 
+function rpgDefaults(seed: GameSeed) {
+  const isRpg = (seed.collectionType ?? "RPG") === "RPG";
+  return {
+    minPlayers: seed.minPlayers ?? (isRpg ? 1 : 2),
+    maxPlayers: seed.maxPlayers ?? (isRpg ? 6 : 4),
+    minAge: seed.minAge ?? (isRpg ? 0 : 10),
+    minPlayTime: seed.minPlayTime ?? (isRpg ? 0 : 30),
+    maxPlayTime: seed.maxPlayTime ?? (isRpg ? 0 : 60),
+  };
+}
+
 function mergeSeedWithHurt(seed: GameSeed, hurt: ReturnType<typeof mapHurtProductToGameData>) {
+  const defs = rpgDefaults(seed);
+  const collectionType = hurt.collectionType ?? seed.collectionType ?? "RPG";
   return {
     title: hurt.title || seed.title,
-    collectionType: hurt.collectionType ?? seed.collectionType ?? "BOARD_GAME",
+    collectionType,
     description: hurt.description ?? seed.description ?? null,
     shortDescription: hurt.shortDescription ?? seed.shortDescription ?? null,
     publisherName: hurt.publisherName ?? seed.publisher ?? null,
     categoryName: hurt.categoryName ?? seed.category ?? null,
-    minPlayers: hurt.minPlayers ?? seed.minPlayers ?? 2,
-    maxPlayers: hurt.maxPlayers ?? seed.maxPlayers ?? 4,
-    minAge: hurt.minAge ?? seed.minAge ?? 10,
-    minPlayTime: hurt.minPlayTime ?? seed.minPlayTime ?? 30,
-    maxPlayTime: hurt.maxPlayTime ?? seed.maxPlayTime ?? 60,
+    minPlayers: hurt.minPlayers ?? defs.minPlayers,
+    maxPlayers: hurt.maxPlayers ?? defs.maxPlayers,
+    minAge: hurt.minAge ?? defs.minAge,
+    minPlayTime: hurt.minPlayTime ?? defs.minPlayTime,
+    maxPlayTime: hurt.maxPlayTime ?? defs.maxPlayTime,
     yearPublished: hurt.yearPublished ?? seed.yearPublished ?? null,
     imageUrl: hurt.imageUrl ?? hurt.thumbnailUrl ?? seed.coverUrl ?? null,
     idProduct: hurt.idProduct,
+    gameType: seed.type ?? inferGameType(collectionType, hurt.categoryName ?? ""),
+  };
+}
+
+async function mergeFromLookup(
+  prisma: PrismaClient,
+  seed: GameSeed,
+  ean: string,
+): Promise<ReturnType<typeof mergeSeedWithHurt> | null> {
+  const lookup = await lookupByEan(prisma, ean, { titleHint: seed.title });
+  const candidates = lookup.candidates;
+  const bySource = (source: string) => candidates.find((c) => c.source === source);
+  const candidate =
+    lookup.selectedCandidate ??
+    bySource("hurt") ??
+    bySource("google_books") ??
+    bySource("open_library") ??
+    candidates.find((c) => c.coverImageUrl || c.description || c.title);
+  if (!candidate && lookup.status === "not_found") return null;
+
+  const descCandidate =
+    bySource("hurt") ??
+    bySource("google_books") ??
+    bySource("open_library") ??
+    candidates.find((c) => c.description);
+  const coverCandidate =
+    bySource("hurt") ??
+    candidates.find((c) => c.coverImageUrl) ??
+    candidate;
+
+  const defs = rpgDefaults(seed);
+  const collectionType =
+    candidate?.collectionTypeSuggestion ?? seed.collectionType ?? "RPG";
+
+  return {
+    title: candidate?.title ?? seed.title,
+    collectionType,
+    description: descCandidate?.description ?? seed.description ?? null,
+    shortDescription:
+      descCandidate?.shortDescription ??
+      descCandidate?.authors?.join(", ") ??
+      seed.shortDescription ??
+      null,
+    publisherName:
+      candidate?.publisher ?? descCandidate?.publisher ?? seed.publisher ?? null,
+    categoryName: seed.category ?? null,
+    minPlayers: candidate?.minPlayers ?? defs.minPlayers,
+    maxPlayers: candidate?.maxPlayers ?? defs.maxPlayers,
+    minAge: candidate?.minAge ?? defs.minAge,
+    minPlayTime: candidate?.minPlayTime ?? defs.minPlayTime,
+    maxPlayTime: candidate?.maxPlayTime ?? defs.maxPlayTime,
+    yearPublished: candidate?.year ?? descCandidate?.year ?? seed.yearPublished ?? null,
+    imageUrl:
+      coverCandidate?.coverImageUrl ??
+      coverCandidate?.thumbnailUrl ??
+      seed.coverUrl ??
+      null,
+    idProduct: coverCandidate?.externalId ?? "",
+    gameType:
+      candidate?.gameTypeSuggestion ??
+      seed.type ??
+      inferGameType(collectionType, seed.title),
   };
 }
 
@@ -167,32 +249,43 @@ async function main() {
       continue;
     }
 
-    const hurtProduct = catalog ? findHurtProductByEan(ean, catalog) : null;
+    const hurtProduct =
+      (catalog ? findHurtProductByEan(ean, catalog) : null) ??
+      (catalog ? findHurtProductByTitle(seed.title, catalog)?.product : null);
     const hurtMapped = hurtProduct ? mapHurtProductToGameData(hurtProduct) : null;
-    const merged = hurtMapped
+    let merged = hurtMapped
       ? mergeSeedWithHurt(seed, hurtMapped)
-      : {
-          title: seed.title,
-          collectionType: seed.collectionType ?? "BOARD_GAME",
-          description: seed.description ?? null,
-          shortDescription: seed.shortDescription ?? null,
-          publisherName: seed.publisher ?? null,
-          categoryName: seed.category ?? null,
-          minPlayers: seed.minPlayers ?? 2,
-          maxPlayers: seed.maxPlayers ?? 4,
-          minAge: seed.minAge ?? 10,
-          minPlayTime: seed.minPlayTime ?? 30,
-          maxPlayTime: seed.maxPlayTime ?? 60,
-          yearPublished: seed.yearPublished ?? null,
-          imageUrl: seed.coverUrl ?? null,
-          idProduct: "",
-        };
+      : await mergeFromLookup(prisma, seed, ean);
 
+    if (!merged) {
+      const defs = rpgDefaults(seed);
+      merged = {
+        title: seed.title,
+        collectionType: seed.collectionType ?? "RPG",
+        description: seed.description ?? null,
+        shortDescription: seed.shortDescription ?? null,
+        publisherName: seed.publisher ?? null,
+        categoryName: seed.category ?? null,
+        minPlayers: defs.minPlayers,
+        maxPlayers: defs.maxPlayers,
+        minAge: defs.minAge,
+        minPlayTime: defs.minPlayTime,
+        maxPlayTime: defs.maxPlayTime,
+        yearPublished: seed.yearPublished ?? null,
+        imageUrl: seed.coverUrl ?? null,
+        idProduct: "",
+        gameType: seed.type ?? "RPG",
+      };
+    }
+
+    const dataSource = hurtProduct ? "hurt.csv" : merged.description ? "lookup EAN" : "tytuł ręczny";
     const cover = await resolveCover(merged.title, ean, merged.imageUrl, seed.coverUrl);
     const source = cover.source ?? (hurtProduct ? "hurt" : null);
 
     console.log(`✓  ${ean} — ${merged.title}`);
-    console.log(`   źródło danych: ${hurtProduct ? "hurt.csv" : "katalog ręczny"}, okładka: ${cover.url ? source : "brak"}`);
+    console.log(
+      `   źródło danych: ${dataSource}, okładka: ${cover.url ? source : "brak"}, opis: ${merged.description ? "tak" : "nie"}`,
+    );
 
     if (dryRun) {
       added += 1;
@@ -222,7 +315,7 @@ async function main() {
           coverImageExternalId: cover.externalId ?? merged.idProduct ?? null,
           publisherId: publisherId ?? undefined,
           categoryIds,
-          type: seed.type ?? "BOARD",
+          type: merged.gameType ?? seed.type ?? "RPG",
           difficulty: seed.difficulty ?? "MEDIUM",
           skipEanChecksum: true,
           isActive: true,
