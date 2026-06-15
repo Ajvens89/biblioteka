@@ -1,9 +1,10 @@
+import type { CopyStatus } from "@prisma/client";
 import { countAvailableCopies } from "@/lib/games/availability";
 
 type GameWithCopyStatuses = {
   id: string;
   title: string;
-  copies: { status: string }[];
+  copies: { status: CopyStatus }[];
 };
 
 /** Sortuje malejąco po liczbie egzemplarzy AVAILABLE, potem tytuł A–Z. */
