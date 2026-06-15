@@ -55,20 +55,30 @@ const baseGameFields = {
 export const gameSchema = z
   .object({
     ...baseGameFields,
-    minPlayers: z.coerce.number().int().min(1).optional(),
-    maxPlayers: z.coerce.number().int().min(1).optional(),
+    minPlayers: z.coerce.number().int().min(0).optional(),
+    maxPlayers: z.coerce.number().int().min(0).optional(),
     minAge: z.coerce.number().int().min(0).optional(),
-    minPlayTime: z.coerce.number().int().min(1).optional(),
-    maxPlayTime: z.coerce.number().int().min(1).optional(),
+    minPlayTime: z.coerce.number().int().min(0).optional(),
+    maxPlayTime: z.coerce.number().int().min(0).optional(),
   })
   .superRefine((data, ctx) => {
     const isRpg = data.collectionType === "RPG";
     if (!isRpg) {
-      if (data.minPlayers == null) ctx.addIssue({ code: "custom", message: "Min graczy jest wymagane", path: ["minPlayers"] });
-      if (data.maxPlayers == null) ctx.addIssue({ code: "custom", message: "Max graczy jest wymagane", path: ["maxPlayers"] });
-      if (data.minAge == null) ctx.addIssue({ code: "custom", message: "Wiek jest wymagany", path: ["minAge"] });
-      if (data.minPlayTime == null) ctx.addIssue({ code: "custom", message: "Min czas jest wymagany", path: ["minPlayTime"] });
-      if (data.maxPlayTime == null) ctx.addIssue({ code: "custom", message: "Max czas jest wymagany", path: ["maxPlayTime"] });
+      if (data.minPlayers == null || data.minPlayers < 1) {
+        ctx.addIssue({ code: "custom", message: "Min graczy jest wymagane (co najmniej 1)", path: ["minPlayers"] });
+      }
+      if (data.maxPlayers == null || data.maxPlayers < 1) {
+        ctx.addIssue({ code: "custom", message: "Max graczy jest wymagane (co najmniej 1)", path: ["maxPlayers"] });
+      }
+      if (data.minAge == null) {
+        ctx.addIssue({ code: "custom", message: "Wiek jest wymagany", path: ["minAge"] });
+      }
+      if (data.minPlayTime == null || data.minPlayTime < 1) {
+        ctx.addIssue({ code: "custom", message: "Min czas jest wymagany (co najmniej 1 min)", path: ["minPlayTime"] });
+      }
+      if (data.maxPlayTime == null || data.maxPlayTime < 1) {
+        ctx.addIssue({ code: "custom", message: "Max czas jest wymagany (co najmniej 1 min)", path: ["maxPlayTime"] });
+      }
     }
   })
   .transform((data) => {
