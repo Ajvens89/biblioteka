@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { normalizeEan } from "@/lib/services/ean";
+import { paginateIds, sortGamesByAvailableCopies } from "@/lib/games/sort-games-by-availability";
 import type { GameFilterInput } from "@/lib/validations/game";
 
 export const gameListInclude = {
@@ -82,7 +83,7 @@ export function buildGameOrderBy(
     case "popular":
       return [{ popularityCount: "desc" }, { title: "asc" }];
     case "available":
-      return [{ popularityCount: "desc" }, { title: "asc" }];
+      return [{ title: "asc" }];
     case "playtime_asc":
       return [{ minPlayTime: "asc" }, { title: "asc" }];
     case "playtime_desc":
@@ -94,6 +95,11 @@ export function buildGameOrderBy(
 
 export async function fetchGames(filters: GameFilterInput) {
   const where = buildGameWhere(filters);
+
+  if (filters.sort === "available") {
+    return fetchGamesSortedByAvailability(filters, where);
+  }
+
   const orderBy = buildGameOrderBy(filters.sort);
   const skip = (filters.page - 1) * filters.pageSize;
 
@@ -107,6 +113,41 @@ export async function fetchGames(filters: GameFilterInput) {
     }),
     prisma.game.count({ where }),
   ]);
+
+  return { items, total, page: filters.page, pageSize: filters.pageSize };
+}
+
+async function fetchGamesSortedByAvailability(
+  filters: GameFilterInput,
+  where: Prisma.GameWhereInput,
+) {
+  const [matching, total] = await Promise.all([
+    prisma.game.findMany({
+      where,
+      select: {
+        id: true,
+        title: true,
+        copies: { select: { status: true } },
+      },
+    }),
+    prisma.game.count({ where }),
+  ]);
+
+  const sortedIds = sortGamesByAvailableCopies(matching).map((g) => g.id);
+  const pageIds = paginateIds(sortedIds, filters.page, filters.pageSize);
+
+  if (pageIds.length === 0) {
+    return { items: [], total, page: filters.page, pageSize: filters.pageSize };
+  }
+
+  const rows = await prisma.game.findMany({
+    where: { id: { in: pageIds } },
+    include: gameListInclude,
+  });
+  const byId = new Map(rows.map((g) => [g.id, g]));
+  const items = pageIds
+    .map((id) => byId.get(id))
+    .filter((g): g is GameListItem => g !== undefined);
 
   return { items, total, page: filters.page, pageSize: filters.pageSize };
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
-import { GameSearchSuggestions } from "@/components/games/game-search-suggestions";
+import { useId, useRef, useState } from "react";
+import { GameSearchSuggestions, type GameSearchSuggestionsHandle } from "@/components/games/game-search-suggestions";
+import { SUGGEST_MIN_QUERY_LENGTH } from "@/lib/games/suggest-games";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,9 @@ export function HomeHeroSearch({ variant = "panel" }: Props) {
   const [q, setQ] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
+  const [activeDescendant, setActiveDescendant] = useState<string>();
   const suggestListId = useId();
+  const suggestRef = useRef<GameSearchSuggestionsHandle>(null);
   const isHero = variant === "hero";
 
   const search = (ean?: string) => {
@@ -53,27 +56,38 @@ export function HomeHeroSearch({ variant = "panel" }: Props) {
             )}
             placeholder="Tytuł, autor, wydawca lub EAN z pudełka…"
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setSuggestOpen(e.target.value.trim().length >= SUGGEST_MIN_QUERY_LENGTH);
+            }}
             onKeyDown={(e) => {
+              if (suggestRef.current?.handleKeyDown(e)) return;
               if (e.key === "Enter") {
                 setSuggestOpen(false);
                 search();
               }
-              if (e.key === "Escape") setSuggestOpen(false);
             }}
             onFocus={() => {
-              if (q.trim().length >= 2) setSuggestOpen(true);
+              if (q.trim().length >= SUGGEST_MIN_QUERY_LENGTH) setSuggestOpen(true);
+            }}
+            onBlur={() => {
+              window.setTimeout(() => setSuggestOpen(false), 150);
             }}
             aria-autocomplete="list"
             aria-controls={suggestListId}
             aria-expanded={suggestOpen}
+            aria-haspopup="listbox"
+            aria-activedescendant={activeDescendant}
           />
           <GameSearchSuggestions
+            ref={suggestRef}
             query={q}
             open={suggestOpen}
-            onOpenChange={setSuggestOpen}
+            onClose={() => setSuggestOpen(false)}
             onSelect={(title) => setQ(title)}
             listId={suggestListId}
+            inputId="home-search"
+            onActiveDescendantChange={setActiveDescendant}
           />
         </div>
         <div className="grid grid-cols-2 gap-3 sm:flex sm:shrink-0">

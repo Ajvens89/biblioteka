@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useId, useState } from "react";
-import { GameSearchSuggestions } from "@/components/games/game-search-suggestions";
+import { useCallback, useId, useRef, useState } from "react";
+import { GameSearchSuggestions, type GameSearchSuggestionsHandle } from "@/components/games/game-search-suggestions";
+import { SUGGEST_MIN_QUERY_LENGTH } from "@/lib/games/suggest-games";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,11 @@ export function CatalogToolbar({
   const [q, setQ] = useState(defaultQ || searchParams.get("q") || defaultEan || "");
   const [scannerOpen, setScannerOpen] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
+  const [activeDescendant, setActiveDescendant] = useState<string>();
   const suggestListId = useId();
+  const suggestRef = useRef<GameSearchSuggestionsHandle>(null);
+
+  const closeSuggestions = useCallback(() => setSuggestOpen(false), []);
 
   const submit = useCallback(
     (opts?: { ean?: string; query?: string }) => {
@@ -71,27 +76,42 @@ export function CatalogToolbar({
               className="zf-search-input h-12 rounded-2xl pl-11"
               placeholder="Tytuł, opis, tag, autor, wydawca, EAN…"
               value={q}
-              onChange={(e) => setQ(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
+              onChange={(e) => {
+                setQ(e.target.value);
+                if (e.target.value.trim().length >= SUGGEST_MIN_QUERY_LENGTH) {
+                  setSuggestOpen(true);
+                } else {
                   setSuggestOpen(false);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (suggestRef.current?.handleKeyDown(e)) return;
+                if (e.key === "Enter") {
+                  closeSuggestions();
                   submit();
                 }
-                if (e.key === "Escape") setSuggestOpen(false);
               }}
               onFocus={() => {
-                if (q.trim().length >= 2) setSuggestOpen(true);
+                if (q.trim().length >= SUGGEST_MIN_QUERY_LENGTH) setSuggestOpen(true);
+              }}
+              onBlur={() => {
+                window.setTimeout(() => closeSuggestions(), 150);
               }}
               aria-autocomplete="list"
               aria-controls={suggestListId}
               aria-expanded={suggestOpen}
+              aria-haspopup="listbox"
+              aria-activedescendant={activeDescendant}
             />
             <GameSearchSuggestions
+              ref={suggestRef}
               query={q}
               open={suggestOpen}
-              onOpenChange={setSuggestOpen}
+              onClose={closeSuggestions}
               onSelect={(title) => setQ(title)}
               listId={suggestListId}
+              inputId="catalog-search-input"
+              onActiveDescendantChange={setActiveDescendant}
             />
           </div>
           <div className="grid grid-cols-2 gap-2 sm:flex">
