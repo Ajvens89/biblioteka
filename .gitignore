@@ -57,11 +57,9 @@ firebase-debug.*.log
 
 # okładki: public/covers/ MUSI być w repo — Firebase App Hosting serwuje je z builda (public/)
 
-# licencjonowany katalog Rebel (skopiuj z Pulpit/images.csv → data/rebel-images.csv)
-/data/rebel-images.csv
-
-# hurtownia — dane handlowe / prywatny katalog (zostaw hurt.example.csv)
-/data/hurt.csv
+# Katalogi hurt/Rebel — w repo (dane opisowe, bez cen); lokalnie też można nadpisać ścieżką w .env
+# /data/rebel-images.csv
+# /data/hurt.csv
 
 # vercel
 .vercel

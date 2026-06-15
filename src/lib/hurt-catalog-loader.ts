@@ -1,4 +1,3 @@
-import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import {
@@ -6,6 +5,7 @@ import {
   parseCsvRecords,
   type HurtCatalog,
 } from "@/lib/hurt-catalog";
+import { readCsvBuffer } from "@/lib/csv-source";
 
 const DEFAULT_PATHS = ["./data/hurt.csv", "./hurt.csv", "../hurt.csv"];
 
@@ -48,14 +48,19 @@ export function resolveHurtCsvPath(extraPaths: string[] = []): string | null {
 
 export async function loadHurtCatalog(csvPath?: string): Promise<HurtCatalog | null> {
   const resolved = csvPath ? path.resolve(csvPath) : resolveHurtCsvPath();
-  if (!resolved || !existsSync(resolved)) return null;
-  if (cachedCatalog && cachedCatalogPath === resolved) return cachedCatalog;
+  const cacheKey = `${process.env.HURT_CSV_URL ?? ""}|${resolved ?? ""}`;
+  if (cachedCatalog && cachedCatalogPath === cacheKey) return cachedCatalog;
 
-  const buffer = await readFile(resolved);
+  const buffer = await readCsvBuffer(
+    resolved && existsSync(resolved) ? resolved : null,
+    process.env.HURT_CSV_URL,
+  );
+  if (!buffer) return null;
+
   const content = decodeHurtCsvBuffer(buffer);
   const records = parseCsvRecords(content);
-  cachedCatalog = buildHurtCatalog(resolved, records);
-  cachedCatalogPath = resolved;
+  cachedCatalog = buildHurtCatalog(resolved ?? process.env.HURT_CSV_URL ?? "remote", records);
+  cachedCatalogPath = cacheKey;
   return cachedCatalog;
 }
 

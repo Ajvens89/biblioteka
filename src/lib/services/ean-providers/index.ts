@@ -7,6 +7,10 @@ import { lookupLocalProvider } from "./local-provider";
 import { buildManualCandidates } from "./manual-provider";
 import { lookupOpenLibraryProvider } from "./open-library-provider";
 import {
+  lookupExternalCoverCandidates,
+  pickHighCoverCandidate,
+} from "./external-cover-providers";
+import {
   COVER_SOURCE_LABELS,
   type CoverCandidate,
   type EanLookupOptions,
@@ -70,7 +74,7 @@ function resolveCollectionDefault(
 }
 
 /**
- * Plan A → B → C → D: lokalna baza, ISBN (Google + Open Library), BGG po tytule, ręcznie.
+ * Plan A → hurt.csv → Rebel/Planszeo/UPC → ISBN (Google + Open Library) → BGG → ręcznie.
  */
 export async function lookupGameByEanWithFallback(
   prisma: PrismaClient,
@@ -131,6 +135,24 @@ export async function lookupGameByEanWithFallback(
         selectedCandidate: hurt.candidate,
         candidates,
         message: hurt.candidate.notes ?? COVER_SOURCE_LABELS.hurt,
+      };
+    }
+  }
+
+  const external = await lookupExternalCoverCandidates(normalized, options?.titleHint);
+  if (external.length > 0) {
+    candidates = mergeCandidates(candidates, external);
+    const highCover = pickHighCoverCandidate(candidates);
+    if (highCover && !candidates.some((c) => c.source === "hurt")) {
+      return {
+        status: "found_external",
+        normalizedEan: normalized,
+        checksumValid,
+        collectionTypeSuggestion:
+          highCover.collectionTypeSuggestion ?? collectionDefault,
+        selectedCandidate: highCover,
+        candidates,
+        message: highCover.notes ?? COVER_SOURCE_LABELS[highCover.source],
       };
     }
   }

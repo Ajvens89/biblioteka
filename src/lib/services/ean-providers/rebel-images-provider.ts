@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
 import path from "node:path";
 import slugify from "slugify";
+import { readCsvBuffer } from "@/lib/csv-source";
 import { validateCoverImageUrl } from "./image-utils";
 import { scoreTitleMatch } from "./upcitemdb-provider";
 
@@ -68,6 +68,7 @@ export function resolveRebelImagesCsvPath(extraPaths: string[] = []): string | n
 export function isRebelImagesEnabled(): boolean {
   const flag = process.env.REBEL_IMAGES?.trim().toLowerCase();
   if (flag === "false" || flag === "0" || flag === "off") return false;
+  if (process.env.REBEL_IMAGES_CSV_URL?.trim()) return true;
   return resolveRebelImagesCsvPath() !== null;
 }
 
@@ -243,12 +244,18 @@ export function findRebelProductIdByEan(ean: string, index: RebelImageIndex): st
 
 export async function loadRebelImageIndex(): Promise<RebelImageIndex | null> {
   const csvPath = resolveRebelImagesCsvPath();
-  if (!csvPath) return null;
-  if (cachedIndex && cachedPath === csvPath) return cachedIndex;
+  const cacheKey = `${process.env.REBEL_IMAGES_CSV_URL ?? ""}|${csvPath ?? ""}`;
+  if (cachedIndex && cachedPath === cacheKey) return cachedIndex;
 
-  const content = await readFile(csvPath, "utf8");
+  const buffer = await readCsvBuffer(
+    csvPath && existsSync(csvPath) ? csvPath : null,
+    process.env.REBEL_IMAGES_CSV_URL,
+  );
+  if (!buffer) return null;
+
+  const content = buffer.toString("utf8");
   cachedIndex = buildRebelImageIndex(content);
-  cachedPath = csvPath;
+  cachedPath = cacheKey;
   return cachedIndex;
 }
 

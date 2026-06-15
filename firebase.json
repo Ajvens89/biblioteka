@@ -13,5 +13,8 @@
         "backfill-covers.log"
       ]
     }
-  ]
+  ],
+  "storage": {
+    "rules": "storage.rules"
+  }
 }
