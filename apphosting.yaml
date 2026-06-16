@@ -9,7 +9,7 @@ runConfig:
   memoryMiB: 1024
 
 scripts:
-  buildCommand: npm run build
+  buildCommand: npm install --no-audit --no-fund && npm run build
 
 env:
   - variable: AUTH_PROVIDER

@@ -43,6 +43,10 @@
     "test:e2e:staging": "playwright test",
     "check:all": "tsx scripts/check-all.ts"
   },
+  "optionalDependencies": {
+    "@next/swc-linux-x64-gnu": "16.2.7",
+    "lightningcss-linux-x64-gnu": "1.32.0"
+  },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
