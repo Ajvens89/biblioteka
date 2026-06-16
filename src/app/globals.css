@@ -519,6 +519,11 @@ body {
   transition: border-color 0.15s ease;
 }
 
+.zf-game-row-cover--rpg {
+  width: 3.25rem;
+  height: 4.875rem;
+}
+
 .zf-game-row--available .zf-game-row-cover {
   border-color: color-mix(in srgb, var(--success) 50%, var(--border));
 }
@@ -536,6 +541,11 @@ body {
   .zf-game-row-cover {
     width: 5.25rem;
     height: 5.25rem;
+  }
+
+  .zf-game-row-cover--rpg {
+    width: 3.75rem;
+    height: 5.625rem;
   }
 }
 

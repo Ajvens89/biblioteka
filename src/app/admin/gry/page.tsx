@@ -16,6 +16,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GameTypeBadge } from "@/components/ui/game-type-badge";
 import { GameCover } from "@/components/ui/game-cover";
+import { cn } from "@/lib/utils";
 import { ArchiveGameButton } from "@/components/admin/archive-game-button";
 import { AdminGamesToolbar } from "@/components/admin/admin-games-toolbar";
 
@@ -104,8 +105,11 @@ export default async function AdminGamesPage({ searchParams }: PageProps) {
                         <GameCover
                           src={g.coverImageUrl}
                           alt={g.title}
-                          aspect="square"
-                          className="h-12 w-10 shrink-0 rounded"
+                          aspect={g.collectionType === "RPG" ? "portrait" : "square"}
+                          className={cn(
+                            "shrink-0 rounded",
+                            g.collectionType === "RPG" ? "h-14 w-10" : "h-12 w-12",
+                          )}
                           sizes="40px"
                           collectionType={g.collectionType}
                         />

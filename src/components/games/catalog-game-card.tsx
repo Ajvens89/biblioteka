@@ -157,7 +157,10 @@ export function CatalogGameCard({
 
       <Link
         href={`/gry/${slug}`}
-        className="zf-game-row-cover shrink-0 self-start"
+        className={cn(
+          "zf-game-row-cover shrink-0 self-start",
+          collectionType === "RPG" && "zf-game-row-cover--rpg",
+        )}
         aria-label={`Okładka: ${title}`}
       >
         <GameCover

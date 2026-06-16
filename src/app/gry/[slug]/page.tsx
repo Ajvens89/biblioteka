@@ -55,7 +55,7 @@ export default async function GameDetailPage({ params }: Props) {
       <div data-testid="game-collection-type">
         <GameTypeBadge collectionType={game.collectionType} size="md" />
       </div>
-      <h1 className="text-display">{game.title}</h1>
+      <h1 className="text-display break-words">{game.title}</h1>
       {game.ean && (
         <p className="text-small font-mono text-muted-foreground" data-testid="game-ean">
           EAN produktu: {game.ean}
@@ -77,7 +77,7 @@ export default async function GameDetailPage({ params }: Props) {
             src={game.coverImageUrl}
             alt={`Okładka gry ${game.title}`}
             collectionType={game.collectionType}
-            aspect="square"
+            aspect={isBoard ? "square" : "portrait"}
             priority
             className="rounded-xl"
             sizes="(max-width: 1024px) 100vw, 352px"

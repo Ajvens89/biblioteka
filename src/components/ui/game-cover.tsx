@@ -34,11 +34,15 @@ export function GameCover({
   const isRpg = collectionType === "RPG";
   const isExternal = /^https?:\/\//i.test(trimmed);
 
+  /** Podręczniki RPG są pionowe — pokaż całą okładkę, nie kadruj jak pudełko planszówki. */
+  const resolvedAspect = isRpg && aspect !== "portrait" ? "portrait" : aspect;
+  const imageFitClass = isRpg ? "object-contain" : "object-cover";
+
   const aspectClass =
-    aspect === "square"
+    resolvedAspect === "square"
       ? "aspect-square"
-      : aspect === "portrait"
-        ? "aspect-[3/4]"
+      : resolvedAspect === "portrait"
+        ? "aspect-[2/3]"
         : "aspect-[4/3]";
 
   return (
@@ -69,7 +73,7 @@ export function GameCover({
           src={trimmed}
           alt={alt}
           fill
-          className="object-cover"
+          className={imageFitClass}
           sizes={sizes}
           priority={priority}
           unoptimized={isExternal}
