@@ -300,15 +300,19 @@ export async function fetchSimilarGames(
 }
 
 export async function fetchPublicStats() {
-  const [games, copies, available, rpg] = await Promise.all([
-    prisma.game.count({ where: { deletedAt: null, isActive: true } }),
+  const activeGameWhere = { deletedAt: null, isActive: true } as const;
+  const [games, copies, available, boardGames, rpgGames] = await Promise.all([
+    prisma.game.count({ where: activeGameWhere }),
     prisma.gameCopy.count(),
     prisma.gameCopy.count({ where: { status: "AVAILABLE" } }),
     prisma.game.count({
-      where: { deletedAt: null, isActive: true, collectionType: "RPG" },
+      where: { ...activeGameWhere, collectionType: "BOARD_GAME" },
+    }),
+    prisma.game.count({
+      where: { ...activeGameWhere, collectionType: "RPG" },
     }),
   ]);
-  return { games, copies, available, rpg };
+  return { games, copies, available, boardGames, rpgGames };
 }
 
 const HOME_CACHE_SECONDS = 60;

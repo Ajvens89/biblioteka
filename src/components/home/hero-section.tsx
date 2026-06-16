@@ -9,12 +9,21 @@ import type { ShowcaseGame } from "./types";
 
 type Props = {
   totalGames: number;
+  boardGameCount: number;
+  rpgGameCount: number;
   availableCopies?: number;
   boardGames: ShowcaseGame[];
   rpgGames: ShowcaseGame[];
 };
 
-export function HeroSection({ totalGames, availableCopies, boardGames, rpgGames }: Props) {
+export function HeroSection({
+  totalGames,
+  boardGameCount,
+  rpgGameCount,
+  availableCopies,
+  boardGames,
+  rpgGames,
+}: Props) {
   return (
     <section className="zf-hero relative overflow-hidden">
       <div className="zf-hero-bg pointer-events-none absolute inset-0" aria-hidden>
@@ -33,7 +42,12 @@ export function HeroSection({ totalGames, availableCopies, boardGames, rpgGames 
               </p>
             </div>
 
-            <StatsChips totalGames={totalGames} availableCopies={availableCopies} />
+            <StatsChips
+              totalGames={totalGames}
+              boardGames={boardGameCount}
+              rpgGames={rpgGameCount}
+              availableCopies={availableCopies}
+            />
 
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
               <Button size="lg" className="zf-btn-primary h-11 w-full sm:w-auto" asChild>

@@ -30,7 +30,7 @@ function toShowcase(games: GameListItem[]): ShowcaseGame[] {
   }));
 }
 
-const FALLBACK_STATS = { games: 0, copies: 0, available: 0, rpg: 0 };
+const FALLBACK_STATS = { games: 0, copies: 0, available: 0, boardGames: 0, rpgGames: 0 };
 
 export default async function HomePage() {
   const empty: GameListItem[] = [];
@@ -48,6 +48,8 @@ export default async function HomePage() {
     <div className="overflow-x-hidden">
       <HeroSection
         totalGames={stats.games}
+        boardGameCount={stats.boardGames}
+        rpgGameCount={stats.rpgGames}
         availableCopies={stats.available}
         boardGames={toShowcase(boardShowcase)}
         rpgGames={toShowcase(rpgShowcase)}
