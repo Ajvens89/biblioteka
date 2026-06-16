@@ -317,7 +317,7 @@ export async function fetchPublicStats() {
 
 const HOME_CACHE_SECONDS = 60;
 
-export const fetchPublicStatsCached = unstable_cache(fetchPublicStats, ["home-public-stats"], {
+export const fetchPublicStatsCached = unstable_cache(fetchPublicStats, ["home-public-stats-v2"], {
   revalidate: HOME_CACHE_SECONDS,
 });
 
