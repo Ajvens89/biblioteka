@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useId, useRef, useState } from "react";
 import { GameSearchSuggestions, type GameSearchSuggestionsHandle } from "@/components/games/game-search-suggestions";
-import { SUGGEST_MIN_QUERY_LENGTH } from "@/lib/games/suggest-games";
+import { SUGGEST_MIN_QUERY_LENGTH } from "@/lib/games/suggest-games.types";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

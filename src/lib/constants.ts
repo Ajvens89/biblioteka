@@ -39,6 +39,14 @@ export const CATALOG_COLLECTION_LABELS: Record<GameCollectionType, string> = {
   RPG: "RPG podręczniki",
 };
 
+/** Szybkie filtry gatunkowe w katalogu (slug kategorii w bazie). */
+export const GENRE_CATEGORY_FILTERS = [
+  { slug: "strategia", label: "Strategiczne" },
+  { slug: "kooperacja", label: "Kooperacyjne" },
+  { slug: "imprezowe", label: "Imprezowe" },
+  { slug: "rodzinne", label: "Rodzinne" },
+] as const;
+
 export const GAME_TYPE_LABELS: Record<GameType, string> = {
   BOARD: "Planszowa",
   CARD: "Karciana",

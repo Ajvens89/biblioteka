@@ -76,6 +76,7 @@ export function GameCover({
           className={imageFitClass}
           sizes={sizes}
           priority={priority}
+          loading={priority ? undefined : "lazy"}
           unoptimized={isExternal}
           onError={() => setBrokenSrc(trimmed)}
         />

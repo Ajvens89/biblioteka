@@ -4,7 +4,7 @@ import {
   normalizeSuggestQuery,
   SUGGEST_MAX_QUERY_LENGTH,
   SUGGEST_MIN_QUERY_LENGTH,
-} from "./suggest-games";
+} from "./suggest-games.types";
 
 describe("normalizeSuggestQuery", () => {
   it("obcina do maksymalnej długości", () => {

@@ -79,6 +79,14 @@ describe("hurt-catalog — mapowanie", () => {
     const mapped = mapHurtProductToGameData(catalog.products[1]);
     assert.equal(mapped.collectionType, "RPG");
   });
+
+  it("ISBN 978 + kategoria Różne → RPG", () => {
+    const rows = parseCsvRecords(`IDProduct,ProductName,Description,EAN,Category,Publisher
+300,"Wampir: Camarilla","Opis",9788397264588,"Różne",Alis`);
+    const catalog = buildHurtCatalog("test.csv", rows);
+    const mapped = mapHurtProductToGameData(catalog.products[0]);
+    assert.equal(mapped.collectionType, "RPG");
+  });
 });
 
 describe("hurt-catalog — pola handlowe", () => {

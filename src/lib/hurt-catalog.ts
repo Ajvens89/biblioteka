@@ -1,5 +1,6 @@
 import type { GameCollectionType } from "@prisma/client";
 import { parseCollectionType } from "@/lib/services/collection-type";
+import { inferCollectionTypeFromEan } from "@/lib/services/game-type-infer";
 import { scoreTitleMatch } from "@/lib/services/ean-providers/upcitemdb-provider";
 
 /** Pola katalogowe z hurt.csv — bez danych handlowych. */
@@ -174,12 +175,20 @@ function parseReleaseYear(releaseDate: string): number | null {
   return match ? Number.parseInt(match[0], 10) : null;
 }
 
-function inferCollectionType(category: string, label: string): GameCollectionType {
+function inferCollectionType(
+  category: string,
+  label: string,
+  ean?: string,
+): GameCollectionType {
   const combined = `${category} ${label}`.toLowerCase();
   if (combined.includes("rpg") || combined.includes("fabular")) return "RPG";
   try {
     return parseCollectionType(category);
   } catch {
+    if (ean) {
+      const digits = ean.replace(/\D/g, "");
+      if (digits.length >= 12) return inferCollectionTypeFromEan(digits);
+    }
     return "BOARD_GAME";
   }
 }
@@ -304,7 +313,7 @@ export function mapHurtProductToGameData(product: HurtCatalogProduct): HurtGameD
     yearPublished: parseReleaseYear(product.releaseDate),
     imageUrl: product.imageUrl?.trim() || null,
     thumbnailUrl: product.thumbnailUrl?.trim() || null,
-    collectionType: inferCollectionType(product.category, product.label),
+    collectionType: inferCollectionType(product.category, product.label, product.ean),
     language: product.language?.trim() || null,
     manufacturerInfo: product.manufacturerInfo?.trim() || null,
     safetyWarning: product.safetyWarning?.trim() || null,

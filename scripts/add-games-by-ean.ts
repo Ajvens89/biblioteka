@@ -139,14 +139,15 @@ function rpgDefaults(seed: GameSeed) {
 
 function mergeSeedWithHurt(seed: GameSeed, hurt: ReturnType<typeof mapHurtProductToGameData>) {
   const defs = rpgDefaults(seed);
-  const collectionType = hurt.collectionType ?? seed.collectionType ?? "RPG";
+  const collectionType = seed.collectionType ?? hurt.collectionType ?? "RPG";
+  const rpgCategory = seed.collectionType === "RPG" ? "RPG" : null;
   return {
     title: hurt.title || seed.title,
     collectionType,
     description: hurt.description ?? seed.description ?? null,
     shortDescription: hurt.shortDescription ?? seed.shortDescription ?? null,
     publisherName: hurt.publisherName ?? seed.publisher ?? null,
-    categoryName: hurt.categoryName ?? seed.category ?? null,
+    categoryName: seed.category ?? rpgCategory ?? hurt.categoryName ?? null,
     minPlayers: hurt.minPlayers ?? defs.minPlayers,
     maxPlayers: hurt.maxPlayers ?? defs.maxPlayers,
     minAge: hurt.minAge ?? defs.minAge,
@@ -187,7 +188,8 @@ async function mergeFromLookup(
 
   const defs = rpgDefaults(seed);
   const collectionType =
-    candidate?.collectionTypeSuggestion ?? seed.collectionType ?? "RPG";
+    seed.collectionType ?? candidate?.collectionTypeSuggestion ?? "RPG";
+  const rpgCategory = seed.collectionType === "RPG" ? "RPG" : null;
 
   return {
     title: candidate?.title ?? seed.title,
@@ -200,7 +202,7 @@ async function mergeFromLookup(
       null,
     publisherName:
       candidate?.publisher ?? descCandidate?.publisher ?? seed.publisher ?? null,
-    categoryName: seed.category ?? null,
+    categoryName: seed.category ?? rpgCategory ?? null,
     minPlayers: candidate?.minPlayers ?? defs.minPlayers,
     maxPlayers: candidate?.maxPlayers ?? defs.maxPlayers,
     minAge: candidate?.minAge ?? defs.minAge,

@@ -4,14 +4,15 @@ import {
   forwardRef,
   useEffect,
   useImperativeHandle,
-  useRef,
   useState,
 } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { CATALOG_COLLECTION_LABELS } from "@/lib/constants";
-import { SUGGEST_MIN_QUERY_LENGTH } from "@/lib/games/suggest-games";
-import type { GameSuggestItem } from "@/lib/games/suggest-games";
+import { SUGGEST_MIN_QUERY_LENGTH } from "@/lib/games/suggest-games.types";
+import type { GameSuggestItem } from "@/lib/games/suggest-games.types";
+import { suggestMatchLabel, useGameSuggestions } from "@/hooks/use-game-suggestions";
 import { cn } from "@/lib/utils";
 
 export type GameSearchSuggestionsHandle = {
@@ -34,14 +35,11 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
     ref,
   ) {
     const router = useRouter();
-    const [items, setItems] = useState<GameSuggestItem[]>([]);
-    const [loading, setLoading] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
-    const abortRef = useRef<AbortController | null>(null);
-    const requestSeqRef = useRef(0);
 
     const trimmed = query.trim();
     const panelOpen = open && trimmed.length >= SUGGEST_MIN_QUERY_LENGTH;
+    const { data: items = [], isFetching, isError } = useGameSuggestions(query, panelOpen);
 
     useEffect(() => {
       setActiveIndex(-1);
@@ -52,48 +50,6 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
         activeIndex >= 0 ? `${listId}-option-${activeIndex}` : undefined,
       );
     }, [activeIndex, listId, onActiveDescendantChange]);
-
-    useEffect(() => {
-      if (trimmed.length < SUGGEST_MIN_QUERY_LENGTH) {
-        setItems([]);
-        setLoading(false);
-        return;
-      }
-
-      const timer = setTimeout(async () => {
-        abortRef.current?.abort();
-        const controller = new AbortController();
-        abortRef.current = controller;
-        const seq = ++requestSeqRef.current;
-        setLoading(true);
-
-        try {
-          const res = await fetch(
-            `/api/games/suggest?q=${encodeURIComponent(trimmed)}`,
-            { signal: controller.signal },
-          );
-          if (seq !== requestSeqRef.current) return;
-          if (!res.ok) {
-            setItems([]);
-            return;
-          }
-          const data = (await res.json()) as { items: GameSuggestItem[] };
-          if (seq !== requestSeqRef.current) return;
-          setItems(data.items);
-        } catch (err) {
-          if ((err as Error).name === "AbortError") return;
-          if (seq !== requestSeqRef.current) return;
-          setItems([]);
-        } finally {
-          if (seq === requestSeqRef.current) setLoading(false);
-        }
-      }, 250);
-
-      return () => {
-        clearTimeout(timer);
-        abortRef.current?.abort();
-      };
-    }, [trimmed]);
 
     const activateItem = (item: GameSuggestItem) => {
       onSelect(item.title);
@@ -137,8 +93,9 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
 
     if (!panelOpen) return null;
 
-    const showEmpty = !loading && items.length === 0;
-    const listboxVisible = loading || items.length > 0 || showEmpty;
+    const loading = isFetching && items.length === 0;
+    const showEmpty = !loading && !isError && items.length === 0;
+    const listboxVisible = loading || items.length > 0 || showEmpty || isError;
 
     if (!listboxVisible) return null;
 
@@ -148,13 +105,18 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
         role="listbox"
         aria-label="Podpowiedzi wyszukiwania"
         aria-labelledby={inputId}
-        aria-busy={loading}
+        aria-busy={isFetching}
         className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg"
         data-testid="game-search-suggestions"
       >
-        {loading && items.length === 0 ? (
+        {loading ? (
           <li className="px-4 py-2 text-sm text-muted-foreground" role="presentation">
             Szukam…
+          </li>
+        ) : null}
+        {isError ? (
+          <li className="px-4 py-2 text-sm text-destructive" role="presentation">
+            Błąd połączenia — spróbuj ponownie
           </li>
         ) : null}
         {showEmpty ? (
@@ -165,6 +127,7 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
         {items.map((item, index) => {
           const active = index === activeIndex;
           const optionId = `${listId}-option-${index}`;
+          const matchLabel = suggestMatchLabel(item.matchKind);
           return (
             <li
               key={item.slug}
@@ -183,12 +146,17 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
                 onClick={() => activateItem(item)}
               >
                 {item.coverImageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.coverImageUrl}
-                    alt=""
-                    className="h-9 w-9 shrink-0 rounded object-cover"
-                  />
+                  <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded">
+                    <Image
+                      src={item.coverImageUrl}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="36px"
+                      loading="lazy"
+                      unoptimized={/^https?:\/\//i.test(item.coverImageUrl)}
+                    />
+                  </span>
                 ) : (
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-muted text-xs">
                     ?
@@ -198,6 +166,7 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
                   <span className="block truncate font-medium text-foreground">{item.title}</span>
                   <span className="text-xs text-muted-foreground">
                     {CATALOG_COLLECTION_LABELS[item.collectionType]}
+                    {matchLabel ? ` · ${matchLabel}` : ""}
                   </span>
                 </span>
               </Link>
