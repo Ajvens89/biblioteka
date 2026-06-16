@@ -182,6 +182,43 @@ test.describe("Biblioteka — E2E", () => {
     await expect(card).toBeVisible({ timeout: 15_000 });
   });
 
+  test("katalog: autocomplete sugestii po tytule", async ({ page }) => {
+    await page.goto("/katalog");
+    const input = page.getByTestId("catalog-search-input");
+    await input.fill("E2E");
+    await expect(page.getByTestId("game-search-suggestions")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("game-search-suggestions").getByRole("option").first()).toBeVisible();
+  });
+
+  test("katalog: filtry gatunkowe zmieniają URL", async ({ page }) => {
+    await page.goto("/katalog");
+    await expect(page.getByTestId("catalog-genre-filters")).toBeVisible();
+    await page.getByTestId("catalog-genre-filters").getByRole("button", { name: "Strategiczne" }).click();
+    await expect(page).toHaveURL(/category=strategia/);
+  });
+
+  test("katalog: filtry trudności zmieniają URL", async ({ page }) => {
+    await page.goto("/katalog");
+    await expect(page.getByTestId("catalog-difficulty-filters")).toBeVisible();
+    await page.getByTestId("catalog-difficulty-filters").getByRole("button", { name: "Łatwa" }).click();
+    await expect(page).toHaveURL(/difficulty=EASY/);
+  });
+
+  test("katalog: puste wyniki pokazują empty state", async ({ page }) => {
+    await page.goto("/katalog?q=xyzxyzxyz-brak-wynikow-e2e");
+    await expect(page.getByTestId("catalog-empty")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("catalog-empty")).toContainText(/Nie znaleziono/i);
+  });
+
+  test("header: wyszukiwarka przekierowuje do katalogu", async ({ page }) => {
+    await page.goto("/");
+    const input = page.getByTestId("header-search-input");
+    await expect(input).toBeVisible();
+    await input.fill("E2E");
+    await input.press("Enter");
+    await expect(page).toHaveURL(/\/katalog\?q=/);
+  });
+
   test("szczegóły gry: pokazuje EAN i typ zbioru", async ({ page }) => {
     await page.goto(`/gry/${E2E_FLOW_GAME_SLUG}`);
     await expect(page.getByTestId("game-collection-type")).toBeVisible();

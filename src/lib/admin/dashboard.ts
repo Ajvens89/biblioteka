@@ -23,6 +23,7 @@ async function fetchAdminDashboardInner() {
     overdueLoans,
     gamesWithoutEan,
     gamesWithoutCover,
+    gamesWithoutCopies,
     boardGames,
     rpgGames,
     recentReservations,
@@ -39,6 +40,9 @@ async function fetchAdminDashboardInner() {
     prisma.game.count({ where: { deletedAt: null, ean: null } }),
     prisma.game.count({
       where: { deletedAt: null, OR: [{ coverImageUrl: null }, { coverImageUrl: "" }] },
+    }),
+    prisma.game.count({
+      where: { deletedAt: null, copies: { none: {} } },
     }),
     prisma.game.count({ where: { deletedAt: null, collectionType: "BOARD_GAME" } }),
     prisma.game.count({ where: { deletedAt: null, collectionType: "RPG" } }),
@@ -89,6 +93,7 @@ async function fetchAdminDashboardInner() {
       overdueLoans,
       gamesWithoutEan,
       gamesWithoutCover,
+      gamesWithoutCopies,
       boardGames,
       rpgGames,
     },
@@ -103,6 +108,12 @@ async function fetchAdminDashboardInner() {
         id: "no-cover",
         message: `${gamesWithoutCover} gier bez okładki`,
         href: "/admin/gry?missingCover=1",
+        tone: "warning" as const,
+      },
+      gamesWithoutCopies > 0 && {
+        id: "no-copies",
+        message: `${gamesWithoutCopies} gier bez egzemplarzy`,
+        href: "/admin/gry?missingCopies=1",
         tone: "warning" as const,
       },
       overdueLoans > 0 && {

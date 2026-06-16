@@ -135,6 +135,15 @@ export function AdminGamesToolbar() {
         >
           Brak okładki
         </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={searchParams.get("missingCopies") === "1" ? "default" : "outline"}
+          data-testid="admin-filter-no-copies"
+          onClick={() => toggleFlag("missingCopies")}
+        >
+          Brak egzemplarzy
+        </Button>
         {(searchParams.toString().length > 0) && (
           <Button type="button" size="sm" variant="ghost" asChild>
             <Link href="/admin/gry">Wyczyść</Link>

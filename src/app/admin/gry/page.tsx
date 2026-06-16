@@ -33,6 +33,7 @@ export default async function AdminGamesPage({ searchParams }: PageProps) {
     collectionType: params.collectionType,
     missingEan: params.missingEan,
     missingCover: params.missingCover,
+    missingCopies: params.missingCopies,
     availability: params.availability,
     sort: params.sort,
   };

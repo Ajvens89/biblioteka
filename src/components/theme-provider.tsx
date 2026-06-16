@@ -12,6 +12,7 @@ import {
 } from "react";
 import {
   parseTheme,
+  readStoredTheme,
   writeThemePersistence,
   type Theme,
 } from "@/lib/theme";
@@ -48,12 +49,15 @@ function applyTheme(resolved: ResolvedTheme) {
 
 export function ThemeProvider({
   children,
-  initialTheme = "system",
+  initialTheme,
 }: {
   children: ReactNode;
   initialTheme?: Theme;
 }) {
-  const [theme, setThemeState] = useState<Theme>(() => parseTheme(initialTheme));
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window !== "undefined") return readStoredTheme();
+    return parseTheme(initialTheme);
+  });
   const systemTheme = useSyncExternalStore(
     subscribeSystemTheme,
     getSystemThemeSnapshot,

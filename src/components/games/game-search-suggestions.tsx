@@ -27,11 +27,24 @@ type Props = {
   listId: string;
   inputId: string;
   onActiveDescendantChange?: (optionId: string | undefined) => void;
+  /** Domyślnie szczegóły gry; catalog = wyniki w katalogu. */
+  linkTarget?: "game" | "catalog";
+  onSearchInCatalog?: () => void;
 };
 
 export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Props>(
   function GameSearchSuggestions(
-    { query, open, onClose, onSelect, listId, inputId, onActiveDescendantChange },
+    {
+      query,
+      open,
+      onClose,
+      onSelect,
+      listId,
+      inputId,
+      onActiveDescendantChange,
+      linkTarget = "game",
+      onSearchInCatalog,
+    },
     ref,
   ) {
     const router = useRouter();
@@ -51,10 +64,14 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
       );
     }, [activeIndex, listId, onActiveDescendantChange]);
 
-    const activateItem = (item: GameSuggestItem) => {
+    const navigateToItem = (item: GameSuggestItem) => {
       onSelect(item.title);
       onClose();
-      router.push(`/gry/${item.slug}`);
+      if (linkTarget === "catalog") {
+        router.push(`/katalog?q=${encodeURIComponent(item.title)}`);
+      } else {
+        router.push(`/gry/${item.slug}`);
+      }
     };
 
     useImperativeHandle(ref, () => ({
@@ -77,7 +94,7 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
 
         if (e.key === "Enter" && activeIndex >= 0 && items[activeIndex]) {
           e.preventDefault();
-          activateItem(items[activeIndex]);
+          navigateToItem(items[activeIndex]);
           return true;
         }
 
@@ -128,22 +145,22 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
           const active = index === activeIndex;
           const optionId = `${listId}-option-${index}`;
           const matchLabel = suggestMatchLabel(item.matchKind);
+          const href =
+            linkTarget === "catalog"
+              ? `/katalog?q=${encodeURIComponent(item.title)}`
+              : `/gry/${item.slug}`;
+
           return (
-            <li
-              key={item.slug}
-              id={optionId}
-              role="option"
-              aria-selected={active}
-            >
+            <li key={item.slug} id={optionId} role="option" aria-selected={active}>
               <Link
-                href={`/gry/${item.slug}`}
+                href={href}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 text-sm transition-colors hover:bg-muted",
                   active && "bg-muted",
                 )}
                 onMouseDown={(e) => e.preventDefault()}
                 onMouseEnter={() => setActiveIndex(index)}
-                onClick={() => activateItem(item)}
+                onClick={() => navigateToItem(item)}
               >
                 {item.coverImageUrl ? (
                   <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded">
@@ -173,6 +190,22 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
             </li>
           );
         })}
+        {items.length > 0 && onSearchInCatalog ? (
+          <li role="presentation" className="border-t border-border">
+            <button
+              type="button"
+              className="w-full px-4 py-2.5 text-left text-sm font-medium text-primary hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                onClose();
+                onSearchInCatalog();
+              }}
+              data-testid="suggest-search-catalog"
+            >
+              Szukaj „{trimmed}” w katalogu
+            </button>
+          </li>
+        ) : null}
       </ul>
     );
   },

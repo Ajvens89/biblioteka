@@ -4,16 +4,17 @@ import { logoutAction } from "@/lib/actions/auth";
 import { getSessionUser, isStaff } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { HeaderSearch } from "@/components/layout/header-search";
 
 export async function SiteHeader() {
   const user = await getSessionUser();
 
   return (
     <header className="site-header sticky top-0 z-50">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 md:gap-4 md:px-6">
         <Link
           href="/"
-          className="group flex items-baseline gap-2 font-display text-foreground transition-colors hover:text-primary"
+          className="group flex shrink-0 items-baseline gap-2 font-display text-foreground transition-colors hover:text-primary"
         >
           <span className="text-lg font-medium tracking-tight md:text-xl">Zakątek</span>
           <span className="hidden text-sm font-normal text-muted-foreground sm:inline">
@@ -21,7 +22,11 @@ export async function SiteHeader() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
+        <div className="hidden min-w-0 flex-1 justify-center md:flex">
+          <HeaderSearch />
+        </div>
+
+        <nav className="hidden items-center gap-6 lg:flex">
           <Link href="/katalog" className="site-nav-link">
             Katalog
           </Link>
@@ -38,7 +43,7 @@ export async function SiteHeader() {
           )}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <ThemeToggle />
           {user ? (
             <>
@@ -64,6 +69,9 @@ export async function SiteHeader() {
             </Button>
           )}
         </div>
+      </div>
+      <div className="border-t border-border/60 px-4 pb-3 pt-2 md:hidden">
+        <HeaderSearch />
       </div>
     </header>
   );

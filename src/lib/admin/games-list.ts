@@ -8,6 +8,7 @@ export type AdminGamesSearchParams = {
   collectionType?: string;
   missingEan?: string;
   missingCover?: string;
+  missingCopies?: string;
   availability?: string;
   sort?: string;
 };
@@ -39,6 +40,10 @@ export function buildAdminGamesWhere(params: AdminGamesSearchParams): Prisma.Gam
     where.OR = [{ coverImageUrl: null }, { coverImageUrl: "" }];
   }
 
+  if (params.missingCopies === "1") {
+    where.copies = { none: {} };
+  }
+
   if (params.availability === "available") {
     where.copies = { some: { status: "AVAILABLE" } };
   } else if (params.availability === "unavailable") {
@@ -59,6 +64,8 @@ export function buildAdminGamesOrderBy(
       return [{ ean: "asc" }, { title: "asc" }];
     case "missingCover":
       return [{ coverImageUrl: "asc" }, { title: "asc" }];
+    case "missingCopies":
+      return [{ title: "asc" }];
     default:
       return { title: "asc" };
   }

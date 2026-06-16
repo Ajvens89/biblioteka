@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { normalizeEan } from "@/lib/services/ean";
 import { paginateIds, sortGamesByAvailableCopies } from "@/lib/games/sort-games-by-availability";
@@ -309,3 +310,22 @@ export async function fetchPublicStats() {
   ]);
   return { games, copies, available, rpg };
 }
+
+const HOME_CACHE_SECONDS = 60;
+
+export const fetchPublicStatsCached = unstable_cache(fetchPublicStats, ["home-public-stats"], {
+  revalidate: HOME_CACHE_SECONDS,
+});
+
+export const fetchAvailableNowCached = unstable_cache(
+  (limit = 6) => fetchAvailableNow(limit),
+  ["home-available-now"],
+  { revalidate: HOME_CACHE_SECONDS },
+);
+
+export const fetchShowcaseGamesCached = unstable_cache(
+  (collectionType: "BOARD_GAME" | "RPG", limit = 4) =>
+    fetchShowcaseGames(collectionType, limit),
+  ["home-showcase"],
+  { revalidate: HOME_CACHE_SECONDS },
+);

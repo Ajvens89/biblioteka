@@ -5,12 +5,14 @@ import { FAQSection } from "@/components/home/faq-section";
 import { DbUnavailableBanner } from "@/components/db-unavailable-banner";
 import { isDatabaseAvailable } from "@/lib/db";
 import {
-  fetchAvailableNow,
-  fetchPublicStats,
-  fetchShowcaseGames,
+  fetchAvailableNowCached,
+  fetchPublicStatsCached,
+  fetchShowcaseGamesCached,
   type GameListItem,
 } from "@/lib/games/queries";
 import type { ShowcaseGame } from "@/components/home/types";
+
+export const revalidate = 60;
 
 function toShowcase(games: GameListItem[]): ShowcaseGame[] {
   return games.map((g) => ({
@@ -35,10 +37,10 @@ export default async function HomePage() {
   const dbOk = await isDatabaseAvailable();
   const [available, stats, boardShowcase, rpgShowcase] = dbOk
     ? await Promise.all([
-        fetchAvailableNow(6),
-        fetchPublicStats(),
-        fetchShowcaseGames("BOARD_GAME", 4),
-        fetchShowcaseGames("RPG", 4),
+        fetchAvailableNowCached(6),
+        fetchPublicStatsCached(),
+        fetchShowcaseGamesCached("BOARD_GAME", 4),
+        fetchShowcaseGamesCached("RPG", 4),
       ])
     : [empty, FALLBACK_STATS, empty, empty];
 

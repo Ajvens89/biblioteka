@@ -81,6 +81,7 @@ function DashboardContent({
           <StatCard label="Przeterminowane" value={stats.overdueLoans} href="/admin/wypozyczenia?status=OVERDUE" tone="danger" />
           <StatCard label="Gry bez EAN" value={stats.gamesWithoutEan} href="/admin/gry?missingEan=1" tone="warning" />
           <StatCard label="Gry bez okładki" value={stats.gamesWithoutCover} href="/admin/gry?missingCover=1" tone="warning" />
+          <StatCard label="Gry bez egzemplarzy" value={stats.gamesWithoutCopies} href="/admin/gry?missingCopies=1" tone="warning" />
           <StatCard label="Gry fabularne" value={stats.rpgGames} href="/admin/gry?collectionType=RPG" />
           <StatCard label="Gry planszowe" value={stats.boardGames} href="/admin/gry?collectionType=BOARD_GAME" />
         </div>
