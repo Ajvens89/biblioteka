@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 export function ProfileForm({
   fullName,
   phone,
+  emailNotificationsEnabled,
 }: {
   fullName: string;
   phone: string;
+  emailNotificationsEnabled: boolean;
 }) {
   const [pending, start] = useTransition();
 
@@ -34,6 +36,22 @@ export function ProfileForm({
       <div className="space-y-2">
         <Label htmlFor="phone">Telefon</Label>
         <Input id="phone" name="phone" defaultValue={phone} />
+      </div>
+      <div className="flex items-start gap-3 rounded-lg border border-border/80 p-4">
+        <input
+          type="checkbox"
+          id="emailNotificationsEnabled"
+          name="emailNotificationsEnabled"
+          defaultChecked={emailNotificationsEnabled}
+          value="on"
+          className="mt-1 h-4 w-4 rounded border border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+        <div>
+          <Label htmlFor="emailNotificationsEnabled">Powiadomienia e-mail</Label>
+          <p className="text-xs text-muted-foreground">
+            Przypomnienia o terminach, rezerwacjach i liście oczekujących.
+          </p>
+        </div>
       </div>
       <Button type="submit" disabled={pending}>
         Zapisz zmiany

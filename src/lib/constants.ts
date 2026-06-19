@@ -97,6 +97,8 @@ export const DEFAULT_SETTINGS = {
   defaultLoanDays: "14",
   reservationValidityDays: "3",
   maxLoanExtensions: "2",
+  waitlistValidityDays: "14",
+  waitlistNotifyHours: "48",
   contactEmail: "kontakt@zakatki-fantastyki.pl",
   contactPhone: "+48 000 000 000",
   foundationAddress: "Fundacja Zakątek Fantastyki",

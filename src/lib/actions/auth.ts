@@ -130,12 +130,17 @@ export async function updateProfileAction(
   const parsed = profileSchema.safeParse({
     fullName: formData.get("fullName") || undefined,
     phone: formData.get("phone") || undefined,
+    emailNotificationsEnabled: formData.get("emailNotificationsEnabled")?.toString(),
   });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd");
 
   await prisma.profile.update({
     where: { id: user.id },
-    data: parsed.data,
+    data: {
+      fullName: parsed.data.fullName,
+      phone: parsed.data.phone,
+      emailNotificationsEnabled: parsed.data.emailNotificationsEnabled ?? false,
+    },
   });
 
   await logAudit({

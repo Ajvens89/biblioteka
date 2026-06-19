@@ -20,6 +20,10 @@ export const registerSchema = z
 export const profileSchema = z.object({
   fullName: z.string().min(2).optional(),
   phone: z.string().optional(),
+  emailNotificationsEnabled: z
+    .union([z.literal("on"), z.literal("true"), z.literal("1")])
+    .optional()
+    .transform((v) => v === "on" || v === "true" || v === "1"),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

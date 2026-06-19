@@ -15,6 +15,8 @@ const labels: Record<keyof typeof DEFAULT_SETTINGS, string> = {
   defaultLoanDays: "Domyślny czas wypożyczenia (dni)",
   reservationValidityDays: "Ważność rezerwacji (dni)",
   maxLoanExtensions: "Maks. przedłużeń",
+  waitlistValidityDays: "Ważność wpisu na liście oczekujących (dni)",
+  waitlistNotifyHours: "Czas na rezerwację po powiadomieniu (godz.)",
   contactEmail: "E-mail kontaktowy",
   contactPhone: "Telefon",
   foundationAddress: "Adres fundacji",
