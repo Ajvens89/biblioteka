@@ -13,6 +13,8 @@ type Props = {
   variant?: "default" | "destructive";
   onConfirm: () => void;
   loading?: boolean;
+  children?: React.ReactNode;
+  closeOnConfirm?: boolean;
 };
 
 export function ConfirmDialog({
@@ -25,6 +27,8 @@ export function ConfirmDialog({
   variant = "default",
   onConfirm,
   loading,
+  children,
+  closeOnConfirm = true,
 }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -33,6 +37,7 @@ export function ConfirmDialog({
           <DialogTitle>{title}</DialogTitle>
           <p className="text-sm text-muted-foreground">{description}</p>
         </DialogHeader>
+        {children}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             {cancelLabel}
@@ -43,7 +48,7 @@ export function ConfirmDialog({
             disabled={loading}
             onClick={() => {
               onConfirm();
-              onOpenChange(false);
+              if (closeOnConfirm) onOpenChange(false);
             }}
           >
             {confirmLabel}

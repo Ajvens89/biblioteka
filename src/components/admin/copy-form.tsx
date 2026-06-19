@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import type { Game } from "@prisma/client";
+import type { CopyStatus, Game } from "@prisma/client";
 import { createCopy, updateCopy } from "@/lib/actions/games";
+import { editCopy } from "@/lib/actions/copies";
 import { COPY_STATUS_LABELS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,13 +27,21 @@ export function CopyForm({
   copy,
   games,
   defaultGameId,
+  allowedStatuses,
+  useFullEdit = false,
 }: {
   copy?: CopyData;
   games: Pick<Game, "id" | "title">[];
   defaultGameId?: string;
+  allowedStatuses?: CopyStatus[];
+  useFullEdit?: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
+
+  const statusOptions = allowedStatuses?.length
+    ? allowedStatuses
+    : (Object.keys(COPY_STATUS_LABELS) as CopyStatus[]);
 
   return (
     <form
@@ -44,17 +53,21 @@ export function CopyForm({
             gameId: String(formData.get("gameId")),
             inventoryNumber: String(formData.get("inventoryNumber")),
             barcode: String(formData.get("barcode") || "") || undefined,
-            status: String(formData.get("status")) as "AVAILABLE",
+            status: String(formData.get("status")) as CopyStatus,
             condition: String(formData.get("condition")) as "GOOD",
             location: String(formData.get("location") || "") || undefined,
             notes: String(formData.get("notes") || "") || undefined,
           };
-          const result = copy?.id
-            ? await updateCopy(copy.id, input)
-            : await createCopy(input);
+          const result =
+            copy?.id && useFullEdit
+              ? await editCopy({ ...input, copyId: copy.id })
+              : copy?.id
+                ? await updateCopy(copy.id, input)
+                : await createCopy(input);
           if (result.success) {
-            toast.success("Zapisano egzemplarz.");
-            router.refresh();
+            toast.success(result.message ?? "Zapisano egzemplarz.");
+            if (copy?.id) router.refresh();
+            else router.push("/admin/egzemplarze");
           } else toast.error(result.error);
         })
       }
@@ -67,6 +80,7 @@ export function CopyForm({
           className="h-10 w-full rounded-md border px-2"
           defaultValue={copy?.gameId ?? defaultGameId ?? games[0]?.id}
           required
+          disabled={Boolean(copy?.id && useFullEdit)}
         >
           {games.map((g) => (
             <option key={g.id} value={g.id}>{g.title}</option>
@@ -98,8 +112,11 @@ export function CopyForm({
       <div className="space-y-2">
         <Label>Status</Label>
         <select name="status" className="h-10 w-full rounded-md border px-2" defaultValue={copy?.status ?? "AVAILABLE"}>
-          {Object.entries(COPY_STATUS_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
+          {(copy?.status && !statusOptions.includes(copy.status as CopyStatus)
+            ? [copy.status as CopyStatus, ...statusOptions]
+            : statusOptions
+          ).map((k) => (
+            <option key={k} value={k}>{COPY_STATUS_LABELS[k]}</option>
           ))}
         </select>
       </div>

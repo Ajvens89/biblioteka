@@ -232,3 +232,75 @@ export async function cancelReservation(
     metadata: audit.metadata,
   });
 }
+
+export async function rejectReservation(
+  prisma: PrismaClient,
+  reservationId: string,
+  audit: AuditContext & { reason?: string },
+): Promise<void> {
+  const reservation = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+    select: { id: true, status: true, copyId: true },
+  });
+  if (!reservation) {
+    throw new ServiceError("Rezerwacja nie istnieje.", "NOT_FOUND");
+  }
+  if (!["PENDING", "APPROVED"].includes(reservation.status)) {
+    throw new ServiceError("Można odrzucić tylko oczekującą lub zatwierdzoną rezerwację.", "INVALID_STATUS");
+  }
+
+  await cancelReservation(prisma, reservationId, reservation.copyId, {
+    actorId: audit.actorId,
+    metadata: {
+      rejected: true,
+      reason: audit.reason ?? null,
+      ...(audit.metadata && typeof audit.metadata === "object" && !Array.isArray(audit.metadata)
+        ? (audit.metadata as Prisma.InputJsonObject)
+        : {}),
+    },
+  });
+}
+
+export async function extendPickupDeadline(
+  prisma: PrismaClient,
+  reservationId: string,
+  days: number,
+  audit: AuditContext,
+): Promise<{ pickupDeadline: Date }> {
+  const reservation = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+    select: { id: true, status: true, pickupDeadline: true, createdAt: true },
+  });
+  if (!reservation) {
+    throw new ServiceError("Rezerwacja nie istnieje.", "NOT_FOUND");
+  }
+  if (!["PENDING", "APPROVED", "READY_FOR_PICKUP"].includes(reservation.status)) {
+    throw new ServiceError("Nie można przedłużyć terminu dla tej rezerwacji.", "INVALID_STATUS");
+  }
+
+  const base = reservation.pickupDeadline ?? reservation.createdAt;
+  const pickupDeadline = new Date(base);
+  pickupDeadline.setDate(pickupDeadline.getDate() + days);
+
+  await prisma.reservation.update({
+    where: { id: reservationId },
+    data: { pickupDeadline },
+  });
+
+  await logAudit({
+    actorId: audit.actorId,
+    action: "UPDATE",
+    entityType: "reservation",
+    entityId: reservationId,
+    metadata: {
+      operation: "extendPickup",
+      days,
+      pickupDeadline: pickupDeadline.toISOString(),
+      ...(audit.metadata && typeof audit.metadata === "object" && !Array.isArray(audit.metadata)
+        ? (audit.metadata as Prisma.InputJsonObject)
+        : {}),
+    },
+  });
+
+  return { pickupDeadline };
+}

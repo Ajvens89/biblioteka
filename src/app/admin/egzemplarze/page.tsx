@@ -3,9 +3,11 @@ import type { Prisma } from "@prisma/client";
 import { requireStaff } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { normalizeEan } from "@/lib/services/ean";
+import { paginateQuery, parsePageParams } from "@/lib/pagination";
 import { CopyForm } from "@/components/admin/copy-form";
 import { CopyQr } from "@/components/admin/copy-qr";
 import { CopiesScanPanel } from "@/components/admin/copies-scan-panel";
+import { AdminPagination } from "@/components/admin/admin-pagination";
 import { PageHeader } from "@/components/ui/page-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -15,50 +17,63 @@ import { Button } from "@/components/ui/button";
 
 export const metadata = { title: "Egzemplarze" };
 
+function buildCopySearchWhere(q?: string): Prisma.GameCopyWhereInput | undefined {
+  if (!q?.trim()) return undefined;
+  const term = q.trim();
+  const or: Prisma.GameCopyWhereInput[] = [
+    { inventoryNumber: { contains: term, mode: "insensitive" } },
+    { barcode: { contains: term, mode: "insensitive" } },
+    { game: { title: { contains: term, mode: "insensitive" } } },
+  ];
+  try {
+    or.push({ game: { ean: normalizeEan(term) } });
+  } catch {
+    or.push({ game: { ean: { contains: term } } });
+  }
+  return { OR: or };
+}
+
 export default async function AdminCopiesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ scan?: string; scanMode?: string; q?: string; gameId?: string }>;
+  searchParams: Promise<{ scan?: string; scanMode?: string; q?: string; gameId?: string; page?: string }>;
 }) {
   await requireStaff();
-  const { scan, scanMode, q, gameId } = await searchParams;
+  const params = await searchParams;
+  const { scan, scanMode, q, gameId } = params;
+  const { page, pageSize } = parsePageParams(params);
+  const listWhere = buildCopySearchWhere(q);
 
-  const listWhere: Prisma.GameCopyWhereInput = {};
-  if (q?.trim()) {
-    const term = q.trim();
-    const or: Prisma.GameCopyWhereInput[] = [
-      { inventoryNumber: { contains: term, mode: "insensitive" } },
-      { barcode: { contains: term, mode: "insensitive" } },
-      { game: { title: { contains: term, mode: "insensitive" } } },
-    ];
-    try {
-      or.push({ game: { ean: normalizeEan(term) } });
-    } catch {
-      or.push({ game: { ean: { contains: term } } });
-    }
-    listWhere.OR = or;
-  }
-
-  const [copies, games] = await Promise.all([
-    prisma.gameCopy.findMany({
-      where: listWhere,
-      include: {
-        game: { select: { id: true, title: true, ean: true, slug: true } },
-        loans: {
-          where: { status: { in: ["ACTIVE", "OVERDUE"] } },
-          take: 1,
-          include: { user: { select: { fullName: true, email: true } } },
-        },
-      },
-      orderBy: { inventoryNumber: "asc" },
-      take: 200,
-    }),
+  const [result, games] = await Promise.all([
+    paginateQuery(
+      () => prisma.gameCopy.count({ where: listWhere }),
+      (skip, take) =>
+        prisma.gameCopy.findMany({
+          where: listWhere,
+          include: {
+            game: { select: { id: true, title: true, ean: true, slug: true } },
+            loans: {
+              where: { status: { in: ["ACTIVE", "OVERDUE"] } },
+              take: 1,
+              include: { user: { select: { fullName: true, email: true } } },
+            },
+          },
+          orderBy: { inventoryNumber: "asc" },
+          skip,
+          take,
+        }),
+      page,
+      pageSize,
+    ),
     prisma.game.findMany({
       where: { deletedAt: null, isActive: true },
       select: { id: true, title: true },
       orderBy: { title: "asc" },
     }),
   ]);
+
+  const copies = result.items;
+  const pageParams = { q, scan, scanMode, gameId, page: String(page) };
 
   const highlighted =
     scan && scanMode !== "product_ean"
@@ -96,6 +111,11 @@ export default async function AdminCopiesPage({
       <PageHeader
         title="Egzemplarze"
         description="Konkretne pudełka w bibliotece — numery inwentarzowe, kody naklejek i statusy."
+        actions={
+          <Button size="sm" asChild>
+            <Link href="/admin/obsluga">Obsługa skanem</Link>
+          </Button>
+        }
       />
 
       <CopiesScanPanel defaultScan={scan} />
@@ -127,10 +147,13 @@ export default async function AdminCopiesPage({
               </p>
             )}
             <div className="flex flex-wrap gap-2">
+              <Button size="sm" asChild>
+                <Link href={`/admin/egzemplarze/${selectedCopy.id}`}>Edytuj</Link>
+              </Button>
               <Button size="sm" variant="outline" asChild>
                 <Link href={`/admin/egzemplarze?gameId=${selectedCopy.gameId}`}>Dodaj kolejny</Link>
               </Button>
-              <Button size="sm" asChild>
+              <Button size="sm" variant="outline" asChild>
                 <Link href={`/gry/${selectedCopy.game.slug}`}>Katalog publiczny</Link>
               </Button>
             </div>
@@ -189,7 +212,7 @@ export default async function AdminCopiesPage({
                   <th className="p-3 text-left">EAN produktu</th>
                   <th className="p-3 text-left">Status</th>
                   <th className="p-3 text-left">Wypożyczenie</th>
-                  <th className="p-3 text-left">QR</th>
+                  <th className="p-3 text-left">Akcje</th>
                 </tr>
               </thead>
               <tbody>
@@ -207,7 +230,12 @@ export default async function AdminCopiesPage({
                         : "—"}
                     </td>
                     <td className="p-3">
-                      <CopyQr inventoryNumber={c.inventoryNumber} />
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button size="sm" variant="outline" asChild>
+                          <Link href={`/admin/egzemplarze/${c.id}`}>Edytuj</Link>
+                        </Button>
+                        <CopyQr inventoryNumber={c.inventoryNumber} />
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -220,9 +248,19 @@ export default async function AdminCopiesPage({
                 <p className="font-semibold">{c.game.title}</p>
                 <p className="font-mono text-xs">{c.inventoryNumber}</p>
                 <StatusBadge kind="copy" status={c.status} className="mt-2" />
+                <Button size="sm" className="mt-3" variant="outline" asChild>
+                  <Link href={`/admin/egzemplarze/${c.id}`}>Edytuj</Link>
+                </Button>
               </div>
             ))}
           </div>
+
+          <AdminPagination
+            page={result.page}
+            totalPages={result.totalPages}
+            basePath="/admin/egzemplarze"
+            params={pageParams}
+          />
         </>
       )}
     </div>

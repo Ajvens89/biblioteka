@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LoanActions } from "@/components/admin/loan-actions";
+import { AdminPagination } from "@/components/admin/admin-pagination";
 import { PageHeader } from "@/components/ui/page-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -7,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { LOAN_STATUS_LABELS } from "@/lib/constants";
 import { prisma } from "@/lib/db";
+import { paginateQuery, parsePageParams } from "@/lib/pagination";
 import { formatDate } from "@/lib/utils";
 import type { LoanStatus } from "@prisma/client";
 import { ClipboardList } from "lucide-react";
@@ -18,35 +20,48 @@ const statuses = Object.keys(LOAN_STATUS_LABELS) as LoanStatus[];
 export default async function AdminLoansPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; page?: string }>;
 }) {
-  const { status } = await searchParams;
-  const loans = await prisma.loan.findMany({
-    where: status ? { status: status as LoanStatus } : undefined,
-    include: { user: true, copy: { include: { game: true } } },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+  const params = await searchParams;
+  const { page, pageSize } = parsePageParams(params);
+  const statusFilter = params.status as LoanStatus | undefined;
+  const where = statusFilter ? { status: statusFilter } : undefined;
+
+  const result = await paginateQuery(
+    () => prisma.loan.count({ where }),
+    (skip, take) =>
+      prisma.loan.findMany({
+        where,
+        include: { user: true, copy: { include: { game: true } } },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+      }),
+    page,
+    pageSize,
+  );
+
+  const pageParams = { status: params.status, page: String(page) };
 
   return (
     <div className="space-y-6 overflow-x-hidden">
       <PageHeader title="Wypożyczenia" description="Aktywne wypożyczenia, zwroty i przeterminowania." />
 
       <div className="flex flex-wrap gap-2">
-        <Button variant={!status ? "default" : "outline"} size="sm" asChild>
+        <Button variant={!statusFilter ? "default" : "outline"} size="sm" asChild>
           <Link href="/admin/wypozyczenia">Wszystkie</Link>
         </Button>
         {statuses.map((s) => (
-          <Button key={s} variant={status === s ? "default" : "outline"} size="sm" asChild>
+          <Button key={s} variant={statusFilter === s ? "default" : "outline"} size="sm" asChild>
             <Link href={`/admin/wypozyczenia?status=${s}`}>{LOAN_STATUS_LABELS[s]}</Link>
           </Button>
         ))}
       </div>
 
-      {loans.length === 0 ? (
+      {result.items.length === 0 ? (
         <EmptyState
           title="Brak wypożyczeń"
-          description={status ? "Brak pozycji w wybranym statusie." : "Nie zarejestrowano jeszcze wypożyczeń."}
+          description={statusFilter ? "Brak pozycji w wybranym statusie." : "Nie zarejestrowano jeszcze wypożyczeń."}
           icon={<ClipboardList className="h-7 w-7" />}
         />
       ) : (
@@ -63,7 +78,7 @@ export default async function AdminLoansPage({
                 </tr>
               </thead>
               <tbody>
-                {loans.map((l) => (
+                {result.items.map((l) => (
                   <tr
                     key={l.id}
                     className={`border-t ${l.status === "OVERDUE" ? "bg-destructive/5" : ""}`}
@@ -86,7 +101,7 @@ export default async function AdminLoansPage({
           </div>
 
           <div className="grid gap-4 md:hidden">
-            {loans.map((l) => (
+            {result.items.map((l) => (
               <SectionCard key={l.id}>
                 <div
                   className="space-y-3"
@@ -108,6 +123,13 @@ export default async function AdminLoansPage({
               </SectionCard>
             ))}
           </div>
+
+          <AdminPagination
+            page={result.page}
+            totalPages={result.totalPages}
+            basePath="/admin/wypozyczenia"
+            params={pageParams}
+          />
         </>
       )}
     </div>

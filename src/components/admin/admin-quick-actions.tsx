@@ -18,6 +18,7 @@ const actions = [
   { href: "/admin/import", label: "Import products.json", icon: Upload, testId: "admin-quick-import" },
   { href: "/admin/import#audit", label: "Audyt EAN", icon: Barcode, testId: "admin-quick-audit" },
   { href: "/admin/rezerwacje?status=PENDING", label: "Rezerwacje do obsługi", icon: CalendarCheck, testId: "admin-quick-reservations" },
+  { href: "/admin/obsluga", label: "Obsługa skanem", icon: ScanLine, testId: "admin-quick-circulation" },
   { href: "/admin/wypozyczenia?status=OVERDUE", label: "Wypożyczenia przeterminowane", icon: AlertTriangle, testId: "admin-quick-overdue" },
   { href: "/admin/egzemplarze", label: "Dodaj egzemplarz", icon: BookCopy, testId: "admin-quick-add-copy" },
   { href: "/admin/wypozyczenia", label: "Wypożyczenia", icon: ClipboardList, testId: "admin-quick-loans" },

@@ -78,6 +78,85 @@ export async function issueLoanFromReservation(
   return { loanId: loan.id, gameSlug: reservation.game?.slug ?? null };
 }
 
+/**
+ * Wydanie na miejscu (bez rezerwacji) — walk-in.
+ */
+export async function issueWalkInLoan(
+  prisma: PrismaClient,
+  userId: string,
+  copyId: string,
+  audit: AuditContext,
+): Promise<IssueLoanResult> {
+  const user = await prisma.profile.findUnique({
+    where: { id: userId },
+    select: { id: true, isBlocked: true },
+  });
+  if (!user) {
+    throw new ServiceError("Użytkownik nie istnieje.", "NOT_FOUND");
+  }
+  if (user.isBlocked) {
+    throw new ServiceError("Konto użytkownika jest zablokowane.", "BLOCKED");
+  }
+
+  const overdue = await prisma.loan.findFirst({
+    where: { userId, status: "OVERDUE" },
+  });
+  if (overdue) {
+    throw new ServiceError("Użytkownik ma przeterminowane wypożyczenie.", "OVERDUE_LOAN");
+  }
+
+  const copy = await prisma.gameCopy.findUnique({
+    where: { id: copyId },
+    include: { game: { select: { slug: true, title: true, isActive: true, deletedAt: true } } },
+  });
+  if (!copy) {
+    throw new ServiceError("Egzemplarz nie istnieje.", "NOT_FOUND");
+  }
+  if (!copy.game.isActive || copy.game.deletedAt) {
+    throw new ServiceError("Gra nie jest dostępna w katalogu.", "INACTIVE_GAME");
+  }
+
+  const loanDays = await getSettingNumber("defaultLoanDays", 14);
+  const dueAt = new Date();
+  dueAt.setDate(dueAt.getDate() + loanDays);
+
+  const loan = await prisma.$transaction(async (tx) => {
+    const copyLock = await tx.gameCopy.updateMany({
+      where: { id: copyId, status: "AVAILABLE" },
+      data: { status: "BORROWED" },
+    });
+    if (copyLock.count === 0) {
+      throw new ServiceError("Egzemplarz nie jest dostępny do wydania.", "COPY_BUSY");
+    }
+
+    return tx.loan.create({
+      data: {
+        userId,
+        copyId,
+        dueAt,
+        status: "ACTIVE",
+      },
+    });
+  });
+
+  await logAudit({
+    actorId: audit.actorId,
+    action: "BORROW",
+    entityType: "loan",
+    entityId: loan.id,
+    metadata: {
+      walkIn: true,
+      copyId,
+      userId,
+      ...(audit.metadata && typeof audit.metadata === "object" && !Array.isArray(audit.metadata)
+        ? (audit.metadata as Prisma.InputJsonObject)
+        : {}),
+    },
+  });
+
+  return { loanId: loan.id, gameSlug: copy.game.slug ?? null };
+}
+
 export type ReturnLoanOptions = {
   damageNotes?: string;
   markDamaged?: boolean;

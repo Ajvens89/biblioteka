@@ -1,16 +1,32 @@
 import { requireAdmin } from "@/lib/auth/guards";
+import { AdminPagination } from "@/components/admin/admin-pagination";
 import { prisma } from "@/lib/db";
+import { paginateQuery, parsePageParams } from "@/lib/pagination";
 import { formatDateTime } from "@/lib/utils";
 
 export const metadata = { title: "Logi aktywności" };
 
-export default async function AdminLogsPage() {
+export default async function AdminLogsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await requireAdmin();
-  const logs = await prisma.auditLog.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 200,
-    include: { actor: { select: { email: true, fullName: true } } },
-  });
+  const params = await searchParams;
+  const { page, pageSize } = parsePageParams(params, { defaultPageSize: 50 });
+
+  const result = await paginateQuery(
+    () => prisma.auditLog.count(),
+    (skip, take) =>
+      prisma.auditLog.findMany({
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        include: { actor: { select: { email: true, fullName: true } } },
+      }),
+    page,
+    pageSize,
+  );
 
   return (
     <div className="space-y-6">
@@ -22,11 +38,12 @@ export default async function AdminLogsPage() {
               <th className="p-3 text-left">Data</th>
               <th className="p-3 text-left">Akcja</th>
               <th className="p-3 text-left">Encja</th>
+              <th className="p-3 text-left">Szczegóły</th>
               <th className="p-3 text-left">Użytkownik</th>
             </tr>
           </thead>
           <tbody>
-            {logs.map((log) => (
+            {result.items.map((log) => (
               <tr key={log.id} className="border-t">
                 <td className="p-3 text-muted-foreground">{formatDateTime(log.createdAt)}</td>
                 <td className="p-3">{log.action}</td>
@@ -36,12 +53,22 @@ export default async function AdminLogsPage() {
                     <span className="text-xs text-muted-foreground"> · {log.entityId.slice(0, 8)}</span>
                   )}
                 </td>
+                <td className="p-3 max-w-xs truncate text-xs text-muted-foreground">
+                  {log.metadata ? JSON.stringify(log.metadata) : "—"}
+                </td>
                 <td className="p-3">{log.actor?.fullName ?? log.actor?.email ?? "—"}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      <AdminPagination
+        page={result.page}
+        totalPages={result.totalPages}
+        basePath="/admin/logi"
+        params={{ page: String(page) }}
+      />
     </div>
   );
 }

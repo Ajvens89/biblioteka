@@ -9,6 +9,8 @@ import { fail, fromServiceError, ok, type ActionResult } from "@/lib/actions/uti
 import {
   createReservationAsStaffSchema,
   createReservationSchema,
+  extendPickupSchema,
+  rejectReservationSchema,
   reservationIdSchema,
 } from "@/lib/validations/ids";
 import * as reservationService from "@/lib/services/reservations";
@@ -246,4 +248,54 @@ export async function markReadyForPickup(reservationId: string): Promise<ActionR
   revalidatePath("/admin/rezerwacje");
   revalidatePath("/moje-rezerwacje");
   return ok();
+}
+
+export async function rejectReservation(
+  reservationId: string,
+  reason: string,
+): Promise<ActionResult> {
+  const parsed = rejectReservationSchema.safeParse({ reservationId, reason });
+  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
+
+  const actorResult = await requireActorStaff();
+  if (!isActorResult(actorResult)) return actorResult;
+
+  try {
+    await reservationService.rejectReservation(prisma, parsed.data.reservationId, {
+      actorId: actorResult.id,
+      reason: parsed.data.reason,
+    });
+  } catch (e) {
+    return fromServiceError(e);
+  }
+
+  revalidatePath("/admin/rezerwacje");
+  revalidatePath("/moje-rezerwacje");
+  return ok(undefined, "Rezerwacja odrzucona.");
+}
+
+export async function extendReservationPickup(
+  reservationId: string,
+  days = 3,
+): Promise<ActionResult> {
+  const parsed = extendPickupSchema.safeParse({ reservationId, days });
+  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
+
+  const actorResult = await requireActorStaff();
+  if (!isActorResult(actorResult)) return actorResult;
+
+  try {
+    await reservationService.extendPickupDeadline(
+      prisma,
+      parsed.data.reservationId,
+      parsed.data.days,
+      { actorId: actorResult.id },
+    );
+  } catch (e) {
+    return fromServiceError(e);
+  }
+
+  revalidatePath("/admin/rezerwacje");
+  revalidatePath("/moje-rezerwacje");
+  return ok(undefined, "Przedłużono termin odbioru.");
 }
