@@ -17,9 +17,9 @@ describe("markOverdueLoans / sendReturnReminders (SEC-002)", () => {
     }
     const fnBody = source.slice(source.indexOf("export async function markOverdueLoans"));
     const adminCheck = fnBody.indexOf("requireActorAdmin");
-    const firstPrisma = fnBody.indexOf("prisma.loan");
+    const firstJob = fnBody.indexOf("markOverdueLoansJob");
     assert.ok(adminCheck >= 0);
-    assert.ok(adminCheck < firstPrisma, "auth przed zapytaniem do bazy");
+    assert.ok(adminCheck < firstJob, "auth przed wywołaniem job");
   });
 
   it("sendReturnReminders wymaga requireActorAdmin przed zapytaniem", async () => {
@@ -28,8 +28,8 @@ describe("markOverdueLoans / sendReturnReminders (SEC-002)", () => {
     }
     const fnBody = source.slice(source.indexOf("export async function sendReturnReminders"));
     const adminCheck = fnBody.indexOf("requireActorAdmin");
-    const firstPrisma = fnBody.indexOf("prisma.loan");
+    const firstJob = fnBody.indexOf("sendReturnRemindersJob");
     assert.ok(adminCheck >= 0);
-    assert.ok(adminCheck < firstPrisma, "auth przed zapytaniem do bazy");
+    assert.ok(adminCheck < firstJob, "auth przed wywołaniem job");
   });
 });

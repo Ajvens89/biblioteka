@@ -57,3 +57,19 @@ export function overdueEmail(gameTitle: string) {
     html: `<p>Gra <strong>${gameTitle}</strong> jest przeterminowana. Skontaktuj się z biblioteką.</p>`,
   };
 }
+
+export function passwordResetEmail(resetUrl: string) {
+  return {
+    subject: "Reset hasła — Biblioteka Zakątka Fantastyki",
+    html: `<p>Otrzymaliśmy prośbę o reset hasła.</p>
+<p><a href="${resetUrl}">Ustaw nowe hasło</a></p>
+<p>Link jest ważny przez 60 minut. Jeśli to nie Ty — zignoruj tę wiadomość.</p>`,
+  };
+}
+
+export function reservationExpiredEmail(gameTitle: string) {
+  return {
+    subject: `Rezerwacja wygasła: ${gameTitle}`,
+    html: `<p>Rezerwacja gry <strong>${gameTitle}</strong> wygasła z powodu przekroczenia terminu odbioru.</p>`,
+  };
+}

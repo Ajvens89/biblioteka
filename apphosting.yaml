@@ -66,6 +66,18 @@ env:
     secret: GOOGLE_GEMINI_API_KEY
     availability:
       - RUNTIME
+  - variable: CRON_SECRET
+    secret: CRON_SECRET
+    availability:
+      - RUNTIME
+  - variable: RESEND_API_KEY
+    secret: RESEND_API_KEY
+    availability:
+      - RUNTIME
+  - variable: EMAIL_FROM
+    value: Biblioteka Zakątek <onboarding@resend.dev>
+    availability:
+      - RUNTIME
   # Opcjonalnie: zdalne CSV z Firebase Storage (scripts/upload-catalog-csv.ts)
   # - variable: HURT_CSV_URL
   #   value: https://firebasestorage.googleapis.com/v0/b/bibl-2c364.appspot.com/o/catalog%2Fhurt.csv?alt=media

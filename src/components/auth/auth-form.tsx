@@ -36,6 +36,11 @@ export function AuthForm({ action, fields, submitLabel, redirectPath }: Props) {
           {state.error}
         </p>
       )}
+      {state?.success && state.message && (
+        <p className="rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success-foreground" role="status">
+          {state.message}
+        </p>
+      )}
       <Button type="submit" className="w-full" disabled={pending} data-testid="login-submit">
         {pending ? "Proszę czekać…" : submitLabel}
       </Button>

@@ -79,6 +79,7 @@ enum NotificationType {
   READY_FOR_PICKUP
   RETURN_REMINDER
   OVERDUE_RETURN
+  RESERVATION_EXPIRED
   GENERAL
 }
 
@@ -108,6 +109,7 @@ model Profile {
   adminNotes        String?   @map("admin_notes")
   avatarUrl         String?   @map("avatar_url")
   passwordHash      String?   @map("password_hash")
+  emailNotificationsEnabled Boolean @default(true) @map("email_notifications_enabled")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
@@ -115,6 +117,7 @@ model Profile {
   loans             Loan[]
   notifications     Notification[]
   auditLogs         AuditLog[]    @relation("AuditActor")
+  passwordResetTokens PasswordResetToken[]
 
   @@index([email])
   @@index([role])
@@ -314,6 +317,8 @@ model Loan {
   returnNotes     String?    @map("return_notes") @db.Text
   damageNotes     String?    @map("damage_notes") @db.Text
   extensionCount  Int        @default(0) @map("extension_count")
+  lastReminderAt  DateTime?  @map("last_reminder_at")
+  overdueNotifiedAt DateTime? @map("overdue_notified_at")
   createdAt       DateTime   @default(now()) @map("created_at")
   updatedAt       DateTime   @updatedAt @map("updated_at")
 
@@ -377,6 +382,7 @@ model Notification {
   type      NotificationType
   title     String
   body      String           @db.Text
+  linkUrl   String?          @map("link_url")
   isRead    Boolean          @default(false) @map("is_read")
   sentEmail Boolean          @default(false) @map("sent_email")
   createdAt DateTime         @default(now()) @map("created_at")
@@ -385,5 +391,50 @@ model Notification {
 
   @@index([userId])
   @@index([isRead])
+  @@index([createdAt])
   @@map("notifications")
+}
+
+model RateLimitEntry {
+  id          String   @id @default(uuid())
+  scope       String
+  keyHash     String   @map("key_hash")
+  count       Int      @default(1)
+  windowStart DateTime @map("window_start")
+  expiresAt   DateTime @map("expires_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([scope, keyHash, windowStart])
+  @@index([expiresAt])
+  @@map("rate_limit_entries")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  tokenHash String    @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user      Profile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
+}
+
+model CronJobLog {
+  id         String    @id @default(uuid())
+  jobName    String    @map("job_name")
+  startedAt  DateTime  @default(now()) @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  status     String
+  processed  Int       @default(0)
+  metadata   Json?
+  error      String?   @db.Text
+
+  @@index([jobName, startedAt])
+  @@map("cron_job_logs")
 }

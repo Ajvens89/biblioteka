@@ -14,6 +14,11 @@ import { updateUserRoleSchema, uuidSchema } from "@/lib/validations/ids";
 import { z } from "zod";
 import { safeRedirectPath } from "@/lib/auth/redirect";
 import { fail, ok, type ActionResult } from "@/lib/actions/utils";
+import {
+  checkRateLimit,
+  rateLimitErrorMessage,
+} from "@/lib/rate-limit/pg-rate-limit";
+import { emailRateLimitKey, getRequestClientKey } from "@/lib/rate-limit/request-context";
 
 export async function loginAction(
   _prev: unknown,
@@ -24,6 +29,14 @@ export async function loginAction(
     password: formData.get("password"),
   });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd");
+
+  const clientKey = await getRequestClientKey();
+  const rl = await checkRateLimit(
+    prisma,
+    "login",
+    emailRateLimitKey(parsed.data.email, clientKey),
+  );
+  if (!rl.allowed) return fail(rateLimitErrorMessage(rl.retryAfterMs));
 
   const redirectTo = safeRedirectPath(formData.get("redirect")?.toString());
 
@@ -54,6 +67,10 @@ export async function registerAction(
     fullName: formData.get("fullName"),
   });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd");
+
+  const clientKey = await getRequestClientKey();
+  const rl = await checkRateLimit(prisma, "register", clientKey);
+  if (!rl.allowed) return fail(rateLimitErrorMessage(rl.retryAfterMs));
 
   if (getAuthProvider() === "local") {
     const result = await registerLocal(

@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { LayoutDashboard, LogIn, LogOut, User } from "lucide-react";
 import { logoutAction } from "@/lib/actions/auth";
+import { getNotifications, getUnreadNotificationCount } from "@/lib/actions/notifications";
 import { getSessionUser, isStaff } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { HeaderSearch } from "@/components/layout/header-search";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 export async function SiteHeader() {
   const user = await getSessionUser();
+  const unreadCount = user ? await getUnreadNotificationCount() : 0;
+  const notifications = user ? (await getNotifications(1)).items : [];
 
   return (
     <header className="site-header sticky top-0 z-50">
@@ -45,6 +49,9 @@ export async function SiteHeader() {
 
         <div className="flex shrink-0 items-center gap-2">
           <ThemeToggle />
+          {user && (
+            <NotificationBell initialCount={unreadCount} initialItems={notifications} />
+          )}
           {user ? (
             <>
               <Button variant="ghost" size="sm" className="hidden sm:inline-flex" asChild>

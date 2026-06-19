@@ -3,14 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { isActorResult, requireActorAdmin, requireActorStaff } from "@/lib/auth/actor";
 import { prisma } from "@/lib/db";
-import { overdueEmail, returnReminderEmail } from "@/lib/email";
-import { notifyUser } from "@/lib/notifications";
 import { getSettingNumber } from "@/lib/settings";
 import { fail, fromServiceError, ok, type ActionResult } from "@/lib/actions/utils";
 import { loanIdSchema, reservationIdSchema } from "@/lib/validations/ids";
 import { updateCopyStatusSchema } from "@/lib/validations/ids";
 import { logAudit } from "@/lib/audit";
 import * as loanService from "@/lib/services/loans";
+import { markOverdueLoansJob, sendReturnRemindersJob } from "@/lib/jobs/loan-maintenance";
 
 export async function issueLoanFromReservation(
   reservationId: string,
@@ -142,76 +141,14 @@ export async function markOverdueLoans(): Promise<ActionResult<{ count: number }
   const actorResult = await requireActorAdmin();
   if (!isActorResult(actorResult)) return actorResult;
 
-  const now = new Date();
-  const overdue = await prisma.loan.findMany({
-    where: { status: "ACTIVE", dueAt: { lt: now } },
-    include: { user: true, copy: { include: { game: true } } },
-  });
-
-  for (const loan of overdue) {
-    await prisma.loan.update({
-      where: { id: loan.id },
-      data: { status: "OVERDUE" },
-    });
-    const email = overdueEmail(loan.copy.game.title);
-    await notifyUser({
-      userId: loan.userId,
-      email: loan.user.email,
-      type: "OVERDUE_RETURN",
-      title: "Przeterminowany zwrot",
-      body: `Gra ${loan.copy.game.title} jest po terminie.`,
-      emailSubject: email.subject,
-      emailHtml: email.html,
-    });
-  }
-
-  await logAudit({
-    actorId: actorResult.id,
-    action: "UPDATE",
-    entityType: "loan_batch",
-    metadata: { operation: "markOverdueLoans", count: overdue.length },
-  });
-
-  return ok({ count: overdue.length });
+  const { marked } = await markOverdueLoansJob(prisma, { actorId: actorResult.id });
+  return ok({ count: marked });
 }
 
 export async function sendReturnReminders(): Promise<ActionResult<{ count: number }>> {
   const actorResult = await requireActorAdmin();
   if (!isActorResult(actorResult)) return actorResult;
 
-  const inThreeDays = new Date();
-  inThreeDays.setDate(inThreeDays.getDate() + 3);
-
-  const loans = await prisma.loan.findMany({
-    where: {
-      status: "ACTIVE",
-      dueAt: { lte: inThreeDays, gte: new Date() },
-    },
-    include: { user: true, copy: { include: { game: true } } },
-  });
-
-  for (const loan of loans) {
-    const email = returnReminderEmail(
-      loan.copy.game.title,
-      loan.dueAt.toLocaleDateString("pl-PL"),
-    );
-    await notifyUser({
-      userId: loan.userId,
-      email: loan.user.email,
-      type: "RETURN_REMINDER",
-      title: "Przypomnienie o zwrocie",
-      body: `Termin zwrotu: ${loan.dueAt.toLocaleDateString("pl-PL")}`,
-      emailSubject: email.subject,
-      emailHtml: email.html,
-    });
-  }
-
-  await logAudit({
-    actorId: actorResult.id,
-    action: "UPDATE",
-    entityType: "loan_batch",
-    metadata: { operation: "sendReturnReminders", count: loans.length },
-  });
-
-  return ok({ count: loans.length });
+  const { sent } = await sendReturnRemindersJob(prisma, { actorId: actorResult.id });
+  return ok({ count: sent });
 }

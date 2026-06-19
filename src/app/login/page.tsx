@@ -8,7 +8,7 @@ import { PageShell } from "@/components/ui/page-shell";
 
 export const metadata = { title: "Logowanie" };
 
-type Props = { searchParams: Promise<{ redirect?: string; registered?: string }> };
+type Props = { searchParams: Promise<{ redirect?: string; registered?: string; reset?: string }> };
 
 export default async function LoginPage({ searchParams }: Props) {
   const params = await searchParams;
@@ -27,6 +27,11 @@ export default async function LoginPage({ searchParams }: Props) {
           <CardDescription>Zaloguj się, aby rezerwować i śledzić wypożyczenia.</CardDescription>
         </CardHeader>
         <CardContent>
+          {params.reset === "1" && (
+            <p className="mb-4 rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm" role="status">
+              Hasło zostało zmienione. Możesz się teraz zalogować.
+            </p>
+          )}
           {params.registered === "1" && (
             <p className="mb-4 rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm" role="status">
               Konto utworzone. Możesz się teraz zalogować.
@@ -46,6 +51,10 @@ export default async function LoginPage({ searchParams }: Props) {
             Nie masz konta?{" "}
             <Link href={registerHref} className="font-medium text-primary underline-offset-2 hover:underline">
               Zarejestruj się
+            </Link>
+            {" · "}
+            <Link href="/reset-hasla" className="font-medium text-primary underline-offset-2 hover:underline">
+              Nie pamiętam hasła
             </Link>
           </p>
         </CardContent>
