@@ -74,6 +74,13 @@ enum LoanStatus {
   DAMAGED
 }
 
+enum EanValidationStatus {
+  VALID
+  MISSING
+  INVALID_CHECKSUM
+  NEEDS_VERIFICATION
+}
+
 enum NotificationType {
   RESERVATION_CONFIRMED
   READY_FOR_PICKUP
@@ -179,6 +186,7 @@ model Game {
   title            String
   slug             String              @unique
   ean              String?
+  eanValidationStatus EanValidationStatus? @map("ean_validation_status")
   collectionType   GameCollectionType  @default(BOARD_GAME) @map("collection_type")
   description      String?             @db.Text
   shortDescription String?             @map("short_description")
@@ -210,6 +218,7 @@ model Game {
   categories       GameCategory[]
   tags             GameTag[]
   reservations     Reservation[]
+  slugAliases      GameSlugAlias[]
 
   @@index([title])
   @@index([isActive])
@@ -219,6 +228,18 @@ model Game {
   @@index([ean])
   @@index([collectionType])
   @@map("games")
+}
+
+model GameSlugAlias {
+  id        String   @id @default(uuid())
+  gameId    String   @map("game_id")
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId])
+  @@map("game_slug_aliases")
 }
 
 model GameCategory {

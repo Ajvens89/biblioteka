@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Clock, ExternalLink, Users } from "lucide-react";
 import { GameCard } from "@/components/games/game-card";
 import { ReserveButton } from "@/components/games/reserve-button";
@@ -26,8 +26,15 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function GameDetailPage({ params }: Props) {
   const { slug } = await params;
-  const game = await fetchGameBySlug(slug);
-  if (!game) notFound();
+  const result = await fetchGameBySlug(slug);
+  if (!result) notFound();
+
+  const slugRedirect = "_slugRedirect" in result ? result._slugRedirect : null;
+  if (slugRedirect && slugRedirect !== slug) {
+    redirect(`/gry/${slugRedirect}`);
+  }
+
+  const game = result;
 
   const user = await getSessionUser();
   const available = countAvailableCopies(game.copies);

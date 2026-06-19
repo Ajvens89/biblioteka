@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
+import { resolveGameSlug } from "@/lib/services/slug-resolve";
 import { ACTIVE_CATALOG_GAME_WHERE } from "@/lib/games/catalog-scope";
 import { normalizeEan } from "@/lib/services/ean";
 import { paginateIds, sortGamesByAvailableCopies } from "@/lib/games/sort-games-by-availability";
@@ -155,8 +156,11 @@ async function fetchGamesSortedByAvailability(
 }
 
 export async function fetchGameBySlug(slug: string) {
-  return prisma.game.findFirst({
-    where: { slug, deletedAt: null },
+  const resolved = await resolveGameSlug(prisma, slug);
+  if (!resolved) return null;
+
+  const game = await prisma.game.findFirst({
+    where: { id: resolved.gameId, deletedAt: null },
     include: {
       ...gameListInclude,
       images: { orderBy: { sortOrder: "asc" } },
@@ -170,6 +174,9 @@ export async function fetchGameBySlug(slug: string) {
       },
     },
   });
+
+  if (!game) return null;
+  return { ...game, _slugRedirect: resolved.isAlias ? resolved.canonicalSlug : null };
 }
 
 export async function fetchFeaturedGames(limit = 6) {

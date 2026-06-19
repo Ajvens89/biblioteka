@@ -7,6 +7,7 @@ import {
   BookCopy,
   CalendarCheck,
   ClipboardList,
+  Copy,
   Gamepad2,
   LayoutDashboard,
   ScrollText,
@@ -18,6 +19,8 @@ import { cn } from "@/lib/utils";
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/gry", label: "Gry", icon: Gamepad2 },
+  { href: "/admin/jakosc-danych", label: "Jakość danych", icon: Copy },
+  { href: "/admin/duplikaty", label: "Duplikaty", icon: Copy },
   { href: "/admin/egzemplarze", label: "Egzemplarze", icon: BookCopy },
   { href: "/admin/rezerwacje", label: "Rezerwacje", icon: CalendarCheck },
   { href: "/admin/wypozyczenia", label: "Wypożyczenia", icon: ClipboardList },
