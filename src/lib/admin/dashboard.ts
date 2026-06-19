@@ -1,5 +1,6 @@
 import { prisma, withPrismaRetry } from "@/lib/db";
 import { isPrismaConnectionError } from "@/lib/db-errors";
+import { ACTIVE_CATALOG_GAME_WHERE } from "@/lib/games/catalog-scope";
 
 export async function fetchAdminDashboard() {
   try {
@@ -44,8 +45,12 @@ async function fetchAdminDashboardInner() {
     prisma.game.count({
       where: { deletedAt: null, copies: { none: {} } },
     }),
-    prisma.game.count({ where: { deletedAt: null, collectionType: "BOARD_GAME" } }),
-    prisma.game.count({ where: { deletedAt: null, collectionType: "RPG" } }),
+    prisma.game.count({
+      where: { ...ACTIVE_CATALOG_GAME_WHERE, collectionType: "BOARD_GAME" },
+    }),
+    prisma.game.count({
+      where: { ...ACTIVE_CATALOG_GAME_WHERE, collectionType: "RPG" },
+    }),
     prisma.reservation.findMany({
       orderBy: { createdAt: "desc" },
       take: 8,

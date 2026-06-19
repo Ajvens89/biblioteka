@@ -44,8 +44,8 @@ export function HeroSection({
 
             <StatsChips
               totalGames={totalGames}
-              boardGames={boardGameCount}
-              rpgGames={rpgGameCount}
+              boardCount={boardGameCount}
+              rpgCount={rpgGameCount}
               availableCopies={availableCopies}
             />
 

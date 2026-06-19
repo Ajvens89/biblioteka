@@ -29,6 +29,7 @@
     "audit:ean": "tsx scripts/audit-ean.ts",
     "audit:covers": "tsx scripts/audit-covers.ts",
     "audit:rpg-batch2": "tsx scripts/audit-rpg-batch2.ts",
+    "audit:catalog-stats": "tsx scripts/audit-catalog-stats.ts",
     "cleanup:orphan-covers": "tsx scripts/cleanup-orphan-covers.ts",
     "backfill:covers": "tsx scripts/backfill-covers.ts",
     "backfill:covers:all": "tsx scripts/backfill-covers.ts --all",

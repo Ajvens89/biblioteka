@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
+import { ACTIVE_CATALOG_GAME_WHERE } from "@/lib/games/catalog-scope";
 import { normalizeEan } from "@/lib/services/ean";
 import { paginateIds, sortGamesByAvailableCopies } from "@/lib/games/sort-games-by-availability";
 import type { GameFilterInput } from "@/lib/validations/game";
@@ -300,16 +301,15 @@ export async function fetchSimilarGames(
 }
 
 export async function fetchPublicStats() {
-  const activeGameWhere = { deletedAt: null, isActive: true } as const;
   const [games, copies, available, boardGames, rpgGames] = await Promise.all([
-    prisma.game.count({ where: activeGameWhere }),
+    prisma.game.count({ where: ACTIVE_CATALOG_GAME_WHERE }),
     prisma.gameCopy.count(),
     prisma.gameCopy.count({ where: { status: "AVAILABLE" } }),
     prisma.game.count({
-      where: { ...activeGameWhere, collectionType: "BOARD_GAME" },
+      where: { ...ACTIVE_CATALOG_GAME_WHERE, collectionType: "BOARD_GAME" },
     }),
     prisma.game.count({
-      where: { ...activeGameWhere, collectionType: "RPG" },
+      where: { ...ACTIVE_CATALOG_GAME_WHERE, collectionType: "RPG" },
     }),
   ]);
   return { games, copies, available, boardGames, rpgGames };
