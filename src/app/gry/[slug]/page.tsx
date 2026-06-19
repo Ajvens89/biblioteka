@@ -1,27 +1,67 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { Clock, ExternalLink, Users } from "lucide-react";
 import { GameCard } from "@/components/games/game-card";
 import { ReserveButton } from "@/components/games/reserve-button";
+import { WaitlistButton } from "@/components/games/waitlist-button";
+import { WishlistButton } from "@/components/games/wishlist-button";
+import { GameRatingForm } from "@/components/games/game-rating-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GameCover } from "@/components/ui/game-cover";
 import { GameTypeBadge } from "@/components/ui/game-type-badge";
 import { PageShell } from "@/components/ui/page-shell";
 import { SectionCard } from "@/components/ui/section-card";
-import { COLLECTION_TYPE_LABELS, DIFFICULTY_LABELS, GAME_TYPE_LABELS } from "@/lib/constants";
+import { APP_NAME, COLLECTION_TYPE_LABELS, DIFFICULTY_LABELS, GAME_TYPE_LABELS } from "@/lib/constants";
 import { getSessionUser } from "@/lib/auth/session";
 import { countAvailableCopies, getAvailabilityLabel } from "@/lib/games/availability";
 import { copyStatusCounts } from "@/lib/games/copy-stats";
 import { fetchGameBySlug, fetchSimilarGames } from "@/lib/games/queries";
+import { getWaitlistStatusAction } from "@/lib/actions/waitlist";
+import { getGameRatingSummary, getUserGameRating } from "@/lib/actions/ratings";
+import { getAppUrl } from "@/lib/site-url";
+import { prisma } from "@/lib/db";
 import Image from "next/image";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const game = await fetchGameBySlug(slug);
-  return { title: game?.title ?? "Gra" };
+  if (!game || game._slugRedirect) {
+    return { title: "Gra" };
+  }
+
+  const description =
+    game.shortDescription?.trim() ||
+    game.description?.slice(0, 160).trim() ||
+    `${game.title} — ${COLLECTION_TYPE_LABELS[game.collectionType]} w bibliotece ${APP_NAME}.`;
+
+  const base = getAppUrl();
+  const cover = game.coverImageUrl?.startsWith("http")
+    ? game.coverImageUrl
+    : game.coverImageUrl
+      ? `${base}${game.coverImageUrl.startsWith("/") ? "" : "/"}${game.coverImageUrl}`
+      : undefined;
+
+  return {
+    title: game.title,
+    description,
+    openGraph: {
+      title: `${game.title} | ${APP_NAME}`,
+      description,
+      type: "website",
+      url: `${base}/gry/${game.slug}`,
+      images: cover ? [{ url: cover, alt: `Okładka: ${game.title}` }] : undefined,
+    },
+    twitter: {
+      card: cover ? "summary_large_image" : "summary",
+      title: game.title,
+      description,
+      images: cover ? [cover] : undefined,
+    },
+  };
 }
 
 export default async function GameDetailPage({ params }: Props) {
@@ -42,8 +82,28 @@ export default async function GameDetailPage({ params }: Props) {
   const stats = copyStatusCounts(game.copies);
   const isBoard = game.collectionType !== "RPG";
   const categoryIds = game.categories.map((c) => c.categoryId);
-  const similar = await fetchSimilarGames(game.id, categoryIds, game.collectionType, 4);
+  const similar = await fetchSimilarGames(
+    game.id,
+    categoryIds,
+    game.collectionType,
+    4,
+    game.publisherId,
+    game.designerId,
+  );
   const loginHref = `/login?redirect=${encodeURIComponent(`/gry/${game.slug}#rezerwacja`)}`;
+
+  const [waitlistStatus, ratingSummary, userRating, onWishlist] = await Promise.all([
+    user ? getWaitlistStatusAction(game.id) : Promise.resolve(null),
+    getGameRatingSummary(game.id),
+    user ? getUserGameRating(game.id, user.id) : Promise.resolve(null),
+    user
+      ? prisma.wishlistItem
+          .findUnique({
+            where: { userId_gameId: { userId: user.id, gameId: game.id } },
+          })
+          .then(Boolean)
+      : Promise.resolve(false),
+  ]);
 
   const infoRows = [
     { label: "Typ zbioru", value: COLLECTION_TYPE_LABELS[game.collectionType] },
@@ -108,6 +168,15 @@ export default async function GameDetailPage({ params }: Props) {
 
         <div className="min-w-0 space-y-6">
           <div className="hidden lg:block">{titleBlock}</div>
+
+          <div className="flex flex-wrap gap-3">
+            <WishlistButton
+              gameId={game.id}
+              initialOnWishlist={onWishlist}
+              isLoggedIn={Boolean(user)}
+              loginHref={loginHref}
+            />
+          </div>
 
           <SectionCard title="Opis">
             <p className="text-body whitespace-pre-wrap">{game.description}</p>
@@ -195,17 +264,26 @@ export default async function GameDetailPage({ params }: Props) {
                 : "Obecnie brak wolnych egzemplarzy."
             }
           >
-            <div id="rezerwacja" className="scroll-mt-24">
+            <div id="rezerwacja" className="scroll-mt-24 space-y-4">
               {user ? (
                 available > 0 ? (
                   <ReserveButton gameId={game.id} />
                 ) : (
-                  <p
-                    className="text-body rounded-lg border border-warning/30 bg-warning/10 p-4"
-                    role="status"
-                  >
-                    Wszystkie egzemplarze są zajęte. Sprawdź katalog później lub zapytaj bibliotekarza.
-                  </p>
+                  <>
+                    <p
+                      className="text-body rounded-lg border border-warning/30 bg-warning/10 p-4"
+                      role="status"
+                    >
+                      Wszystkie egzemplarze są zajęte. Dołącz do listy oczekujących lub sprawdź katalog później.
+                    </p>
+                    <WaitlistButton
+                      gameId={game.id}
+                      available={available}
+                      initialStatus={waitlistStatus}
+                      loginHref={loginHref}
+                      isLoggedIn
+                    />
+                  </>
                 )
               ) : (
                 <p className="text-body">
@@ -219,6 +297,17 @@ export default async function GameDetailPage({ params }: Props) {
                 </p>
               )}
             </div>
+          </SectionCard>
+
+          <SectionCard title="Oceny">
+            <GameRatingForm
+              gameId={game.id}
+              isLoggedIn={Boolean(user)}
+              loginHref={loginHref}
+              initialRating={userRating?.rating}
+              initialComment={userRating?.comment ?? undefined}
+              summary={ratingSummary}
+            />
           </SectionCard>
         </div>
       </div>

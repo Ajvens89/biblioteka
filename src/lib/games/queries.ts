@@ -277,34 +277,45 @@ export async function fetchSimilarGames(
   categoryIds: string[],
   collectionType: "BOARD_GAME" | "RPG",
   limit = 4,
+  publisherId?: string | null,
+  designerId?: string | null,
 ) {
-  if (categoryIds.length === 0) {
-    return prisma.game.findMany({
-      where: {
-        id: { not: gameId },
-        deletedAt: null,
-        isActive: true,
-        collectionType,
-      },
-      include: gameListInclude,
-      take: limit,
-      orderBy: { popularityCount: "desc" },
-    });
+  const baseWhere = {
+    id: { not: gameId },
+    deletedAt: null,
+    isActive: true,
+    collectionType,
+  } as const;
+
+  const orClauses: Prisma.GameWhereInput[] = [];
+  if (categoryIds.length) {
+    orClauses.push({ categories: { some: { categoryId: { in: categoryIds } } } });
   }
-  return prisma.game.findMany({
-    where: {
-      id: { not: gameId },
-      deletedAt: null,
-      isActive: true,
-      OR: [
-        { categories: { some: { categoryId: { in: categoryIds } } } },
-        { collectionType },
-      ],
-    },
+  if (publisherId) orClauses.push({ publisherId });
+  if (designerId) orClauses.push({ designerId });
+
+  const candidates = await prisma.game.findMany({
+    where: orClauses.length ? { ...baseWhere, OR: orClauses } : baseWhere,
     include: gameListInclude,
-    take: limit,
+    take: Math.max(limit * 4, 16),
     orderBy: { popularityCount: "desc" },
   });
+
+  const categorySet = new Set(categoryIds);
+  const scored = candidates
+    .map((g) => {
+      const sharedCategories = g.categories.filter((c) => categorySet.has(c.categoryId)).length;
+      const samePublisher = publisherId && g.publisherId === publisherId ? 2 : 0;
+      const sameDesigner = designerId && g.designerId === designerId ? 1 : 0;
+      const available = g.copies.filter((c) => c.status === "AVAILABLE").length;
+      return {
+        game: g,
+        score: sharedCategories * 3 + samePublisher + sameDesigner + (available > 0 ? 0.5 : 0),
+      };
+    })
+    .sort((a, b) => b.score - a.score || b.game.popularityCount - a.game.popularityCount);
+
+  return scored.slice(0, limit).map((s) => s.game);
 }
 
 export async function fetchPublicStats() {
