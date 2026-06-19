@@ -25,11 +25,17 @@ export default async function AdminImportPage() {
   }
 
   await requireAdmin();
-  const [defaultGamesPath, defaultProductsPath, productsFileInfo] = await Promise.all([
+  const [gamesPathResult, productsPathResult, productsInfoResult] = await Promise.all([
     getDefaultGamesJsonPath(),
     getDefaultProductsPath(),
     getProductsFileInfo(),
   ]);
+
+  const defaultGamesPath =
+    gamesPathResult.success ? gamesPathResult.data?.path ?? null : null;
+  const defaultProductsPath =
+    productsPathResult.success ? productsPathResult.data?.path ?? null : null;
+  const productsFileInfo = productsInfoResult.success ? productsInfoResult.data ?? null : null;
 
   return (
     <div className="space-y-6" data-testid="admin-import-page">

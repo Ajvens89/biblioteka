@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { isActorResult, requireActorStaff } from "@/lib/auth/actor";
+import { isActorResult, requireActorAdmin, requireActorStaff } from "@/lib/auth/actor";
 import { prisma } from "@/lib/db";
 import { overdueEmail, returnReminderEmail } from "@/lib/email";
 import { notifyUser } from "@/lib/notifications";
@@ -138,7 +138,10 @@ export async function updateCopyStatus(
   return ok();
 }
 
-export async function markOverdueLoans(): Promise<number> {
+export async function markOverdueLoans(): Promise<ActionResult<{ count: number }>> {
+  const actorResult = await requireActorAdmin();
+  if (!isActorResult(actorResult)) return actorResult;
+
   const now = new Date();
   const overdue = await prisma.loan.findMany({
     where: { status: "ACTIVE", dueAt: { lt: now } },
@@ -161,10 +164,21 @@ export async function markOverdueLoans(): Promise<number> {
       emailHtml: email.html,
     });
   }
-  return overdue.length;
+
+  await logAudit({
+    actorId: actorResult.id,
+    action: "UPDATE",
+    entityType: "loan_batch",
+    metadata: { operation: "markOverdueLoans", count: overdue.length },
+  });
+
+  return ok({ count: overdue.length });
 }
 
-export async function sendReturnReminders(): Promise<number> {
+export async function sendReturnReminders(): Promise<ActionResult<{ count: number }>> {
+  const actorResult = await requireActorAdmin();
+  if (!isActorResult(actorResult)) return actorResult;
+
   const inThreeDays = new Date();
   inThreeDays.setDate(inThreeDays.getDate() + 3);
 
@@ -191,5 +205,13 @@ export async function sendReturnReminders(): Promise<number> {
       emailHtml: email.html,
     });
   }
-  return loans.length;
+
+  await logAudit({
+    actorId: actorResult.id,
+    action: "UPDATE",
+    entityType: "loan_batch",
+    metadata: { operation: "sendReturnReminders", count: loans.length },
+  });
+
+  return ok({ count: loans.length });
 }

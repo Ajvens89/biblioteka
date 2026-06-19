@@ -12,6 +12,30 @@ const args = process.argv.slice(2);
 const isStaging = args.includes("--staging");
 const resetSeedData = args.includes("--reset-seed-data");
 
+/** Blokuje przypadkowe uruchomienie seeda na produkcji. */
+function assertSeedAllowed(): void {
+  if (process.env.SEED_FORCE === "true") return;
+
+  if (process.env.NODE_ENV === "production" && !isStaging) {
+    console.error(
+      "❌ Seed zablokowany: NODE_ENV=production. Ustaw SEED_FORCE=true tylko świadomie.",
+    );
+    process.exit(1);
+  }
+
+  const dbUrl = process.env.DATABASE_URL ?? "";
+  const prodMarkers = ["neon.tech", ".hosted.app", "production"];
+  if (
+    prodMarkers.some((marker) => dbUrl.toLowerCase().includes(marker)) &&
+    process.env.SEED_FORCE !== "true"
+  ) {
+    console.error(
+      "❌ Seed zablokowany: DATABASE_URL wygląda na produkcję. Ustaw SEED_FORCE=true tylko świadomie.",
+    );
+    process.exit(1);
+  }
+}
+
 function localAuthUserId(email: string) {
   return `local:${email.toLowerCase()}`;
 }
@@ -231,6 +255,8 @@ async function seedDemoReservations(
 }
 
 async function main() {
+  assertSeedAllowed();
+
   if (isStaging) {
     console.log("🌱 Seed STAGING (idempotentny upsert, bez usuwania danych)…");
   } else {
@@ -385,8 +411,8 @@ async function main() {
   }
 
   console.log("✅ Seed zakończony.");
-  console.log("   Konta testowe:");
-  TEST_USERS.forEach((u) => console.log(`   - ${u.email} / ${u.password}`));
+  console.log("   Konta testowe (hasła — README / docs/STAGING.md, nie logujemy haseł):");
+  TEST_USERS.forEach((u) => console.log(`   - ${u.email} (${u.role})`));
 }
 
 main()

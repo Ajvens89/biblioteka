@@ -37,6 +37,25 @@ export async function assertCanUserReserve(
   }
 }
 
+/** Blokuje drugą aktywną rezerwację tej samej gry przez jednego użytkownika. */
+export async function assertNoActiveReservationForGame(
+  prisma: PrismaClient,
+  userId: string,
+  gameId: string,
+): Promise<void> {
+  const existing = await prisma.reservation.findFirst({
+    where: {
+      userId,
+      gameId,
+      status: { in: ["PENDING", "APPROVED", "READY_FOR_PICKUP"] },
+    },
+    select: { id: true },
+  });
+  if (existing) {
+    throw new ServiceError("Masz już aktywną rezerwację tej gry.", "DUPLICATE_RESERVATION");
+  }
+}
+
 export type ReserveGameInput = {
   userId: string;
   gameId: string;

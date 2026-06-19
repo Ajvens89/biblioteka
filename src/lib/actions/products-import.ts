@@ -180,17 +180,24 @@ export async function saveProductsJsonToProjectAction(
   return ok({ path: target });
 }
 
-export async function getDefaultProductsPath(): Promise<string | null> {
-  return resolveProductsFilePath([]);
+export async function getDefaultProductsPath(): Promise<ActionResult<{ path: string | null }>> {
+  const actorResult = await requireActorAdmin();
+  if (!isActorResult(actorResult)) return actorResult;
+  return ok({ path: resolveProductsFilePath([]) });
 }
 
-export async function getProductsFileInfo(): Promise<{
-  path: string;
-  sizeBytes: number;
-  sizeLabel: string;
-} | null> {
+export async function getProductsFileInfo(): Promise<
+  ActionResult<{
+    path: string;
+    sizeBytes: number;
+    sizeLabel: string;
+  } | null>
+> {
+  const actorResult = await requireActorAdmin();
+  if (!isActorResult(actorResult)) return actorResult;
+
   const filePath = resolveProductsFilePath([]);
-  if (!filePath) return null;
+  if (!filePath) return ok(null);
   const { stat } = await import("node:fs/promises");
   const info = await stat(filePath);
   const kb = info.size / 1024;
@@ -200,5 +207,5 @@ export async function getProductsFileInfo(): Promise<{
       : kb < 1
         ? `${info.size} B`
         : `${kb.toFixed(1)} KB`;
-  return { path: filePath, sizeBytes: info.size, sizeLabel };
+  return ok({ path: filePath, sizeBytes: info.size, sizeLabel });
 }

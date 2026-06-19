@@ -88,6 +88,8 @@ export async function importGamesJsonUploadAction(
   }
 }
 
-export async function getDefaultGamesJsonPath(): Promise<string | null> {
-  return resolveGamesJsonPath([]);
+export async function getDefaultGamesJsonPath(): Promise<ActionResult<{ path: string | null }>> {
+  const actorResult = await requireActorAdmin();
+  if (!isActorResult(actorResult)) return actorResult;
+  return ok({ path: resolveGamesJsonPath([]) });
 }

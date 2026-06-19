@@ -7,14 +7,15 @@ import { readyForPickupEmail, reservationConfirmedEmail } from "@/lib/email";
 import { notifyUser } from "@/lib/notifications";
 import { fail, fromServiceError, ok, type ActionResult } from "@/lib/actions/utils";
 import {
+  createReservationAsStaffSchema,
   createReservationSchema,
   reservationIdSchema,
 } from "@/lib/validations/ids";
 import * as reservationService from "@/lib/services/reservations";
 
+/** Rezerwacja przez zalogowanego użytkownika (bez obejścia limitów z klienta). */
 export async function createReservation(
   gameId: string,
-  override = false,
 ): Promise<ActionResult<{ id: string }>> {
   const parsed = createReservationSchema.safeParse({ gameId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
@@ -24,9 +25,12 @@ export async function createReservation(
   const user = actorResult;
 
   try {
-    await reservationService.assertCanUserReserve(prisma, user.id, {
-      override: override || user.role === "ADMIN",
-    });
+    await reservationService.assertCanUserReserve(prisma, user.id);
+    await reservationService.assertNoActiveReservationForGame(
+      prisma,
+      user.id,
+      parsed.data.gameId,
+    );
   } catch (e) {
     return fromServiceError(e);
   }
@@ -51,6 +55,90 @@ export async function createReservation(
       type: "RESERVATION_CONFIRMED",
       title: "Rezerwacja przyjęta",
       body: `Zarezerwowałeś grę ${game.title}.`,
+      emailSubject: email.subject,
+      emailHtml: email.html,
+    });
+
+    revalidatePath("/moje-rezerwacje");
+    revalidatePath(`/gry/${game.slug}`);
+    revalidatePath("/katalog");
+    revalidatePath("/admin/rezerwacje");
+
+    return ok({ id: reservationId });
+  } catch (e) {
+    return fromServiceError<{ id: string }>(e);
+  }
+}
+
+/**
+ * Rezerwacja w imieniu użytkownika przez bibliotekarza/admina.
+ * Jedyny dozwolony sposób obejścia limitów — wymaga powodu i roli STAFF+.
+ */
+export async function createReservationAsStaff(input: {
+  gameId: string;
+  targetUserId: string;
+  reason: string;
+  bypassLimits?: boolean;
+}): Promise<ActionResult<{ id: string }>> {
+  const parsed = createReservationAsStaffSchema.safeParse(input);
+  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
+
+  const actorResult = await requireActorStaff();
+  if (!isActorResult(actorResult)) return actorResult;
+  const staff = actorResult;
+
+  const targetUser = await prisma.profile.findUnique({
+    where: { id: parsed.data.targetUserId },
+    select: { id: true, email: true, isBlocked: true },
+  });
+  if (!targetUser) return fail("Użytkownik docelowy nie istnieje.");
+  if (targetUser.isBlocked) return fail("Konto użytkownika jest zablokowane.");
+
+  try {
+    await reservationService.assertCanUserReserve(prisma, targetUser.id, {
+      override: parsed.data.bypassLimits,
+    });
+    if (!parsed.data.bypassLimits) {
+      await reservationService.assertNoActiveReservationForGame(
+        prisma,
+        targetUser.id,
+        parsed.data.gameId,
+      );
+    }
+  } catch (e) {
+    return fromServiceError(e);
+  }
+
+  const game = await prisma.game.findFirst({
+    where: { id: parsed.data.gameId, isActive: true, deletedAt: null },
+  });
+  if (!game) return fail("Gra nie została znaleziona.");
+
+  try {
+    const { reservationId } = await reservationService.reserveGame(prisma, {
+      userId: targetUser.id,
+      gameId: parsed.data.gameId,
+      incrementPopularity: false,
+      audit: {
+        actorId: staff.id,
+        metadata: {
+          staffOverride: true,
+          bypassLimits: parsed.data.bypassLimits,
+          reason: parsed.data.reason,
+          targetUserId: targetUser.id,
+          staffId: staff.id,
+          staffRole: staff.role,
+        },
+      },
+    });
+
+    const email = reservationConfirmedEmail(game.title);
+    await notifyUser({
+      userId: targetUser.id,
+      email: targetUser.email,
+      type: "RESERVATION_CONFIRMED",
+      title: "Rezerwacja przyjęta",
+      body: `Zarezerwowano grę ${game.title} przez bibliotekę.`,
       emailSubject: email.subject,
       emailHtml: email.html,
     });
