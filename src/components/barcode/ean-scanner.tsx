@@ -139,11 +139,11 @@ export function EanScanner({ open, onOpenChange, onScan }: EanScannerProps) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) cleanup(); onOpenChange(v); }}>
-      <DialogContent className="max-w-md" onPointerDownOutside={cleanup}>
+      <DialogContent className="max-w-md" onPointerDownOutside={cleanup} aria-describedby="ean-scanner-desc">
         <DialogHeader>
-          <DialogTitle>Skanuj EAN / ISBN produktu</DialogTitle>
+          <DialogTitle id="ean-scanner-title">Skanuj EAN / ISBN produktu</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground">
+        <p id="ean-scanner-desc" className="text-sm text-muted-foreground">
           Kod z pudełka lub książki (tytuł w bibliotece). Nie skanuj tu naklejki egzemplarza — do tego służy{" "}
           <span className="whitespace-nowrap">/admin/egzemplarze</span>.
           Po odczycie skaner się zamknie.
@@ -159,6 +159,8 @@ export function EanScanner({ open, onOpenChange, onScan }: EanScannerProps) {
             className="aspect-video w-full rounded-md bg-black object-cover"
             muted
             playsInline
+            aria-label="Podgląd kamery do skanowania kodów kreskowych EAN"
+            aria-describedby="ean-scanner-desc"
           />
         )}
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

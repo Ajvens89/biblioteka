@@ -32,6 +32,7 @@ export function CatalogMobileFilters(props: Props) {
         className="lg:hidden"
         data-testid="catalog-filters-mobile"
         onClick={() => setOpen(true)}
+        aria-label="Otwórz filtry katalogu"
         aria-haspopup="dialog"
       >
         <SlidersHorizontal className="h-4 w-4" />

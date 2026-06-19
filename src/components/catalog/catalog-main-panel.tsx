@@ -4,8 +4,7 @@ import { CatalogCategoryTabs } from "@/components/games/catalog-category-tabs";
 import { CatalogTopFilters } from "@/components/games/catalog-top-filters";
 import { CatalogMobileFilters } from "@/components/games/catalog-mobile-filters";
 import { CatalogFilterChips } from "@/components/games/catalog-filter-chips";
-import { CatalogGenreFilters } from "@/components/catalog/catalog-genre-filters";
-import { CatalogDifficultyFilters } from "@/components/catalog/catalog-difficulty-filters";
+import { CatalogQuickFilters } from "@/components/catalog/catalog-quick-filters";
 import { CatalogResults } from "@/components/catalog/catalog-results";
 import type { Category, Designer, Publisher, Tag } from "@prisma/client";
 import type { GameFilterInput } from "@/lib/validations/game";
@@ -53,16 +52,8 @@ export function CatalogMainPanel({
       </div>
 
       <div className="space-y-2">
-        <p className="text-sm font-medium text-foreground">Gatunek</p>
         <Suspense>
-          <CatalogGenreFilters />
-        </Suspense>
-      </div>
-
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-foreground">Trudność</p>
-        <Suspense>
-          <CatalogDifficultyFilters />
+          <CatalogQuickFilters />
         </Suspense>
       </div>
 

@@ -64,15 +64,15 @@ export function CatalogFilterChips() {
         <Link
           key={key}
           href={removeKey(key)}
-          className="inline-flex items-center gap-1 rounded-full border bg-secondary/50 px-3 py-1 text-xs font-medium hover:bg-secondary"
+          className="inline-flex items-center gap-1 rounded-full border bg-secondary/50 px-3 py-1 text-xs font-medium hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           {label}
           <X className="h-3 w-3" aria-hidden />
           <span className="sr-only">Usuń filtr {label}</span>
         </Link>
       ))}
-      <Button variant="ghost" size="sm" asChild>
-        <Link href="/katalog">Wyczyść filtry</Link>
+      <Button variant="ghost" size="sm" asChild className="focus-visible:ring-2 focus-visible:ring-ring">
+        <Link href="/katalog">Wyczyść wszystkie filtry</Link>
       </Button>
     </div>
   );

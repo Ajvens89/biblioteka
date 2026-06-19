@@ -11,7 +11,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { prisma } from "@/lib/db";
 import { formatDate, formatDateTime } from "@/lib/utils";
 
-export const metadata = { title: "Moje konto" };
+export const metadata = { title: "Moje rezerwacje" };
 
 const ACTIVE_RESERVATION = ["PENDING", "APPROVED", "READY_FOR_PICKUP", "BORROWED"];
 const ACTIVE_LOAN = ["ACTIVE", "OVERDUE"];

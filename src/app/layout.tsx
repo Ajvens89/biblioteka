@@ -4,6 +4,7 @@ import { Providers } from "@/components/providers";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
+import { getAppUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -19,8 +20,14 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getAppUrl()),
   title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
   description: APP_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    locale: "pl_PL",
+    siteName: APP_NAME,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
