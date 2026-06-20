@@ -8,7 +8,9 @@ export type EmailPayload = {
 
 export async function sendEmail(payload: EmailPayload): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM ?? "Biblioteka Zakątka <onboarding@resend.dev>";
+  const from =
+    process.env.EMAIL_FROM ??
+    "Biblioteka Zakątka Fantastyki <biblioteka@zakatekfantastyki.pl>";
 
   if (!apiKey) {
     console.info("[Email mock]", payload.to, payload.subject);
