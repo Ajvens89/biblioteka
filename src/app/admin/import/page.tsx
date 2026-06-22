@@ -14,7 +14,7 @@ export default async function AdminImportPage() {
 
   if (!dbOk) {
     return (
-      <div className="space-y-6" data-testid="admin-import-page">
+      <div className="space-y-6 overflow-x-hidden" data-testid="admin-import-page">
         <PageHeader
           title="Import / eksport katalogu"
           description="Eksport i import biblioteki (games.json), import hurtowy products.json oraz audyt EAN."
@@ -38,7 +38,7 @@ export default async function AdminImportPage() {
   const productsFileInfo = productsInfoResult.success ? productsInfoResult.data ?? null : null;
 
   return (
-    <div className="space-y-6" data-testid="admin-import-page">
+    <div className="space-y-6 overflow-x-hidden" data-testid="admin-import-page">
       <PageHeader
         title="Import / eksport katalogu"
         description="Eksport i import biblioteki (games.json), import hurtowy products.json oraz audyt EAN."

@@ -19,6 +19,7 @@ import { GameCover } from "@/components/ui/game-cover";
 import { cn } from "@/lib/utils";
 import { ArchiveGameButton } from "@/components/admin/archive-game-button";
 import { AdminGamesToolbar } from "@/components/admin/admin-games-toolbar";
+import { MobileDataCard, MobileDataCardGrid } from "@/components/ui/mobile-data-card";
 
 export const metadata = { title: "Gry — admin" };
 
@@ -155,12 +156,12 @@ export default async function AdminGamesPage({ searchParams }: PageProps) {
             </table>
           </div>
 
-          <div className="grid gap-4 md:hidden">
+          <MobileDataCardGrid>
             {games.map((g) => {
               const available = countAvailableCopies(g.copies);
               const status = gameAvailabilityLabel(g.copies);
               return (
-                <div key={g.id} className="card-elevated space-y-3 p-4">
+                <MobileDataCard key={g.id}>
                   <div className="flex gap-3">
                     <GameCover src={g.coverImageUrl} alt={g.title} className="h-20 w-16 shrink-0" />
                     <div className="min-w-0 flex-1">
@@ -181,10 +182,10 @@ export default async function AdminGamesPage({ searchParams }: PageProps) {
                       <Link href={`/admin/egzemplarze?gameId=${g.id}`}>Dodaj egzemplarz</Link>
                     </Button>
                   </div>
-                </div>
+                </MobileDataCard>
               );
             })}
-          </div>
+          </MobileDataCardGrid>
         </>
       )}
     </div>

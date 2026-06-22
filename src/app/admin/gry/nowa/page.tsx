@@ -18,7 +18,7 @@ export default async function NewGamePage({ searchParams }: Props) {
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       <PageHeader
         title="Nowa gra"
         description="Kreator krok po kroku — EAN nie tworzy gry automatycznie bez zatwierdzenia."

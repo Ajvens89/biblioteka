@@ -15,8 +15,8 @@ export function GameMobileActionBar({ gameTitle, available, isLoggedIn, loginHre
   if (available <= 0) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 p-3 backdrop-blur lg:hidden">
-      <div className="mx-auto flex max-w-lg items-center gap-3">
+    <div className="game-sticky-bar fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur lg:hidden">
+      <div className="mx-auto flex max-w-lg items-center gap-3 p-3">
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">{gameTitle}</p>
           <p className="text-xs text-success">Dostępna do rezerwacji</p>

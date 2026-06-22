@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { GameForm } from "@/components/admin/game-form";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard } from "@/components/ui/section-card";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -22,19 +24,21 @@ export default async function EditGamePage({ params }: Props) {
   ]);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Edycja: {game.title}</h1>
-      <GameForm
-        game={{
-          ...game,
-          categoryIds: game.categories.map((c) => c.categoryId),
-          tagIds: game.tags.map((t) => t.tagId),
-        }}
-        publishers={publishers}
-        designers={designers}
-        categories={categories}
-        tags={tags}
-      />
+    <div className="space-y-6 overflow-x-hidden">
+      <PageHeader title={`Edycja: ${game.title}`} description="Metadane gry, kategorie i tagi." />
+      <SectionCard title="Formularz gry">
+        <GameForm
+          game={{
+            ...game,
+            categoryIds: game.categories.map((c) => c.categoryId),
+            tagIds: game.tags.map((t) => t.tagId),
+          }}
+          publishers={publishers}
+          designers={designers}
+          categories={categories}
+          tags={tags}
+        />
+      </SectionCard>
     </div>
   );
 }

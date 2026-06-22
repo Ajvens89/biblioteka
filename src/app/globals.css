@@ -56,23 +56,23 @@
     --foreground: #ede8e0;
     --card: #1c2230;
     --card-foreground: #ede8e0;
-    --primary: #c97a8a;
-    --primary-foreground: #141820;
+    --primary: #d4899a;
+    --primary-foreground: #faf8f4;
     --secondary: #262d3c;
     --secondary-foreground: #e8e2d8;
     --muted: #262d3c;
-    --muted-foreground: #9a94a8;
+    --muted-foreground: #b0a8bc;
     --accent: #c99a6a;
-    --accent-foreground: #141820;
-    --success: #4ade80;
-    --success-foreground: #141820;
-    --warning: #fbbf24;
-    --warning-foreground: #141820;
-    --destructive: #f87171;
-    --destructive-foreground: #141820;
-    --border: #343c4e;
-    --input: #343c4e;
-    --ring: #c97a8a;
+    --accent-foreground: #faf8f4;
+    --success: #3d9a6a;
+    --success-foreground: #ecfdf3;
+    --warning: #e5a820;
+    --warning-foreground: #1a1408;
+    --destructive: #e85d5d;
+    --destructive-foreground: #fef2f2;
+    --border: #3d4658;
+    --input: #3d4658;
+    --ring: #e8a0b0;
     --section-faq: #181e28;
     --section-steps: #161c26;
     --section-catalog: #141820;
@@ -90,23 +90,23 @@
   --foreground: #ede8e0;
   --card: #1c2230;
   --card-foreground: #ede8e0;
-  --primary: #c97a8a;
-  --primary-foreground: #141820;
+  --primary: #d4899a;
+  --primary-foreground: #faf8f4;
   --secondary: #262d3c;
   --secondary-foreground: #e8e2d8;
   --muted: #262d3c;
-  --muted-foreground: #9a94a8;
+  --muted-foreground: #b0a8bc;
   --accent: #c99a6a;
-  --accent-foreground: #141820;
-  --success: #4ade80;
-  --success-foreground: #141820;
-  --warning: #fbbf24;
-  --warning-foreground: #141820;
-  --destructive: #f87171;
-  --destructive-foreground: #141820;
-  --border: #343c4e;
-  --input: #343c4e;
-  --ring: #c97a8a;
+  --accent-foreground: #faf8f4;
+  --success: #3d9a6a;
+  --success-foreground: #ecfdf3;
+  --warning: #e5a820;
+  --warning-foreground: #1a1408;
+  --destructive: #e85d5d;
+  --destructive-foreground: #fef2f2;
+  --border: #3d4658;
+  --input: #3d4658;
+  --ring: #e8a0b0;
   --section-faq: #181e28;
   --section-steps: #161c26;
   --section-catalog: #141820;
@@ -155,6 +155,12 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 .font-display {
@@ -713,4 +719,42 @@ body:has([data-admin-panel]) .site-footer {
   border-radius: var(--radius);
   background: var(--card);
   padding: 1rem;
+}
+
+/* Sticky mobile action bar — safe area + nie zasłania treści */
+.game-sticky-bar {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+/* Dialogi na małych ekranach */
+@media (max-width: 640px) {
+  [data-radix-dialog-content] {
+    max-height: min(90dvh, calc(100dvh - 2rem));
+    overflow-y: auto;
+    width: calc(100vw - 2rem) !important;
+    max-width: calc(100vw - 2rem) !important;
+  }
+}
+
+/* Formularze admin — pełna szerokość na mobile */
+@media (max-width: 639px) {
+  .admin-form-actions {
+    flex-direction: column;
+  }
+
+  .admin-form-actions > * {
+    width: 100%;
+  }
+}
+
+/* Katalog — filtry bez overflow */
+.catalog-layout {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+/* Placeholder w dark mode */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: color-mix(in srgb, var(--muted-foreground) 85%, transparent);
 }
