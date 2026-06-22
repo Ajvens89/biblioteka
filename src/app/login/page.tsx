@@ -3,8 +3,8 @@ import { loginAction } from "@/lib/actions/auth";
 import { safeRedirectPath } from "@/lib/auth/redirect";
 import { AuthForm } from "@/components/auth/auth-form";
 import { AuthModeBanner } from "@/components/auth/auth-mode-banner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PageShell } from "@/components/ui/page-shell";
+import { AuthPageShell } from "@/components/layout/auth-page-shell";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const metadata = { title: "Logowanie" };
 
@@ -18,22 +18,25 @@ export default async function LoginPage({ searchParams }: Props) {
     : "/rejestracja";
 
   return (
-    <PageShell width="narrow" className="py-12">
-      <Card className="card-elevated shadow-soft" data-testid="login-page">
-        <CardHeader className="text-center sm:text-left">
-          <CardTitle className="text-h2" data-testid="login-heading">
-            Logowanie
-          </CardTitle>
-          <CardDescription>Zaloguj się, aby rezerwować i śledzić wypożyczenia.</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <AuthPageShell
+      title="Logowanie"
+      description="Zaloguj się, aby rezerwować gry i śledzić wypożyczenia."
+    >
+      <Card className="card-elevated" data-testid="login-page">
+        <CardContent className="pt-6">
           {params.reset === "1" && (
-            <p className="mb-4 rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm" role="status">
+            <p
+              className="mb-4 rounded-md border border-success/30 bg-success/10 px-3 py-2.5 text-sm"
+              role="status"
+            >
               Hasło zostało zmienione. Możesz się teraz zalogować.
             </p>
           )}
           {params.registered === "1" && (
-            <p className="mb-4 rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm" role="status">
+            <p
+              className="mb-4 rounded-md border border-success/30 bg-success/10 px-3 py-2.5 text-sm"
+              role="status"
+            >
               Konto utworzone. Możesz się teraz zalogować.
             </p>
           )}
@@ -59,6 +62,6 @@ export default async function LoginPage({ searchParams }: Props) {
           </p>
         </CardContent>
       </Card>
-    </PageShell>
+    </AuthPageShell>
   );
 }

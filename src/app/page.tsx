@@ -2,6 +2,7 @@ import { HeroSection } from "@/components/home/hero-section";
 import { AvailableGamesSection } from "@/components/home/available-games-section";
 import { HowItWorksSection } from "@/components/home/how-it-works-section";
 import { FAQSection } from "@/components/home/faq-section";
+import { FoundationSection } from "@/components/home/foundation-section";
 import { DbUnavailableBanner } from "@/components/db-unavailable-banner";
 import { isDatabaseAvailable } from "@/lib/db";
 import {
@@ -68,6 +69,7 @@ export default async function HomePage() {
       </div>
 
       <HowItWorksSection />
+      <FoundationSection />
       <FAQSection />
     </div>
   );

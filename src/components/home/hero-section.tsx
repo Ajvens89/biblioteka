@@ -57,7 +57,7 @@ export function HeroSection({
                 </Link>
               </Button>
               <Button size="lg" className="zf-btn-ghost h-11 w-full sm:w-auto" asChild>
-                <Link href="/login">Zaloguj się</Link>
+                <Link href="/regulamin">Zasady wypożyczania</Link>
               </Button>
             </div>
           </div>

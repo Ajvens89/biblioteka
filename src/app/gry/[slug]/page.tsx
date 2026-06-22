@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { Clock, ExternalLink, Users } from "lucide-react";
 import { GameCard } from "@/components/games/game-card";
+import { GameMobileActionBar } from "@/components/games/game-mobile-action-bar";
 import { ReserveButton } from "@/components/games/reserve-button";
 import { WaitlistButton } from "@/components/games/waitlist-button";
 import { WishlistButton } from "@/components/games/wishlist-button";
@@ -135,7 +136,7 @@ export default async function GameDetailPage({ params }: Props) {
   );
 
   return (
-    <PageShell className="overflow-x-hidden">
+    <PageShell className="overflow-x-hidden pb-24 lg:pb-0">
       <div className="mb-6 lg:hidden">{titleBlock}</div>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,22rem)_1fr] lg:items-start">
@@ -322,6 +323,13 @@ export default async function GameDetailPage({ params }: Props) {
           </div>
         </section>
       )}
+
+      <GameMobileActionBar
+        gameTitle={game.title}
+        available={available}
+        isLoggedIn={Boolean(user)}
+        loginHref={loginHref}
+      />
     </PageShell>
   );
 }

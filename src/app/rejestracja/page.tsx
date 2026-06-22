@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { registerAction } from "@/lib/actions/auth";
 import { AuthForm } from "@/components/auth/auth-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PageShell } from "@/components/ui/page-shell";
+import { AuthPageShell } from "@/components/layout/auth-page-shell";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const metadata = { title: "Rejestracja" };
 
@@ -15,13 +15,12 @@ export default async function RegisterPage({ searchParams }: Props) {
     : "/login";
 
   return (
-    <PageShell width="narrow" className="py-12">
-      <Card className="card-elevated shadow-soft" data-testid="register-page">
-        <CardHeader className="text-center sm:text-left">
-          <CardTitle className="text-h2">Rejestracja</CardTitle>
-          <CardDescription>Bezpłatne konto w bibliotece gier Zakątka Fantastyki.</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <AuthPageShell
+      title="Rejestracja"
+      description="Bezpłatne konto w bibliotece gier Zakątka Fantastyki."
+    >
+      <Card className="card-elevated" data-testid="register-page">
+        <CardContent className="pt-6">
           <AuthForm
             action={registerAction}
             submitLabel="Załóż konto"
@@ -40,6 +39,6 @@ export default async function RegisterPage({ searchParams }: Props) {
           </p>
         </CardContent>
       </Card>
-    </PageShell>
+    </AuthPageShell>
   );
 }
