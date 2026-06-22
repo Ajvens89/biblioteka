@@ -1,11 +1,8 @@
 import Link from "next/link";
 import {
-  BookOpen,
-  Dices,
   LayoutDashboard,
   LogIn,
   LogOut,
-  Scroll,
   User,
 } from "lucide-react";
 import { logoutAction } from "@/lib/actions/auth";
@@ -23,9 +20,9 @@ export async function SiteHeader() {
   const notifications = user ? (await getNotifications(1)).items : [];
 
   const navLinks = [
-    { href: "/katalog", label: "Katalog", icon: BookOpen },
-    { href: "/katalog?collectionType=BOARD_GAME", label: "Planszówki", icon: Dices },
-    { href: "/katalog?collectionType=RPG", label: "RPG", icon: Scroll },
+    { href: "/katalog", label: "Katalog", icon: "catalog" as const },
+    { href: "/katalog?collectionType=BOARD_GAME", label: "Planszówki", icon: "board" as const },
+    { href: "/katalog?collectionType=RPG", label: "RPG", icon: "rpg" as const },
   ];
 
   return (

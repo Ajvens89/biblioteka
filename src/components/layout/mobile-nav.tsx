@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BookOpen, LayoutDashboard, LogIn, Menu, User } from "lucide-react";
+import {
+  BookOpen,
+  Dices,
+  LayoutDashboard,
+  LogIn,
+  Menu,
+  Scroll,
+  User,
+  type LucideIcon,
+} from "lucide-react";
 import type { UserRole } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +21,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-type NavLink = { href: string; label: string; icon: React.ComponentType<{ className?: string }> };
+const ICONS: Record<string, LucideIcon> = {
+  catalog: BookOpen,
+  board: Dices,
+  rpg: Scroll,
+  account: User,
+  admin: LayoutDashboard,
+  login: LogIn,
+};
+
+type NavLink = { href: string; label: string; icon?: keyof typeof ICONS };
 
 type SessionUser = {
   email: string;
@@ -28,15 +46,30 @@ type Props = {
 export function MobileNav({ links, user }: Props) {
   const [open, setOpen] = useState(false);
 
-  const accountLinks = user
+  const accountLinks: NavLink[] = user
     ? [
-        { href: "/moje-konto", label: "Moje konto", icon: User },
-        { href: "/moje-rezerwacje", label: "Rezerwacje", icon: BookOpen },
+        { href: "/moje-konto", label: "Moje konto", icon: "account" },
+        { href: "/moje-rezerwacje", label: "Rezerwacje", icon: "catalog" },
         ...(user.role === "ADMIN" || user.role === "LIBRARIAN"
-          ? [{ href: "/admin", label: "Panel administracyjny", icon: LayoutDashboard }]
+          ? [{ href: "/admin", label: "Panel administracyjny", icon: "admin" as const }]
           : []),
       ]
-    : [{ href: "/login", label: "Zaloguj się", icon: LogIn }];
+    : [{ href: "/login", label: "Zaloguj się", icon: "login" }];
+
+  function renderLink({ href, label, icon }: NavLink) {
+    const Icon = icon ? ICONS[icon] : null;
+    return (
+      <Link
+        key={href}
+        href={href}
+        onClick={() => setOpen(false)}
+        className="flex min-h-[44px] items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium hover:bg-secondary"
+      >
+        {Icon && <Icon className="h-4 w-4 text-primary" aria-hidden />}
+        {label}
+      </Link>
+    );
+  }
 
   return (
     <>
@@ -60,31 +93,11 @@ export function MobileNav({ links, user }: Props) {
             <p className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Katalog
             </p>
-            {links.map(({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setOpen(false)}
-                className="flex min-h-[44px] items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium hover:bg-secondary"
-              >
-                <Icon className="h-4 w-4 text-primary" aria-hidden />
-                {label}
-              </Link>
-            ))}
+            {links.map(renderLink)}
             <p className="mt-3 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Konto
             </p>
-            {accountLinks.map(({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setOpen(false)}
-                className="flex min-h-[44px] items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium hover:bg-secondary"
-              >
-                <Icon className="h-4 w-4 text-primary" aria-hidden />
-                {label}
-              </Link>
-            ))}
+            {accountLinks.map(renderLink)}
           </nav>
         </DialogContent>
       </Dialog>
