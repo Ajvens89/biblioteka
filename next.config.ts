@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
       { protocol: "http", hostname: "**.r10.io" },
       { protocol: "https", hostname: "mediacdn.aent-m.com" },
       { protocol: "https", hostname: "**.jet.com" },
-      { protocol: "https", hostname: "firebasestorage.googleapis.com" },
+      { protocol: "https", hostname: "zakatekfantastyki.pl" },
       { protocol: "https", hostname: "**.firebasestorage.app" },
     ],
   },

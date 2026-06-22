@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" fill="none" aria-hidden="true">
+  <path opacity="0.15" fill="#BCF010" d="M40 160 L60 80 L80 160 Z M55 70 L65 45 L75 70 Z"/>
+  <path opacity="0.12" fill="#612BD4" d="M120 165 L140 95 L155 120 L170 90 L190 165 Z"/>
+  <circle opacity="0.2" fill="#BCF010" cx="280" cy="50" r="3"/>
+  <circle opacity="0.15" fill="#BCF010" cx="300" cy="70" r="2"/>
+  <circle opacity="0.18" fill="#E4F99F" cx="320" cy="40" r="2.5"/>
+  <path opacity="0.1" fill="#612BD4" d="M330 160 Q350 120 370 160 L375 165 L325 165 Z"/>
+  <path opacity="0.08" fill="#BCF010" d="M200 30 C210 10 230 10 240 30 L235 50 L205 50 Z"/>
+</svg>
