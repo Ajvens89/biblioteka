@@ -62,10 +62,10 @@ export default async function AccountPage({ searchParams }: PageProps) {
 
   const tabs = [
     { id: "profil", label: "Profil", href: "/moje-konto?tab=profil" },
-    { id: "statystyki", label: "Statystyki", href: "/moje-konto?tab=statystyki" },
-    { id: "powiadomienia", label: "Powiadomienia", href: "/moje-konto?tab=powiadomienia" },
-    { id: "zyczenia", label: "Chcę zagrać", href: "/moje-konto?tab=zyczenia" },
-    { id: "wypozyczenia", label: "Wypożyczenia", href: "/moje-konto?tab=wypozyczenia" },
+    { id: "statystyki", label: "Statystyki wypraw", href: "/moje-konto?tab=statystyki" },
+    { id: "powiadomienia", label: "Wiadomości z Zakątka", href: "/moje-konto?tab=powiadomienia" },
+    { id: "zyczenia", label: "Lista odkrywcy", href: "/moje-konto?tab=zyczenia" },
+    { id: "wypozyczenia", label: "Twoje aktualne przygody", href: "/moje-konto?tab=wypozyczenia" },
   ];
   const activeTab = tab && tabs.some((t) => t.id === tab) ? tab : "profil";
 
@@ -74,7 +74,7 @@ export default async function AccountPage({ searchParams }: PageProps) {
       <header className="space-y-4">
         <div>
           <p className="text-eyebrow">Twoje konto</p>
-          <h1 className="text-h2 mt-1">Moje konto</h1>
+          <h1 className="text-h2 mt-1">Wyrusz po kolejną grę</h1>
           <p className="text-body mt-2 text-muted-foreground">
             {profile.fullName ?? profile.email} · {ROLE_LABELS[profile.role]}
           </p>

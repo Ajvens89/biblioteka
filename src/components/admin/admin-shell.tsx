@@ -23,7 +23,7 @@ import {
   Users,
 } from "lucide-react";
 import { logoutAction } from "@/lib/actions/auth";
-import { APP_NAME } from "@/lib/constants";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -101,12 +101,11 @@ function NavLinks({
                   onClick={onNavigate}
                   title={collapsed ? label : undefined}
                   className={cn(
-                    "flex min-h-[40px] items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    active
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground/80 hover:bg-secondary",
+                    "admin-nav-link flex min-h-[40px] items-center gap-2.5 px-3 py-2 text-sm font-medium",
+                    active && "font-semibold",
                     collapsed && "justify-center px-2",
                   )}
+                  aria-current={active ? "page" : undefined}
                 >
                   <Icon className="h-4 w-4 shrink-0" aria-hidden />
                   {!collapsed && label}
@@ -144,17 +143,14 @@ export function AdminShell({ children, userLabel }: Props) {
     <div data-admin-panel className="flex min-h-dvh w-full max-w-[100vw] overflow-x-hidden bg-background">
       <aside
         className={cn(
-          "hidden shrink-0 flex-col border-r border-border bg-card transition-[width] duration-200 md:flex",
+          "admin-sidebar hidden shrink-0 flex-col transition-[width] duration-200 md:flex",
           collapsed ? "w-[4.25rem]" : "w-64",
         )}
       >
         <div className="flex items-center justify-between border-b border-border px-3 py-4">
           {!collapsed && (
             <div className="min-w-0 px-1">
-              <p className="truncate text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Panel
-              </p>
-              <p className="truncate text-sm font-medium text-primary">{APP_NAME}</p>
+              <BrandLogo size="sm" showSubtitle subtitle="Panel biblioteczny" />
             </div>
           )}
           <Button
