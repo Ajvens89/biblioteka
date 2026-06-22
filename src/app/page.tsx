@@ -7,7 +7,6 @@ import { DbUnavailableBanner } from "@/components/db-unavailable-banner";
 import { isDatabaseAvailable } from "@/lib/db";
 import {
   fetchAvailableNowCached,
-  fetchPublicStatsCached,
   fetchShowcaseGamesCached,
   type GameListItem,
 } from "@/lib/games/queries";
@@ -31,30 +30,20 @@ function toShowcase(games: GameListItem[]): ShowcaseGame[] {
   }));
 }
 
-const FALLBACK_STATS = { games: 0, copies: 0, available: 0, boardGames: 0, rpgGames: 0 };
-
 export default async function HomePage() {
   const empty: GameListItem[] = [];
   const dbOk = await isDatabaseAvailable();
-  const [available, stats, boardShowcase, rpgShowcase] = dbOk
+  const [available, boardShowcase, rpgShowcase] = dbOk
     ? await Promise.all([
         fetchAvailableNowCached(6),
-        fetchPublicStatsCached(),
         fetchShowcaseGamesCached("BOARD_GAME", 4),
         fetchShowcaseGamesCached("RPG", 4),
       ])
-    : [empty, FALLBACK_STATS, empty, empty];
+    : [empty, empty, empty];
 
   return (
     <div className="overflow-x-hidden">
-      <HeroSection
-        totalGames={stats.games}
-        boardGameCount={stats.boardGames}
-        rpgGameCount={stats.rpgGames}
-        availableCopies={stats.available}
-        boardGames={toShowcase(boardShowcase)}
-        rpgGames={toShowcase(rpgShowcase)}
-      />
+      <HeroSection boardGames={toShowcase(boardShowcase)} rpgGames={toShowcase(rpgShowcase)} />
 
       {!dbOk && (
         <div className="mx-auto max-w-7xl px-4 pt-6">
@@ -63,7 +52,7 @@ export default async function HomePage() {
       )}
 
       <div className="zf-section-catalog px-4 py-16 md:py-24">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto w-full max-w-[90rem]">
           <AvailableGamesSection games={available} />
         </div>
       </div>

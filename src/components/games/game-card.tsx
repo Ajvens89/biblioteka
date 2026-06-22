@@ -49,21 +49,13 @@ export function GameCard({
   const collectionType = game.collectionType as GameCollectionType;
 
   if (variant === "catalog") {
-    const description = game.shortDescription?.trim() || game.description?.trim() || null;
-    const publisherLabel = game.publisher?.name ?? game.designer?.name ?? null;
-
     return (
       <CatalogGameCard
         slug={game.slug}
         title={game.title}
-        description={description}
-        publisherLabel={publisherLabel}
-        ean={game.ean}
         isBoard={isBoard}
         minPlayers={game.minPlayers}
         maxPlayers={game.maxPlayers}
-        minPlayTime={game.minPlayTime}
-        maxPlayTime={game.maxPlayTime}
         coverImageUrl={game.coverImageUrl}
         collectionType={collectionType}
         isAvailable={available > 0}

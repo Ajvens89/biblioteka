@@ -1,8 +1,7 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Clock, QrCode, Users, UserRound } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import type { GameCollectionType } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { GameCover } from "@/components/ui/game-cover";
@@ -12,73 +11,25 @@ import { cn } from "@/lib/utils";
 type Props = {
   slug: string;
   title: string;
-  description: string | null;
-  publisherLabel: string | null;
-  ean: string | null;
+  coverImageUrl: string | null;
+  collectionType: GameCollectionType;
   isBoard: boolean;
   minPlayers: number;
   maxPlayers: number;
-  minPlayTime: number;
-  maxPlayTime: number;
-  coverImageUrl: string | null;
-  collectionType: GameCollectionType;
   isAvailable: boolean;
   availLabel: string;
   showReserve: boolean;
   className?: string;
 };
 
-function ExpandableDescription({ text }: { text: string }) {
-  const [expanded, setExpanded] = useState(false);
-  const [canExpand, setCanExpand] = useState(false);
-  const measureRef = useRef<HTMLParagraphElement>(null);
-
-  useLayoutEffect(() => {
-    const el = measureRef.current;
-    if (!el) return;
-    setCanExpand(el.scrollHeight > el.clientHeight + 1);
-  }, [text]);
-
-  const clampClass = !expanded ? "line-clamp-3" : undefined;
-
-  if (!canExpand) {
-    return (
-      <p ref={measureRef} className={cn("text-small text-muted-foreground", clampClass)}>
-        {text}
-      </p>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      className={cn(
-        "text-small w-full text-left text-muted-foreground transition-colors",
-        "hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        clampClass,
-      )}
-      onClick={() => setExpanded((v) => !v)}
-      aria-expanded={expanded}
-      aria-label={expanded ? "Zwiń opis" : "Rozwiń opis"}
-    >
-      {text}
-    </button>
-  );
-}
-
 export function CatalogGameCard({
   slug,
   title,
-  description,
-  publisherLabel,
-  ean,
+  coverImageUrl,
+  collectionType,
   isBoard,
   minPlayers,
   maxPlayers,
-  minPlayTime,
-  maxPlayTime,
-  coverImageUrl,
-  collectionType,
   isAvailable,
   availLabel,
   showReserve,
@@ -86,92 +37,53 @@ export function CatalogGameCard({
 }: Props) {
   return (
     <article
-      className={cn(
-        "zf-game-row group h-full",
-        isAvailable ? "zf-game-row--available" : "zf-game-row--unavailable",
-        className,
-      )}
+      className={cn("zf-game-card group", className)}
       data-testid="game-card"
       data-available={isAvailable ? "true" : "false"}
     >
-      <div className="flex min-w-0 flex-1 flex-col gap-2.5 py-0.5">
-        <div className="space-y-1.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display text-base font-medium leading-snug">
-              <Link
-                href={`/gry/${slug}`}
-                className="text-primary transition-colors hover:text-accent"
-              >
-                {title}
-              </Link>
-            </h3>
-            <GameTypeBadge collectionType={collectionType} />
-          </div>
-          {description && <ExpandableDescription text={description} />}
-        </div>
-
-        <ul className="text-small space-y-1 text-muted-foreground">
-          {publisherLabel && (
-            <li className="flex items-center gap-2">
-              <UserRound className="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden />
-              <span className="truncate uppercase tracking-wide text-xs">{publisherLabel}</span>
-            </li>
-          )}
-          {ean && (
-            <li className="flex items-center gap-2 font-mono text-[0.6875rem]">
-              <QrCode className="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden />
-              <span className="truncate">{ean}</span>
-            </li>
-          )}
-          {isBoard && (
-            <li className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-              <span className="inline-flex items-center gap-1">
-                <Users className="h-3.5 w-3.5 opacity-60" aria-hidden />
-                {minPlayers}–{maxPlayers}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5 opacity-60" aria-hidden />
-                {minPlayTime}–{maxPlayTime} min
-              </span>
-            </li>
-          )}
-        </ul>
-
-        <div className="mt-auto flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-between">
-          <p
-            className={cn(
-              "inline-flex items-center gap-1.5 text-xs font-medium",
-              isAvailable ? "text-success" : "text-muted-foreground",
-            )}
-          >
-            {isAvailable ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden /> : null}
-            {availLabel}
-          </p>
-          {showReserve && isAvailable && (
-            <Button size="sm" className="zf-btn-primary h-9 w-full shrink-0 px-4 text-xs font-semibold sm:w-auto" asChild>
-              <Link href={`/gry/${slug}#rezerwacja`}>Zarezerwuj</Link>
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <Link
-        href={`/gry/${slug}`}
-        className={cn(
-          "zf-game-row-cover shrink-0 self-start",
-          collectionType === "RPG" && "zf-game-row-cover--rpg",
-        )}
-        aria-label={`Okładka: ${title}`}
-      >
+      <Link href={`/gry/${slug}`} className="zf-game-card-cover relative block overflow-hidden">
         <GameCover
           src={coverImageUrl}
-          alt=""
+          alt={`Okładka: ${title}`}
           collectionType={collectionType}
           fill
-          className="rounded-sm"
-          sizes="(max-width: 640px) 40vw, 120px"
+          className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          sizes="(max-width: 640px) 45vw, (max-width: 1280px) 20vw, 200px"
         />
+        <div className="absolute left-2 top-2">
+          <GameTypeBadge collectionType={collectionType} />
+        </div>
       </Link>
+
+      <div className="zf-game-card-body">
+        <h3 className="line-clamp-2 text-sm font-semibold leading-snug md:text-base">
+          <Link href={`/gry/${slug}`} className="hover:text-[var(--zf-green-500)]">
+            {title}
+          </Link>
+        </h3>
+
+        {isBoard && (
+          <p className="text-xs text-muted-foreground">
+            {minPlayers}–{maxPlayers} graczy
+          </p>
+        )}
+
+        <p
+          className={cn(
+            "zf-game-card-status mt-auto inline-flex items-center gap-1",
+            isAvailable ? "zf-game-card-status--available" : "text-muted-foreground",
+          )}
+        >
+          {isAvailable && <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />}
+          {availLabel}
+        </p>
+
+        {showReserve && isAvailable && (
+          <Button size="sm" className="zf-btn-primary mt-1 h-9 w-full text-xs" asChild>
+            <Link href={`/gry/${slug}#rezerwacja`}>Zarezerwuj</Link>
+          </Button>
+        )}
+      </div>
     </article>
   );
 }

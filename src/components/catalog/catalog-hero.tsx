@@ -5,12 +5,12 @@ type Props = {
 
 export function CatalogHero({ total, dbOk }: Props) {
   return (
-    <header className="zf-catalog-hero mb-10 space-y-3">
-      <p className="text-eyebrow">Katalog online</p>
+    <header className="zf-catalog-hero space-y-3">
+      <p className="text-eyebrow">Odkryj nasz świat gier</p>
       <h1 className="text-display">Katalog gier</h1>
-      <p className="text-body max-w-xl text-muted-foreground">
+      <p className="text-body max-w-2xl text-muted-foreground">
         {dbOk
-          ? `${total} pozycji w bibliotece. Szukaj po tytule, autorze, wydawcy lub zeskanuj kod EAN.`
+          ? `${total} pozycji w bibliotece. Znajdź grę dla swojej drużyny — szukaj po tytule, autorze, wydawcy lub EAN.`
           : "Katalog jest chwilowo niedostępny — sprawdź ponownie za chwilę."}
       </p>
     </header>

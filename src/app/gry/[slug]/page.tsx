@@ -136,8 +136,10 @@ export default async function GameDetailPage({ params }: Props) {
   );
 
   return (
-    <PageShell className="overflow-x-hidden pb-24 lg:pb-0">
-      <div className="mb-6 lg:hidden">{titleBlock}</div>
+    <PageShell className="overflow-x-hidden pb-24 lg:pb-0" width="wide">
+      <div className="zf-game-hero-band mb-8 lg:hidden">
+        {titleBlock}
+      </div>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,22rem)_1fr] lg:items-start">
         <div className="space-y-4">
@@ -168,7 +170,7 @@ export default async function GameDetailPage({ params }: Props) {
         </div>
 
         <div className="min-w-0 space-y-6">
-          <div className="hidden lg:block">{titleBlock}</div>
+          <div className="zf-game-hero-band hidden lg:block">{titleBlock}</div>
 
           <div className="flex flex-wrap gap-3">
             <WishlistButton

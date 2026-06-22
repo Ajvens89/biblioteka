@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@prisma/client";
+import { logoutAction } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -98,6 +99,28 @@ export function MobileNav({ links, user }: Props) {
               Konto
             </p>
             {accountLinks.map(renderLink)}
+            <a
+              href="https://zakatekfantastyki.pl/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className="flex min-h-[44px] items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-secondary"
+            >
+              Strona Fundacji
+            </a>
+            {user && (
+              <form action={logoutAction} className="px-3 pt-2">
+                <Button
+                  type="submit"
+                  variant="outline"
+                  className="w-full"
+                  data-testid="logout-button"
+                  onClick={() => setOpen(false)}
+                >
+                  Wyloguj
+                </Button>
+              </form>
+            )}
           </nav>
         </DialogContent>
       </Dialog>

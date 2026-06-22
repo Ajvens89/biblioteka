@@ -52,7 +52,7 @@ export function CatalogResults({
           action={emptyState.action}
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" data-testid="catalog-grid">
+        <div className="zf-catalog-grid" data-testid="catalog-grid">
           {items.map((game) => (
             <GameCard key={game.id} game={game} showReserve variant="catalog" />
           ))}

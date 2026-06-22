@@ -70,7 +70,7 @@ export default async function CatalogPage({ searchParams }: PageProps) {
   const emptyState = buildCatalogEmptyState(filters, params);
 
   return (
-    <PageShell className="overflow-x-hidden" width="wide">
+    <PageShell className="zf-catalog-page overflow-x-hidden" width="wide">
       <CatalogHero total={result.total} dbOk={dbOk} />
 
       {!dbOk && (

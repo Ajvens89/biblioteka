@@ -1,18 +1,15 @@
 import Link from "next/link";
-import {
-  LayoutDashboard,
-  LogIn,
-  LogOut,
-  User,
-} from "lucide-react";
-import { logoutAction } from "@/lib/actions/auth";
+import { ExternalLink, LogIn, User } from "lucide-react";
 import { getNotifications, getUnreadNotificationCount } from "@/lib/actions/notifications";
-import { getSessionUser, isStaff } from "@/lib/auth/session";
+import { getSessionUser } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { HeaderSearch } from "@/components/layout/header-search";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { BrandLogo } from "@/components/brand/brand-logo";
+import { HeaderSearch } from "@/components/layout/header-search";
+
+const FOUNDATION_URL = "https://zakatekfantastyki.pl/";
 
 export async function SiteHeader() {
   const user = await getSessionUser();
@@ -27,49 +24,32 @@ export async function SiteHeader() {
 
   return (
     <header className="site-header sticky top-0 z-50">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 md:h-16 md:gap-4 md:px-6">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="mx-auto flex h-14 w-full max-w-[90rem] items-center justify-between gap-3 px-4 md:h-16 md:px-6">
+        <div className="flex min-w-0 items-center gap-2">
           <MobileNav links={navLinks} user={user} />
-          <Link
-            href="/"
-            className="group flex shrink-0 items-center gap-2.5 font-display text-foreground transition-colors hover:text-primary"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
-              Z
-            </span>
-            <span className="hidden flex-col leading-tight sm:flex">
-              <span className="text-sm font-medium tracking-tight">Zakątek Fantastyki</span>
-              <span className="text-[0.6875rem] font-normal text-muted-foreground">
-                Biblioteka gier
-              </span>
-            </span>
-          </Link>
-        </div>
-
-        <div className="hidden min-w-0 flex-1 justify-center lg:flex lg:max-w-md xl:max-w-lg">
-          <HeaderSearch />
+          <BrandLogo size="sm" />
         </div>
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Główna nawigacja">
           {navLinks.map(({ href, label }) => (
-            <Link key={href} href={href} className="site-nav-link rounded-md px-3 py-2">
+            <Link key={href} href={href} className="site-nav-link rounded-xl px-3 py-2">
               {label}
             </Link>
           ))}
-          {user && (
-            <Link href="/moje-rezerwacje" className="site-nav-link rounded-md px-3 py-2">
-              Rezerwacje
+          {user ? (
+            <Link href="/moje-konto" className="site-nav-link rounded-xl px-3 py-2">
+              Moje konto
             </Link>
-          )}
-          {user && isStaff(user.role) && (
-            <Link
-              href="/admin"
-              className="site-nav-link inline-flex items-center gap-1.5 rounded-md px-3 py-2"
-            >
-              <LayoutDashboard className="h-4 w-4" aria-hidden />
-              Panel
-            </Link>
-          )}
+          ) : null}
+          <a
+            href={FOUNDATION_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="site-foundation-link inline-flex items-center gap-1 rounded-xl px-3 py-2"
+          >
+            Strona Fundacji
+            <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
+          </a>
         </nav>
 
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
@@ -78,33 +58,25 @@ export async function SiteHeader() {
             <NotificationBell initialCount={unreadCount} initialItems={notifications} />
           )}
           {user ? (
-            <>
-              <Button variant="ghost" size="sm" className="hidden sm:inline-flex" asChild>
-                <Link href="/moje-konto">
-                  <User className="h-4 w-4" aria-hidden />
-                  <span className="hidden max-w-[8rem] truncate lg:inline">
-                    {user.fullName ?? user.email}
-                  </span>
-                </Link>
-              </Button>
-              <form action={logoutAction}>
-                <Button variant="outline" size="sm" type="submit" data-testid="logout-button">
-                  <LogOut className="h-4 w-4" aria-hidden />
-                  <span className="hidden md:inline">Wyloguj</span>
-                </Button>
-              </form>
-            </>
+            <Button variant="outline" size="sm" className="rounded-xl" asChild>
+              <Link href="/moje-konto">
+                <User className="h-4 w-4" aria-hidden />
+                <span className="hidden max-w-[8rem] truncate md:inline">
+                  {user.fullName ?? "Konto"}
+                </span>
+              </Link>
+            </Button>
           ) : (
-            <Button size="sm" className="site-login-btn font-medium" asChild>
+            <Button size="sm" className="site-login-btn rounded-xl" asChild>
               <Link href="/login">
                 <LogIn className="h-4 w-4" aria-hidden />
-                <span className="hidden xs:inline sm:inline">Zaloguj</span>
+                <span className="hidden sm:inline">Zaloguj</span>
               </Link>
             </Button>
           )}
         </div>
       </div>
-      <div className="border-t border-border/50 px-4 pb-3 pt-2 lg:hidden">
+      <div className="border-t border-border/60 px-4 pb-3 pt-2 lg:hidden">
         <HeaderSearch />
       </div>
     </header>
