@@ -4,6 +4,7 @@ import { ProfileForm } from "@/components/account/profile-form";
 import { ExtensionRequestButton } from "@/components/loans/extension-request-button";
 import { GameCover } from "@/components/ui/game-cover";
 import { PageShell } from "@/components/ui/page-shell";
+import { UserAccountNav } from "@/components/layout/user-account-nav";
 import { SectionCard } from "@/components/ui/section-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ROLE_LABELS } from "@/lib/constants";
@@ -60,37 +61,55 @@ export default async function AccountPage({ searchParams }: PageProps) {
   const loanHistory = loans.filter((l) => !ACTIVE_LOAN.includes(l.status));
 
   const tabs = [
-    { id: "profil", label: "Profil" },
-    { id: "statystyki", label: "Statystyki" },
-    { id: "powiadomienia", label: "Powiadomienia" },
-    { id: "zyczenia", label: "Lista życzeń" },
-    { id: "wypozyczenia", label: "Wypożyczenia" },
+    { id: "profil", label: "Profil", href: "/moje-konto?tab=profil" },
+    { id: "statystyki", label: "Statystyki", href: "/moje-konto?tab=statystyki" },
+    { id: "powiadomienia", label: "Powiadomienia", href: "/moje-konto?tab=powiadomienia" },
+    { id: "zyczenia", label: "Chcę zagrać", href: "/moje-konto?tab=zyczenia" },
+    { id: "wypozyczenia", label: "Wypożyczenia", href: "/moje-konto?tab=wypozyczenia" },
   ];
   const activeTab = tab && tabs.some((t) => t.id === tab) ? tab : "profil";
 
   return (
-    <PageShell width="narrow" className="space-y-8">
-      <header>
-        <h1 className="text-display">Moje konto</h1>
-        <p className="text-body mt-2 text-muted-foreground">
-          {profile.fullName ?? profile.email} · {ROLE_LABELS[profile.role]}
-        </p>
-        <nav className="mt-4 flex flex-wrap gap-2" aria-label="Sekcje konta">
-          {tabs.map((t) => (
-            <Link
-              key={t.id}
-              href={`/moje-konto?tab=${t.id}`}
-              className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                activeTab === t.id
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border hover:bg-muted"
-              }`}
-              aria-current={activeTab === t.id ? "page" : undefined}
-            >
-              {t.label}
-            </Link>
-          ))}
-        </nav>
+    <PageShell width="narrow" className="space-y-8 py-8 md:py-10">
+      <header className="space-y-4">
+        <div>
+          <p className="text-eyebrow">Twoje konto</p>
+          <h1 className="text-h2 mt-1">Moje konto</h1>
+          <p className="text-body mt-2 text-muted-foreground">
+            {profile.fullName ?? profile.email} · {ROLE_LABELS[profile.role]}
+          </p>
+        </div>
+
+        {(stats.activeLoans > 0 || stats.activeReservations > 0) && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {stats.activeReservations > 0 && (
+              <Link
+                href="/moje-rezerwacje"
+                className="rounded-md border border-primary/20 bg-primary/5 p-4 transition-colors hover:bg-primary/10"
+              >
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Aktywne rezerwacje
+                </p>
+                <p className="font-display mt-1 text-2xl font-medium text-primary">
+                  {stats.activeReservations}
+                </p>
+              </Link>
+            )}
+            {stats.activeLoans > 0 && (
+              <Link
+                href="/moje-konto?tab=wypozyczenia"
+                className="rounded-md border border-accent/25 bg-accent/8 p-4 transition-colors hover:bg-accent/12"
+              >
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Aktywne wypożyczenia
+                </p>
+                <p className="font-display mt-1 text-2xl font-medium">{stats.activeLoans}</p>
+              </Link>
+            )}
+          </div>
+        )}
+
+        <UserAccountNav items={tabs} activeId={activeTab} />
       </header>
 
       {activeTab === "profil" && (

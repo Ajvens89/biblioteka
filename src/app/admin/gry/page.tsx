@@ -83,7 +83,7 @@ export default async function AdminGamesPage({ searchParams }: PageProps) {
       ) : (
         <>
           <div className="hidden overflow-hidden rounded-xl border md:block">
-            <table className="w-full text-sm">
+            <table className="admin-table w-full text-sm">
               <thead className="bg-muted/50">
                 <tr>
                   <th className="w-14 p-3 text-left">Okładka</th>

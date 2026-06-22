@@ -32,7 +32,7 @@ export default async function AdminLogsPage({
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Log aktywności</h1>
       <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
+        <table className="admin-table w-full text-sm">
           <thead className="bg-muted/50">
             <tr>
               <th className="p-3 text-left">Data</th>

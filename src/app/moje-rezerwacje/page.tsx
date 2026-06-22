@@ -38,9 +38,10 @@ export default async function MyReservationsPage() {
   const loanHistory = loans.filter((l) => !ACTIVE_LOAN.includes(l.status));
 
   return (
-    <PageShell width="narrow" className="space-y-10">
+    <PageShell width="narrow" className="space-y-10 py-8 md:py-10">
       <header>
-        <h1 className="text-display">Moje konto</h1>
+        <p className="text-eyebrow">Twoje konto</p>
+        <h1 className="text-h2 mt-1">Moje rezerwacje</h1>
         <p className="text-body mt-2 text-muted-foreground">
           Rezerwacje i wypożyczenia w bibliotece Zakątka Fantastyki.
         </p>

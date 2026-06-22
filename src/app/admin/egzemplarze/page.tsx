@@ -204,7 +204,7 @@ export default async function AdminCopiesPage({
       ) : (
         <>
           <div className="hidden overflow-hidden rounded-xl border md:block">
-            <table className="w-full text-sm">
+            <table className="admin-table w-full text-sm">
               <thead className="bg-muted/50">
                 <tr>
                   <th className="p-3 text-left">Nr inw.</th>
