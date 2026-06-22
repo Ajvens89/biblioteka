@@ -431,6 +431,7 @@ body:has([data-admin-panel]) .site-footer {
 .zf-game-card-cover {
   position: relative;
   aspect-ratio: 3 / 4;
+  max-height: 17.5rem;
   background: var(--zf-surface-elevated);
 }
 
