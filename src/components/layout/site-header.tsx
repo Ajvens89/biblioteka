@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ExternalLink, LogIn, User } from "lucide-react";
+import { ExternalLink, LogIn, LogOut, User } from "lucide-react";
+import { logoutAction } from "@/lib/actions/auth";
 import { getNotifications, getUnreadNotificationCount } from "@/lib/actions/notifications";
 import { getSessionUser } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
@@ -58,14 +59,28 @@ export async function SiteHeader() {
             <NotificationBell initialCount={unreadCount} initialItems={notifications} />
           )}
           {user ? (
-            <Button variant="outline" size="sm" className="rounded-xl" asChild>
-              <Link href="/moje-konto">
-                <User className="h-4 w-4" aria-hidden />
-                <span className="hidden max-w-[8rem] truncate md:inline">
-                  {user.fullName ?? "Konto"}
-                </span>
-              </Link>
-            </Button>
+            <>
+              <Button variant="outline" size="sm" className="rounded-xl" asChild>
+                <Link href="/moje-konto">
+                  <User className="h-4 w-4" aria-hidden />
+                  <span className="hidden max-w-[8rem] truncate md:inline">
+                    {user.fullName ?? "Konto"}
+                  </span>
+                </Link>
+              </Button>
+              <form action={logoutAction} className="hidden sm:block">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="submit"
+                  className="rounded-xl"
+                  data-testid="logout-button"
+                >
+                  <LogOut className="h-4 w-4" aria-hidden />
+                  <span className="hidden lg:inline">Wyloguj</span>
+                </Button>
+              </form>
+            </>
           ) : (
             <Button size="sm" className="site-login-btn rounded-xl" asChild>
               <Link href="/login">

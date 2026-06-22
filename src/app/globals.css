@@ -235,6 +235,16 @@ body:has([data-admin-panel]) .site-footer {
   color: var(--zf-green-500);
 }
 
+.zf-link-cta {
+  color: var(--zf-green-500);
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.zf-link-cta:hover {
+  color: var(--zf-green-300);
+}
+
 /* —— Hero —— */
 
 .zf-hero {
@@ -430,8 +440,8 @@ body:has([data-admin-panel]) .site-footer {
 
 .zf-game-card-cover {
   position: relative;
-  aspect-ratio: 3 / 4;
-  max-height: 17.5rem;
+  width: 100%;
+  height: clamp(10rem, 22vw, 17.5rem);
   background: var(--zf-surface-elevated);
 }
 

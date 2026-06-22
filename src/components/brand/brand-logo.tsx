@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-const LOGO_URL =
-  "https://zakatekfantastyki.pl/wp-content/uploads/2025/11/zakatek_fantastyki_logo.jpg";
+/** Lokalna kopia logo Fundacji — fallback bez zależności od WordPressa. */
+const LOGO_SRC = "/brand/logo.jpg";
 
 type Props = {
   className?: string;
@@ -18,7 +18,7 @@ export function BrandLogo({
   showSubtitle = true,
   size = "md",
 }: Props) {
-  const height = size === "sm" ? 36 : 44;
+  const imageClass = size === "sm" ? "h-9 sm:h-10" : "h-10 sm:h-11";
 
   return (
     <Link
@@ -27,11 +27,11 @@ export function BrandLogo({
       aria-label="Zakątek Fantastyki — Biblioteka gier, strona główna"
     >
       <Image
-        src={LOGO_URL}
+        src={LOGO_SRC}
         alt="Zakątek Fantastyki"
-        width={height * 3}
-        height={height}
-        className="h-9 w-auto shrink-0 object-contain sm:h-11"
+        width={160}
+        height={48}
+        className={cn("w-auto shrink-0 object-contain", imageClass)}
         priority
       />
       {showSubtitle && (
