@@ -28,9 +28,9 @@ test.describe("Biblioteka — E2E", () => {
     await expect(page.getByTestId("login-page")).toBeVisible();
 
     await loginAsUser(page);
-    await expect(page).toHaveURL(/\/moje-rezerwacje/);
+    await expect(page).toHaveURL(/\/moje-konto/);
 
-    await page.goto("/katalog");
+    await page.goto(`/katalog?q=${encodeURIComponent(E2E_FLOW_GAME_TITLE)}`);
     await expect(page.getByRole("heading", { name: "Katalog gier" })).toBeVisible();
     await expect(
       page.locator('[data-testid="game-card"]').filter({ hasText: E2E_FLOW_GAME_TITLE }),

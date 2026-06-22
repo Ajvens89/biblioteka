@@ -1,6 +1,7 @@
 import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { assertProductionAuthSafe } from "./production-guard";
+import { mutableEnv, setTestEnv } from "@/lib/test/env";
 
 const ENV_KEYS = [
   "NODE_ENV",
@@ -16,16 +17,14 @@ type EnvSnapshot = Record<string, string | undefined>;
 function snapshotEnv(): EnvSnapshot {
   const snap: EnvSnapshot = {};
   for (const key of ENV_KEYS) {
-    snap[key] = process.env[key];
+    snap[key] = mutableEnv[key];
   }
   return snap;
 }
 
 function restoreEnv(snap: EnvSnapshot) {
   for (const key of ENV_KEYS) {
-    const value = snap[key];
-    if (value === undefined) delete process.env[key];
-    else process.env[key] = value;
+    setTestEnv(key, snap[key]);
   }
 }
 
@@ -34,9 +33,9 @@ describe("assertProductionAuthSafe", () => {
 
   beforeEach(() => {
     envSnap = snapshotEnv();
-    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    delete process.env.ALLOW_LOCAL_AUTH_IN_PRODUCTION;
+    delete mutableEnv.NEXT_PUBLIC_SUPABASE_URL;
+    delete mutableEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    delete mutableEnv.ALLOW_LOCAL_AUTH_IN_PRODUCTION;
   });
 
   afterEach(() => {
@@ -44,44 +43,44 @@ describe("assertProductionAuthSafe", () => {
   });
 
   it("nie blokuje w development", () => {
-    process.env.NODE_ENV = "development";
-    process.env.AUTH_PROVIDER = "local";
+    setTestEnv("NODE_ENV", "development");
+    setTestEnv("AUTH_PROVIDER", "local");
     assertProductionAuthSafe();
   });
 
   it("nie blokuje podczas next build (phase-production-build)", () => {
-    process.env.NODE_ENV = "production";
-    process.env.NEXT_PHASE = "phase-production-build";
-    process.env.AUTH_PROVIDER = "local";
-    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://real.supabase.co";
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+    setTestEnv("NODE_ENV", "production");
+    setTestEnv("NEXT_PHASE", "phase-production-build");
+    setTestEnv("AUTH_PROVIDER", "local");
+    setTestEnv("NEXT_PUBLIC_SUPABASE_URL", "https://real.supabase.co");
+    setTestEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9");
     assertProductionAuthSafe();
   });
 
   it("pozwala local auth bez Supabase (Firebase + Neon)", () => {
-    process.env.NODE_ENV = "production";
-    delete process.env.NEXT_PHASE;
-    process.env.AUTH_PROVIDER = "local";
+    setTestEnv("NODE_ENV", "production");
+    setTestEnv("NEXT_PHASE", undefined);
+    setTestEnv("AUTH_PROVIDER", "local");
     assertProductionAuthSafe();
   });
 
   it("pozwala local auth z Supabase gdy ALLOW_LOCAL_AUTH_IN_PRODUCTION=true", () => {
-    process.env.NODE_ENV = "production";
-    delete process.env.NEXT_PHASE;
-    process.env.AUTH_PROVIDER = "local";
-    process.env.ALLOW_LOCAL_AUTH_IN_PRODUCTION = "true";
-    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://real.supabase.co";
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+    setTestEnv("NODE_ENV", "production");
+    setTestEnv("NEXT_PHASE", undefined);
+    setTestEnv("AUTH_PROVIDER", "local");
+    setTestEnv("ALLOW_LOCAL_AUTH_IN_PRODUCTION", "true");
+    setTestEnv("NEXT_PUBLIC_SUPABASE_URL", "https://real.supabase.co");
+    setTestEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9");
     assertProductionAuthSafe();
   });
 
   it("blokuje local auth w produkcji z Supabase bez ALLOW_*", () => {
-    process.env.NODE_ENV = "production";
-    delete process.env.NEXT_PHASE;
-    process.env.AUTH_PROVIDER = "local";
-    delete process.env.ALLOW_LOCAL_AUTH_IN_PRODUCTION;
-    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://real.supabase.co";
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+    setTestEnv("NODE_ENV", "production");
+    setTestEnv("NEXT_PHASE", undefined);
+    setTestEnv("AUTH_PROVIDER", "local");
+    setTestEnv("ALLOW_LOCAL_AUTH_IN_PRODUCTION", undefined);
+    setTestEnv("NEXT_PUBLIC_SUPABASE_URL", "https://real.supabase.co");
+    setTestEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9");
 
     assert.throws(() => assertProductionAuthSafe(), /AUTH_PROVIDER=local jest zablokowany/);
   });
