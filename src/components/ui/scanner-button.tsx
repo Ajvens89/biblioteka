@@ -29,7 +29,7 @@ export function ScannerButton({
         className={cn(
           "gap-2 border-2 border-accent/40 bg-accent/15 font-semibold text-accent-foreground shadow-sm",
           "hover:bg-accent/25 hover:border-accent/60",
-          "h-12 min-h-12 rounded-2xl px-4",
+          "h-12 min-h-12 rounded-md px-4",
           className,
         )}
         data-testid={testId}

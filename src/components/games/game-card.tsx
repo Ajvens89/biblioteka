@@ -14,9 +14,8 @@ import type {
 import {
   countAvailableCopies,
   formatCopyAvailability,
-  getAvailabilityLabel,
 } from "@/lib/games/availability";
-import { Badge } from "@/components/ui/badge";
+import { AvailabilityBadge } from "@/components/ui/availability-badge";
 import { Button } from "@/components/ui/button";
 import { GameCover } from "@/components/ui/game-cover";
 import { GameTypeBadge } from "@/components/ui/game-type-badge";
@@ -44,7 +43,6 @@ export function GameCard({
 }) {
   const available = countAvailableCopies(game.copies);
   const total = game.copies.length;
-  const avail = getAvailabilityLabel(available, total);
   const isBoard = game.collectionType !== "RPG";
   const collectionType = game.collectionType as GameCollectionType;
 
@@ -80,9 +78,11 @@ export function GameCard({
           className="rounded-none"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"
         />
-        <Badge variant={avail.variant} className="absolute right-3 top-3 shadow-sm" aria-label={`Status: ${avail.label}`}>
-          {avail.label}
-        </Badge>
+        <AvailabilityBadge
+          available={available}
+          total={total}
+          className="absolute right-3 top-3 shadow-sm"
+        />
       </Link>
 
       <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">

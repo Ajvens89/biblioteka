@@ -75,7 +75,7 @@ export function CatalogToolbar({
               <Input
                 id="catalog-search-input"
                 data-testid="catalog-search-input"
-                className="zf-search-input h-12 rounded-2xl pl-11"
+                className="zf-search-input h-12 rounded-md pl-11"
                 placeholder="Tytuł, opis, tag, autor, wydawca, EAN…"
                 value={q}
                 onChange={(e) => {
@@ -124,7 +124,7 @@ export function CatalogToolbar({
                 onClick={() => setScannerOpen(true)}
                 className="sm:min-w-[9.5rem]"
               />
-              <Button type="button" className="zf-btn-primary h-12 flex-1 rounded-2xl sm:min-w-[7rem]" onClick={() => submit()}>
+              <Button type="button" className="zf-btn-primary h-12 flex-1 rounded-md sm:min-w-[7rem]" onClick={() => submit()}>
                 <Search className="h-4 w-4" aria-hidden />
                 Szukaj
               </Button>

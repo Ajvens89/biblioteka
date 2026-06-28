@@ -8,6 +8,7 @@ import { ReserveButton } from "@/components/games/reserve-button";
 import { WaitlistButton } from "@/components/games/waitlist-button";
 import { WishlistButton } from "@/components/games/wishlist-button";
 import { GameRatingForm } from "@/components/games/game-rating-form";
+import { AvailabilityBadge } from "@/components/ui/availability-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GameCover } from "@/components/ui/game-cover";
@@ -16,7 +17,7 @@ import { PageShell } from "@/components/ui/page-shell";
 import { SectionCard } from "@/components/ui/section-card";
 import { APP_NAME, COLLECTION_TYPE_LABELS, DIFFICULTY_LABELS, GAME_TYPE_LABELS } from "@/lib/constants";
 import { getSessionUser } from "@/lib/auth/session";
-import { countAvailableCopies, getAvailabilityLabel } from "@/lib/games/availability";
+import { countAvailableCopies } from "@/lib/games/availability";
 import { copyStatusCounts } from "@/lib/games/copy-stats";
 import { fetchGameBySlug, fetchSimilarGames } from "@/lib/games/queries";
 import { getWaitlistStatusAction } from "@/lib/actions/waitlist";
@@ -79,7 +80,6 @@ export default async function GameDetailPage({ params }: Props) {
 
   const user = await getSessionUser();
   const available = countAvailableCopies(game.copies);
-  const avail = getAvailabilityLabel(available, game.copies.length);
   const stats = copyStatusCounts(game.copies);
   const isBoard = game.collectionType !== "RPG";
   const categoryIds = game.categories.map((c) => c.categoryId);
@@ -129,9 +129,7 @@ export default async function GameDetailPage({ params }: Props) {
           EAN produktu: {game.ean}
         </p>
       )}
-      <Badge variant={avail.variant} className="text-sm" aria-label={`Status: ${avail.label}`}>
-        {avail.label}
-      </Badge>
+      <AvailabilityBadge available={available} total={game.copies.length} className="text-sm" />
     </div>
   );
 
