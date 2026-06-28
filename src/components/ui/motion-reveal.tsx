@@ -22,16 +22,8 @@ export function MotionReveal({
 }: Props) {
   const ref = useRef<HTMLElement>(null);
   const [revealed, setRevealed] = useState(false);
-  const [motionEnabled, setMotionEnabled] = useState(false);
 
   useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      setRevealed(true);
-      return;
-    }
-
-    setMotionEnabled(true);
     const el = ref.current;
     if (!el) return;
 
@@ -55,7 +47,7 @@ export function MotionReveal({
       className={cn(
         "motion-reveal",
         `motion-reveal--${variant}`,
-        motionEnabled && !revealed && "motion-reveal--pending",
+        !revealed && "motion-reveal--pending",
         revealed && "motion-reveal--visible",
         className,
       )}

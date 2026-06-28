@@ -48,6 +48,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ci": "playwright test",
     "test:e2e:staging": "playwright test",
+    "check:code": "tsx scripts/check-code.ts",
+    "audit:data": "tsx scripts/audit-data.ts",
     "check:all": "tsx scripts/check-all.ts"
   },
   "optionalDependencies": {
