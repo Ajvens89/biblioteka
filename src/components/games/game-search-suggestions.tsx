@@ -123,7 +123,7 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
         aria-label="Podpowiedzi wyszukiwania"
         aria-labelledby={inputId}
         aria-busy={isFetching}
-        className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg"
+        className="zf-search-suggestions absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-lg border border-border bg-popover py-1 shadow-lg"
         data-testid="game-search-suggestions"
       >
         {loading ? (
@@ -155,8 +155,8 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
               <Link
                 href={href}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 text-sm transition-colors hover:bg-muted",
-                  active && "bg-muted",
+                  "flex items-center gap-3 px-3 py-2 text-sm transition-[background-color,transform] duration-[var(--motion-fast)] hover:bg-muted",
+                  active && "bg-muted translate-x-0.5",
                 )}
                 onMouseDown={(e) => e.preventDefault()}
                 onMouseEnter={() => setActiveIndex(index)}

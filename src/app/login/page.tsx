@@ -2,7 +2,6 @@ import Link from "next/link";
 import { loginAction } from "@/lib/actions/auth";
 import { safeRedirectPath } from "@/lib/auth/redirect";
 import { AuthForm } from "@/components/auth/auth-form";
-import { AuthModeBanner } from "@/components/auth/auth-mode-banner";
 import { AuthPageShell } from "@/components/layout/auth-page-shell";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -40,7 +39,6 @@ export default async function LoginPage({ searchParams }: Props) {
               Konto utworzone. Możesz się teraz zalogować.
             </p>
           )}
-          <AuthModeBanner />
           <AuthForm
             action={loginAction}
             submitLabel="Zaloguj się"

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { GameCard } from "@/components/games/game-card";
+import { CatalogGridAnimated } from "@/components/catalog/catalog-grid-animated";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import type { CatalogEmptyState } from "@/lib/games/catalog-empty";
@@ -52,11 +52,7 @@ export function CatalogResults({
           action={emptyState.action}
         />
       ) : (
-        <div className="zf-catalog-grid" data-testid="catalog-grid">
-          {items.map((game) => (
-            <GameCard key={game.id} game={game} showReserve variant="catalog" />
-          ))}
-        </div>
+        <CatalogGridAnimated items={items} showReserve />
       )}
 
       {totalPages > 1 && (

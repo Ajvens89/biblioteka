@@ -64,7 +64,7 @@ export function MobileNav({ links, user }: Props) {
         key={href}
         href={href}
         onClick={() => setOpen(false)}
-        className="flex min-h-[44px] items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium hover:bg-secondary"
+        className="mobile-nav-link flex min-h-[44px] items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium"
       >
         {Icon && <Icon className="h-4 w-4 text-primary" aria-hidden />}
         {label}
@@ -80,13 +80,14 @@ export function MobileNav({ links, user }: Props) {
         size="icon"
         className="lg:hidden"
         aria-label="Otwórz menu"
+        aria-expanded={open}
         onClick={() => setOpen(true)}
       >
         <Menu className="h-5 w-5" />
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90dvh] overflow-y-auto p-0 sm:max-w-sm">
+        <DialogContent className="mobile-nav-panel max-h-[90dvh] overflow-y-auto p-0 sm:max-w-sm">
           <DialogHeader className="border-b px-4 py-4">
             <DialogTitle className="font-display text-lg">Menu</DialogTitle>
           </DialogHeader>
@@ -104,7 +105,7 @@ export function MobileNav({ links, user }: Props) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setOpen(false)}
-              className="flex min-h-[44px] items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-secondary"
+              className="mobile-nav-link flex min-h-[44px] items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium"
             >
               Strona Fundacji
             </a>

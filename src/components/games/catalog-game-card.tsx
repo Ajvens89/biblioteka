@@ -47,7 +47,7 @@ export function CatalogGameCard({
           alt={`Okładka: ${title}`}
           collectionType={collectionType}
           fill
-          className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          className="object-cover"
           sizes="(max-width: 640px) 45vw, (max-width: 1280px) 20vw, 200px"
         />
         <div className="absolute left-2 top-2">
@@ -57,7 +57,7 @@ export function CatalogGameCard({
 
       <div className="zf-game-card-body">
         <h3 className="line-clamp-2 text-sm font-semibold leading-snug md:text-base">
-          <Link href={`/gry/${slug}`} className="hover:text-[var(--zf-green-500)]">
+          <Link href={`/gry/${slug}`} className="transition-colors hover:text-primary">
             {title}
           </Link>
         </h3>
@@ -79,7 +79,7 @@ export function CatalogGameCard({
         </p>
 
         {showReserve && isAvailable && (
-          <Button size="sm" className="zf-btn-primary mt-1 h-9 w-full text-xs" asChild>
+          <Button size="sm" className="mt-1 h-9 w-full text-xs" asChild>
             <Link href={`/gry/${slug}#rezerwacja`}>Zarezerwuj</Link>
           </Button>
         )}

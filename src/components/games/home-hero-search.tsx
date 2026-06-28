@@ -40,7 +40,7 @@ export function HomeHeroSearch({ variant = "panel" }: Props) {
         <label htmlFor="home-search" className="sr-only">
           Szukaj gry w katalogu
         </label>
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch">
+        <div className={cn("flex flex-col gap-3 lg:flex-row lg:items-stretch", isHero && "zf-hero-search rounded-lg p-1")}>
           <div className="relative min-w-0 flex-1">
             <Search
               className={cn(
@@ -107,7 +107,8 @@ export function HomeHeroSearch({ variant = "panel" }: Props) {
             />
             <Button
               type="button"
-              className="h-12 min-w-[8.5rem] rounded-lg px-6 font-semibold zf-btn-primary"
+              variant={isHero ? "hero" : "default"}
+              className="h-12 min-w-[8.5rem] rounded-md px-6 font-semibold"
               onClick={() => search()}
             >
               <Search className="h-4 w-4" aria-hidden />

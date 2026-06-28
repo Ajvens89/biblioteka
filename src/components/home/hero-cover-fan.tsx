@@ -8,33 +8,28 @@ type Props = {
   className?: string;
 };
 
-const POSITIONS = [
-  { left: "4%", top: "8%", width: "42%", rotate: -8, z: 2 },
-  { left: "28%", top: "0%", width: "38%", rotate: 4, z: 3 },
-  { left: "52%", top: "12%", width: "40%", rotate: -3, z: 4 },
-  { left: "18%", top: "38%", width: "36%", rotate: 6, z: 1 },
-] as const;
-
+/** Desktop: dominująca okładka + tło — głębia przez scale, translate, cień. */
 export function HeroCoverFan({ games, className }: Props) {
-  const items = games.slice(0, 4);
-  if (items.length === 0) return null;
+  const [hero, ...rest] = games.slice(0, 4);
+  if (!hero) return null;
+
+  const bgPositions = [
+    { className: "zf-hero-cover-bg zf-hero-cover-bg--1", rotate: -12, scale: 0.88 },
+    { className: "zf-hero-cover-bg zf-hero-cover-bg--2", rotate: 8, scale: 0.82 },
+    { className: "zf-hero-cover-bg zf-hero-cover-bg--3", rotate: -5, scale: 0.78 },
+  ] as const;
 
   return (
-    <div className={cn("zf-cover-fan hidden lg:block", className)} aria-hidden>
-      {items.map((game, i) => {
-        const pos = POSITIONS[i] ?? POSITIONS[0];
+    <div className={cn("zf-hero-cover-stage hidden lg:block", className)} aria-hidden>
+      {rest.slice(0, 3).map((game, i) => {
+        const pos = bgPositions[i];
+        if (!pos) return null;
         return (
           <Link
             key={game.id}
             href={`/gry/${game.slug}`}
-            className="zf-cover-fan-item relative block aspect-[3/4]"
-            style={{
-              left: pos.left,
-              top: pos.top,
-              width: pos.width,
-              zIndex: pos.z,
-              transform: `rotate(${pos.rotate}deg)`,
-            }}
+            className={cn("zf-hero-cover-bg-link", pos.className)}
+            style={{ transform: `rotate(${pos.rotate}deg) scale(${pos.scale})` }}
             tabIndex={-1}
           >
             <GameCover
@@ -43,34 +38,47 @@ export function HeroCoverFan({ games, className }: Props) {
               collectionType={game.collectionType}
               fill
               className="rounded-lg"
-              sizes="280px"
+              sizes="200px"
             />
           </Link>
         );
       })}
+
+      <Link
+        href={`/gry/${hero.slug}`}
+        className="zf-hero-cover-hero relative block"
+        tabIndex={-1}
+      >
+        <GameCover
+          src={hero.coverImageUrl}
+          alt=""
+          collectionType={hero.collectionType}
+          fill
+          priority
+          className="rounded-xl"
+          sizes="(min-width: 1024px) 320px, 0px"
+        />
+      </Link>
     </div>
   );
 }
 
-/** Mobilna wersja — jedna okładka */
+/** Mobile: kompaktowa jedna okładka — nie wypycha wyszukiwarki. */
 export function HeroCoverMobile({ games }: { games: ShowcaseGame[] }) {
   const game = games[0];
   if (!game) return null;
 
   return (
-    <div className="relative mx-auto mt-8 h-52 w-40 lg:hidden" aria-hidden>
-      <Link
-        href={`/gry/${game.slug}`}
-        className="zf-cover-fan-item relative block h-full w-full rotate-[-4deg]"
-        tabIndex={-1}
-      >
+    <div className="zf-hero-cover-mobile relative mx-auto mt-6 h-36 w-28 sm:h-40 sm:w-32 lg:hidden" aria-hidden>
+      <Link href={`/gry/${game.slug}`} className="zf-hero-cover-mobile-link block h-full w-full" tabIndex={-1}>
         <GameCover
           src={game.coverImageUrl}
           alt=""
           collectionType={game.collectionType}
           fill
-          className="rounded-lg"
-          sizes="160px"
+          priority
+          className="rounded-lg shadow-lg"
+          sizes="128px"
         />
       </Link>
     </div>

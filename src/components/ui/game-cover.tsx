@@ -28,13 +28,13 @@ export function GameCover({
   collectionType = "BOARD_GAME",
 }: Props) {
   const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const trimmed = src?.trim() ?? "";
   const isBroken = Boolean(trimmed && brokenSrc === trimmed);
   const isPlaceholder = !trimmed || isBroken;
   const isRpg = collectionType === "RPG";
   const isExternal = /^https?:\/\//i.test(trimmed);
 
-  /** Podręczniki RPG są pionowe — pokaż całą okładkę, nie kadruj jak pudełko planszówki. */
   const resolvedAspect = isRpg && aspect !== "portrait" ? "portrait" : aspect;
   const imageFitClass = isRpg ? "object-contain" : "object-cover";
 
@@ -73,11 +73,16 @@ export function GameCover({
           src={trimmed}
           alt={alt}
           fill
-          className={imageFitClass}
+          className={cn(
+            imageFitClass,
+            "transition-opacity duration-300 ease-[var(--ease-standard)]",
+            loaded ? "opacity-100" : "opacity-0",
+          )}
           sizes={sizes}
           priority={priority}
           loading={priority ? undefined : "lazy"}
           unoptimized={isExternal}
+          onLoad={() => setLoaded(true)}
           onError={() => setBrokenSrc(trimmed)}
         />
       )}
