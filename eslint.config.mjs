@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Wynik kompilacji TypeScript funkcji Firebase (generowany przez `tsc`).
+    "functions/lib/**",
   ]),
 ]);
 

@@ -65,6 +65,3 @@ export function HowItWorksSection() {
     </section>
   );
 }
-
-/** @deprecated Użyj HowItWorksSection */
-export const LandingHowItWorks = HowItWorksSection;

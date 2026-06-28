@@ -53,5 +53,3 @@ export function HeroSection({ boardGames, rpgGames }: Props) {
     </section>
   );
 }
-
-export const LandingHero = HeroSection;

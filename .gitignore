@@ -61,6 +61,13 @@ firebase-debug.*.log
 # /data/rebel-images.csv
 # /data/hurt.csv
 
+# Firebase Functions — node_modules i wynik kompilacji TS (lib/ generowane przez `tsc`)
+/functions/node_modules/
+/functions/lib/
+
+# Lighthouse — generowane raporty
+/reports/lighthouse-*.json
+
 # vercel
 .vercel
 

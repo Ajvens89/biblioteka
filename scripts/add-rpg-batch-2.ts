@@ -279,13 +279,13 @@ async function main() {
     const hurtMapped = hurtProduct ? mapHurtProductToGameData(hurtProduct) : null;
 
     const title = seed.title;
-    let description =
+    const description =
       (ean && MANUAL_DESCRIPTION[ean]) ??
       seed.description ??
       hurtMapped?.description ??
       null;
-    let shortDescription = seed.shortDescription ?? hurtMapped?.shortDescription ?? null;
-    let publisherName = seed.publisher ?? hurtMapped?.publisherName ?? null;
+    const shortDescription = seed.shortDescription ?? hurtMapped?.shortDescription ?? null;
+    const publisherName = seed.publisher ?? hurtMapped?.publisherName ?? null;
 
     const cover = await resolveCover(
       title,

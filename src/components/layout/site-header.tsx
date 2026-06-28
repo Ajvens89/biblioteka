@@ -4,7 +4,6 @@ import { logoutAction } from "@/lib/actions/auth";
 import { getNotifications, getUnreadNotificationCount } from "@/lib/actions/notifications";
 import { getSessionUser } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { BrandLogo } from "@/components/brand/brand-logo";
@@ -54,7 +53,6 @@ export async function SiteHeader() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <ThemeToggle />
           {user && (
             <NotificationBell initialCount={unreadCount} initialItems={notifications} />
           )}

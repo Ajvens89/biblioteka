@@ -63,6 +63,3 @@ export function FAQSection() {
     </section>
   );
 }
-
-/** @deprecated Użyj FAQSection */
-export const LandingFaq = FAQSection;

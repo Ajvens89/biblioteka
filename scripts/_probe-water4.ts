@@ -30,7 +30,7 @@ async function main() {
       console.log("\n", url.split("/")[2], "links:", productLinks);
       const imgs = [...html.matchAll(/(?:src|data-src|content)="([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"/gi)].map((m) => m[1]);
       for (const raw of [...new Set(imgs)]) {
-        let img = raw.startsWith("//") ? `https:${raw}` : raw.startsWith("/") ? new URL(raw, url).href : raw;
+        const img = raw.startsWith("//") ? `https:${raw}` : raw.startsWith("/") ? new URL(raw, url).href : raw;
         if (img.includes("logo") || img.includes("icon") || img.includes("sprite")) continue;
         if (await probeImageUrl(img)) {
           console.log("IMG", img.slice(0, 120));
