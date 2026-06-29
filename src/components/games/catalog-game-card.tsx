@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, Users } from "lucide-react";
 import type { GameCollectionType } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { GameCover } from "@/components/ui/game-cover";
@@ -16,6 +16,8 @@ type Props = {
   isBoard: boolean;
   minPlayers: number;
   maxPlayers: number;
+  maxPlayTime: number;
+  minAge: number;
   isAvailable: boolean;
   availLabel: string;
   showReserve: boolean;
@@ -30,11 +32,23 @@ export function CatalogGameCard({
   isBoard,
   minPlayers,
   maxPlayers,
+  maxPlayTime,
+  minAge,
   isAvailable,
   availLabel,
   showReserve,
   className,
 }: Props) {
+  const playersText =
+    isBoard && maxPlayers > 0
+      ? minPlayers && minPlayers !== maxPlayers
+        ? `${minPlayers}–${maxPlayers}`
+        : `${maxPlayers}`
+      : null;
+  const timeText = isBoard && maxPlayTime > 0 ? `≤${maxPlayTime} min` : null;
+  const ageText = isBoard && minAge > 0 ? `${minAge}+` : null;
+  const hasMeta = Boolean(playersText || timeText || ageText);
+
   return (
     <article
       className={cn("zf-game-card group", className)}
@@ -48,7 +62,7 @@ export function CatalogGameCard({
           collectionType={collectionType}
           fill
           className="object-cover"
-          sizes="(max-width: 640px) 45vw, (max-width: 1280px) 20vw, 200px"
+          sizes="(max-width: 640px) 45vw, (max-width: 1280px) 22vw, 220px"
         />
         <div className="absolute left-2 top-2">
           <GameTypeBadge collectionType={collectionType} />
@@ -62,10 +76,22 @@ export function CatalogGameCard({
           </Link>
         </h3>
 
-        {isBoard && (
-          <p className="text-xs text-muted-foreground">
-            {minPlayers}–{maxPlayers} graczy
-          </p>
+        {hasMeta && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            {playersText && (
+              <span className="inline-flex items-center gap-1">
+                <Users className="h-3.5 w-3.5" aria-hidden />
+                {playersText}
+              </span>
+            )}
+            {timeText && (
+              <span className="inline-flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" aria-hidden />
+                {timeText}
+              </span>
+            )}
+            {ageText && <span>{ageText}</span>}
+          </div>
         )}
 
         <p
@@ -78,9 +104,16 @@ export function CatalogGameCard({
           {availLabel}
         </p>
 
-        {showReserve && isAvailable && (
+        {showReserve && isAvailable ? (
           <Button size="sm" className="mt-1 h-9 w-full text-xs" asChild>
             <Link href={`/gry/${slug}#rezerwacja`}>Zarezerwuj</Link>
+          </Button>
+        ) : (
+          <Button variant="outline" size="sm" className="mt-1 h-9 w-full text-xs" asChild>
+            <Link href={`/gry/${slug}`}>
+              Zobacz szczegóły
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            </Link>
           </Button>
         )}
       </div>

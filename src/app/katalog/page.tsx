@@ -3,12 +3,15 @@ import { Suspense } from "react";
 import { PageShell } from "@/components/ui/page-shell";
 import { DbUnavailableBanner } from "@/components/db-unavailable-banner";
 import {
-  CatalogHero,
+  CatalogHeader,
+  CatalogSearch,
+  CatalogQuickPicks,
+  CatalogDesktopFilters,
   CatalogMainPanel,
-  CatalogSidebarPanel,
 } from "@/components/catalog";
 import { buildCatalogEmptyState } from "@/lib/games/catalog-empty";
-import { fetchGames } from "@/lib/games/queries";
+import { fetchGames, fetchPublicStatsCached } from "@/lib/games/queries";
+import { hasAnyActiveParam, type CatalogOptionLists } from "@/lib/games/catalog-filters";
 import { gameFilterSchema } from "@/lib/validations/game";
 import { isDatabaseAvailable, prisma } from "@/lib/db";
 import { APP_NAME } from "@/lib/constants";
@@ -56,22 +59,51 @@ export default async function CatalogPage({ searchParams }: PageProps) {
 
   const dbOk = await isDatabaseAvailable();
 
-  const [result, categories, tags, publishers, designers] = dbOk
+  const [result, categories, tags, publishers, designers, stats] = dbOk
     ? await Promise.all([
         fetchGames(filters),
         prisma.category.findMany({ orderBy: { name: "asc" } }),
         prisma.tag.findMany({ orderBy: { name: "asc" }, take: 40 }),
         prisma.publisher.findMany({ orderBy: { name: "asc" }, take: 50 }),
         prisma.designer.findMany({ orderBy: { name: "asc" }, take: 50 }),
+        fetchPublicStatsCached(),
       ])
-    : [{ items: [], total: 0 }, [], [], [], []];
+    : [{ items: [], total: 0 }, [], [], [], [], { games: 0 }];
 
   const totalPages = Math.ceil(result.total / filters.pageSize);
   const emptyState = buildCatalogEmptyState(filters, params);
 
+  const lists: CatalogOptionLists = {
+    categories: categories.map((c) => ({ slug: c.slug, name: c.name })),
+    tags: tags.map((t) => ({ slug: t.slug, name: t.name })),
+    publishers: publishers.map((p) => ({ slug: p.slug, name: p.name })),
+    designers: designers.map((d) => ({ slug: d.slug, name: d.name })),
+  };
+
+  const globalTotal = "games" in stats ? stats.games : result.total;
+  const sp = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v) sp.set(k, v);
+  });
+  const activeParams = hasAnyActiveParam(sp);
+
   return (
     <PageShell className="zf-catalog-page overflow-x-hidden" width="wide">
-      <CatalogHero total={result.total} dbOk={dbOk} />
+      <CatalogHeader
+        total={globalTotal}
+        matching={result.total}
+        hasActiveParams={activeParams}
+        dbOk={dbOk}
+      />
+
+      <div className="zf-catalog-controls">
+        <Suspense>
+          <CatalogSearch defaultQ={filters.q} defaultEan={filters.ean} />
+        </Suspense>
+        <Suspense>
+          <CatalogQuickPicks />
+        </Suspense>
+      </div>
 
       {!dbOk && (
         <div className="mb-8">
@@ -80,22 +112,15 @@ export default async function CatalogPage({ searchParams }: PageProps) {
       )}
 
       <div className="lg:grid lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-8">
-        <CatalogSidebarPanel
-          categories={categories}
-          tags={tags}
-          publishers={publishers}
-          designers={designers}
-          current={filters}
-        />
+        <Suspense>
+          <CatalogDesktopFilters lists={lists} />
+        </Suspense>
 
         <Suspense>
           <CatalogMainPanel
             filters={filters}
             params={params}
-            categories={categories}
-            tags={tags}
-            publishers={publishers}
-            designers={designers}
+            lists={lists}
             items={result.items}
             total={result.total}
             totalPages={totalPages}

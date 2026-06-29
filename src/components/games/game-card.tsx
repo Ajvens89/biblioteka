@@ -54,6 +54,8 @@ export function GameCard({
         isBoard={isBoard}
         minPlayers={game.minPlayers}
         maxPlayers={game.maxPlayers}
+        maxPlayTime={game.maxPlayTime}
+        minAge={game.minAge}
         coverImageUrl={game.coverImageUrl}
         collectionType={collectionType}
         isAvailable={available > 0}

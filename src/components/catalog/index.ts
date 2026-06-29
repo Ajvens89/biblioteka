@@ -1,7 +1,11 @@
-/** Moduł katalogu — hero, filtry, wyniki, wyszukiwarka. */
-export { CatalogHero } from "./catalog-hero";
-export { CatalogGenreFilters } from "./catalog-genre-filters";
-export { CatalogDifficultyFilters } from "./catalog-difficulty-filters";
+/** Moduł katalogu — nagłówek, wyszukiwarka, filtry, wyniki. */
+export { CatalogHeader } from "./catalog-header";
+export { CatalogSearch } from "./catalog-search";
+export { CatalogQuickPicks } from "./catalog-quick-picks";
+export { CatalogFilters } from "./catalog-filters";
+export { CatalogDesktopFilters } from "./catalog-desktop-filters";
+export { CatalogMobileFilters } from "./catalog-mobile-filters";
+export { CatalogResultsToolbar } from "./catalog-results-toolbar";
+export { CatalogActiveChips } from "./catalog-active-chips";
 export { CatalogResults } from "./catalog-results";
-export { CatalogSidebarPanel } from "./catalog-sidebar-panel";
 export { CatalogMainPanel } from "./catalog-main-panel";
