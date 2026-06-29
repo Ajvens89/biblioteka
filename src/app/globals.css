@@ -924,7 +924,169 @@ body:has([data-admin-panel]) .site-footer {
   background: var(--card);
 }
 
-/* Game detail header */
+/* —— Game detail —— */
+
+.zf-game-page {
+  --game-reservation-glow: rgb(188 240 16 / 0.12);
+}
+
+.zf-game-back {
+  animation: gameEnter var(--motion-normal) var(--ease-emphasized) both;
+}
+
+.zf-game-title {
+  font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.zf-game-cover-frame {
+  border-radius: var(--radius-card);
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  background: color-mix(in srgb, var(--card) 90%, var(--primary) 4%);
+  padding: 0.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.zf-game-availability {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  padding: 1rem 1.125rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.zf-game-availability--available {
+  border-color: color-mix(in srgb, var(--success) 45%, var(--border));
+  background: color-mix(in srgb, var(--success) 10%, var(--card));
+  color: var(--foreground);
+}
+
+.zf-game-availability--available svg {
+  color: var(--zf-green-500);
+}
+
+.zf-game-availability--unavailable {
+  border-color: color-mix(in srgb, var(--destructive) 35%, var(--border));
+  background: color-mix(in srgb, var(--destructive) 6%, var(--card));
+}
+
+.zf-game-availability--unavailable svg {
+  color: var(--destructive);
+}
+
+.zf-game-availability--empty svg {
+  color: var(--muted-foreground);
+}
+
+.zf-game-params {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+@media (min-width: 640px) {
+  .zf-game-params {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.zf-game-param {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.zf-game-param-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+}
+
+.zf-game-param-value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.zf-game-reservation {
+  padding: 1.25rem 1.375rem;
+  border-radius: var(--radius-card);
+  border: 2px solid var(--border);
+  background: var(--card);
+  transition:
+    border-color var(--motion-normal) var(--ease-standard),
+    box-shadow var(--motion-normal) var(--ease-standard);
+}
+
+.zf-game-reservation--available {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--primary) 14%, var(--card)),
+    var(--card)
+  );
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 8%, transparent),
+    0 8px 32px var(--game-reservation-glow);
+}
+
+.zf-game-reservation--waitlist {
+  border-color: color-mix(in srgb, var(--warning) 40%, var(--border));
+  background: color-mix(in srgb, var(--warning) 6%, var(--card));
+}
+
+.zf-game-reservation--empty {
+  border-style: dashed;
+}
+
+.zf-game-pickup {
+  padding: 1rem 1.125rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--muted) 35%, var(--card));
+}
+
+.prose-game {
+  line-height: 1.7;
+  max-height: 24rem;
+  overflow-y: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .game-enter-cover {
+    animation: gameEnter var(--motion-normal) var(--ease-emphasized) both;
+  }
+
+  .game-enter-main {
+    animation: gameEnter var(--motion-normal) var(--ease-emphasized) both;
+    animation-delay: 60ms;
+  }
+}
+
+@keyframes gameEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Legacy game hero band — kept for any remaining refs */
 .zf-game-hero-band {
   margin: -1rem -1rem 2rem;
   padding: 2rem 1rem;

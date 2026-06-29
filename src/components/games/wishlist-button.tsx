@@ -13,19 +13,21 @@ type Props = {
   initialOnWishlist: boolean;
   isLoggedIn: boolean;
   loginHref: string;
+  /** Kompaktowy wariant przy okładce. */
+  compact?: boolean;
 };
 
-export function WishlistButton({ gameId, initialOnWishlist, isLoggedIn, loginHref }: Props) {
+export function WishlistButton({ gameId, initialOnWishlist, isLoggedIn, loginHref, compact }: Props) {
   const [pending, start] = useTransition();
   const router = useRouter();
   const [onList, setOnList] = useState(initialOnWishlist);
 
   if (!isLoggedIn) {
     return (
-      <Button variant="outline" className="min-h-11" asChild>
+      <Button variant="outline" className={cn("min-h-11", compact && "w-full")} asChild>
         <a href={loginHref}>
           <Heart className="h-4 w-4" aria-hidden />
-          Zaloguj się, aby dodać do listy życzeń
+          {compact ? "Lista życzeń" : "Zaloguj się, aby dodać do listy życzeń"}
         </a>
       </Button>
     );
@@ -35,7 +37,7 @@ export function WishlistButton({ gameId, initialOnWishlist, isLoggedIn, loginHre
     <Button
       type="button"
       variant="outline"
-      className={cn("min-h-11", onList && "border-primary/50 bg-primary/5")}
+      className={cn("min-h-11", compact && "w-full", onList && "border-primary/50 bg-primary/5")}
       disabled={pending}
       onClick={() =>
         start(async () => {
