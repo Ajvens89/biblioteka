@@ -54,10 +54,17 @@ export function countActiveFilters(params: URLSearchParams): number {
   return Object.keys(readFilterValues(params)).length;
 }
 
-/** Czy URL zawiera jakikolwiek aktywny parametr (filtry, fraza, EAN). */
+/** Klucze, które przy obecności wpływają na liczbę pasujących pozycji. */
+const COUNTABLE_KEYS = new Set<string>([...CATALOG_FILTER_KEYS, "q", "ean"]);
+
+/**
+ * Czy URL zawiera aktywny filtr lub frazę wyszukiwania.
+ * Ignoruje nieznane parametry (np. utm_*, cache-bust), aby nagłówek nie
+ * przełączał się błędnie na „X z Y” przy linkach z dopiskami.
+ */
 export function hasAnyActiveParam(params: URLSearchParams): boolean {
   for (const [key, value] of params.entries()) {
-    if (key === "page" || key === "pageSize" || key === "sort") continue;
+    if (!COUNTABLE_KEYS.has(key)) continue;
     if (key === "availability" && value !== "available") continue;
     if (value && value.trim()) return true;
   }
