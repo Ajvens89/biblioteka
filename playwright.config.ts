@@ -33,9 +33,12 @@ export default defineConfig({
   webServer: skipWebServer
     ? undefined
     : {
-        command: `npm run build && npx next start -p ${port}`,
+        // Klient Prisma generowany jest raz PRZED testami (check:code / prisma:generate).
+        // Serwer e2e tylko buduje i startuje aplikację — bez ponownego `prisma generate`,
+        // żeby uniknąć EPERM przy blokadzie silnika Prisma na Windows/OneDrive.
+        command: `npm run build:e2e && npx next start -p ${port}`,
         url: baseURL,
-        reuseExistingServer: !!process.env.PLAYWRIGHT_REUSE_SERVER,
+        reuseExistingServer: !process.env.CI || !!process.env.PLAYWRIGHT_REUSE_SERVER,
         timeout: 300_000,
         env: {
           ...process.env,

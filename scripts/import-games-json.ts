@@ -13,6 +13,7 @@ import {
 } from "../src/lib/services/games-json";
 
 const dryRun = process.argv.includes("--dry-run");
+const noOverwrite = process.argv.includes("--no-overwrite");
 const filePath = resolveGamesJsonPath(process.argv);
 
 const prisma = new PrismaClient();
@@ -27,7 +28,7 @@ async function main() {
     process.exit(1);
   }
 
-  const stats = await importGamesFromFile(prisma, filePath, { dryRun });
+  const stats = await importGamesFromFile(prisma, filePath, { dryRun, noOverwrite });
   console.log(formatGamesImportReport(stats));
   if (stats.skipped > 0 && stats.created + stats.updated === 0) {
     process.exit(1);

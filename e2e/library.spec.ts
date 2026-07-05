@@ -237,6 +237,20 @@ test.describe("Biblioteka — E2E", () => {
     expect(overflow).toBe(false);
   });
 
+  test("admin: centrum jakości danych — podsumowanie i eksport CSV", async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto("/admin/jakosc-danych");
+    await expect(page.getByTestId("catalog-quality-hub")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Centrum jakości katalogu" })).toBeVisible();
+    await page.getByTestId("catalog-quality-export").click();
+  });
+
+  test("admin: raporty przekierowują do centrum jakości", async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto("/admin/raporty");
+    await expect(page).toHaveURL(/\/admin\/jakosc-danych$/);
+  });
+
   test("admin: dashboard pokazuje szybkie akcje", async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/admin");

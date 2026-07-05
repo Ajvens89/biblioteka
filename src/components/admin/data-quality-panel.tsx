@@ -21,6 +21,7 @@ const SECTIONS: Array<{ key: keyof CatalogQualityReport; label: string }> = [
   { key: "typeMismatch", label: "Niespójny typ" },
   { key: "missingAuthor", label: "Brak autora" },
   { key: "missingPublisher", label: "Brak wydawcy" },
+  { key: "missingCover", label: "Brak okładki" },
   { key: "missingDescription", label: "Brak opisu" },
 ];
 
@@ -68,7 +69,7 @@ export function DataQualityPanel({ report }: Props) {
             {label} ({report.totals[key] ?? 0})
           </button>
         ))}
-        <Button size="sm" variant="outline" onClick={exportCsv} disabled={pending}>
+        <Button size="sm" variant="outline" onClick={exportCsv} disabled={pending} data-testid="catalog-quality-export">
           Eksport CSV
         </Button>
       </div>

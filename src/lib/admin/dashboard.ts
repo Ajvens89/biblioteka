@@ -24,6 +24,7 @@ async function fetchAdminDashboardInner() {
     overdueLoans,
     gamesWithoutEan,
     gamesWithoutCover,
+    gamesWithoutDescription,
     gamesWithoutCopies,
     boardGames,
     rpgGames,
@@ -41,6 +42,12 @@ async function fetchAdminDashboardInner() {
     prisma.game.count({ where: { deletedAt: null, ean: null } }),
     prisma.game.count({
       where: { deletedAt: null, OR: [{ coverImageUrl: null }, { coverImageUrl: "" }] },
+    }),
+    prisma.game.count({
+      where: {
+        deletedAt: null,
+        OR: [{ description: null }, { description: "" }],
+      },
     }),
     prisma.game.count({
       where: { deletedAt: null, copies: { none: {} } },
@@ -98,6 +105,7 @@ async function fetchAdminDashboardInner() {
       overdueLoans,
       gamesWithoutEan,
       gamesWithoutCover,
+      gamesWithoutDescription,
       gamesWithoutCopies,
       boardGames,
       rpgGames,
@@ -112,7 +120,7 @@ async function fetchAdminDashboardInner() {
       gamesWithoutCover > 0 && {
         id: "no-cover",
         message: `${gamesWithoutCover} gier bez okładki`,
-        href: "/admin/gry?missingCover=1",
+        href: "/admin/jakosc-danych",
         tone: "warning" as const,
       },
       gamesWithoutCopies > 0 && {

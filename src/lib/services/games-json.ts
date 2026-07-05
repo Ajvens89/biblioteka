@@ -62,6 +62,7 @@ export type GamesJsonFile = {
 export type ImportGamesJsonStats = {
   filePath: string;
   dryRun: boolean;
+  noOverwrite: boolean;
   read: number;
   created: number;
   updated: number;
@@ -315,8 +316,17 @@ async function syncGameRelations(
   gameId: string,
   categoryIds: string[],
   tagIds: string[],
+  replaceExisting = true,
 ) {
-  await prisma.gameCategory.deleteMany({ where: { gameId } });
+  if (replaceExisting) {
+    await prisma.gameCategory.deleteMany({ where: { gameId } });
+  } else {
+    const existingCategories = await prisma.gameCategory.count({ where: { gameId } });
+    if (existingCategories > 0) categoryIds = [];
+    const existingTags = await prisma.gameTag.count({ where: { gameId } });
+    if (existingTags > 0) tagIds = [];
+  }
+
   if (categoryIds.length) {
     await prisma.gameCategory.createMany({
       data: categoryIds.map((categoryId) => ({ gameId, categoryId })),
@@ -324,7 +334,10 @@ async function syncGameRelations(
     });
   }
 
-  await prisma.gameTag.deleteMany({ where: { gameId } });
+  if (replaceExisting) {
+    await prisma.gameTag.deleteMany({ where: { gameId } });
+  }
+
   if (tagIds.length) {
     await prisma.gameTag.createMany({
       data: tagIds.map((tagId) => ({ gameId, tagId })),
@@ -415,14 +428,16 @@ async function upsertCopies(
 export async function importGamesFromFile(
   prisma: PrismaClient,
   filePath: string,
-  options?: { dryRun?: boolean },
+  options?: { dryRun?: boolean; noOverwrite?: boolean },
 ): Promise<ImportGamesJsonStats> {
   const dryRun = options?.dryRun ?? false;
+  const noOverwrite = options?.noOverwrite ?? false;
   const data = await loadGamesJsonFile(filePath);
 
   const stats: ImportGamesJsonStats = {
     filePath,
     dryRun,
+    noOverwrite,
     read: data.games.length,
     created: 0,
     updated: 0,
@@ -503,14 +518,22 @@ export async function importGamesFromFile(
 
     let gameId: string;
     if (existing) {
+      const fullExisting = noOverwrite
+        ? await prisma.game.findUniqueOrThrow({ where: { id: existing.id } })
+        : null;
+
       const { slug: _importSlug, ...updateFields } = gameData;
-      await prisma.game.update({
-        where: { id: existing.id },
-        data: {
-          ...updateFields,
-          ean: ean ?? undefined,
-        },
-      });
+      const data =
+        noOverwrite && fullExisting
+          ? buildNoOverwriteUpdate(fullExisting, updateFields, ean)
+          : { ...updateFields, ean: ean ?? undefined };
+
+      if (Object.keys(data).length > 0) {
+        await prisma.game.update({
+          where: { id: existing.id },
+          data,
+        });
+      }
       gameId = existing.id;
       stats.updated += 1;
     } else {
@@ -521,16 +544,85 @@ export async function importGamesFromFile(
 
     const categoryIds = await ensureCategoryIds(prisma, record.categories);
     const tagIds = await ensureTagIds(prisma, record.tags);
-    await syncGameRelations(prisma, gameId, categoryIds, tagIds);
+    await syncGameRelations(prisma, gameId, categoryIds, tagIds, !noOverwrite);
     await upsertCopies(prisma, gameId, record.copies, false, stats);
   }
 
   return stats;
 }
 
+function isEmptyImportValue(value: unknown): boolean {
+  if (value == null) return true;
+  if (typeof value === "string") return value.trim() === "";
+  if (typeof value === "number") return value <= 0;
+  return false;
+}
+
+function buildNoOverwriteUpdate(
+  existing: {
+    title: string;
+    description: string | null;
+    shortDescription: string | null;
+    minPlayers: number;
+    maxPlayers: number;
+    minAge: number;
+    minPlayTime: number;
+    maxPlayTime: number;
+    difficulty: string;
+    type: string;
+    yearPublished: number | null;
+    coverImageUrl: string | null;
+    coverImageSource: string | null;
+    instructionUrl: string | null;
+    isActive: boolean;
+    isFeatured: boolean;
+    publisherId: string | null;
+    designerId: string | null;
+    collectionType: string;
+    ean: string | null;
+  },
+  incoming: Record<string, unknown>,
+  ean: string | null,
+) {
+  const update: Record<string, unknown> = {};
+  const keys = [
+    "title",
+    "description",
+    "shortDescription",
+    "minPlayers",
+    "maxPlayers",
+    "minAge",
+    "minPlayTime",
+    "maxPlayTime",
+    "difficulty",
+    "type",
+    "yearPublished",
+    "coverImageUrl",
+    "coverImageSource",
+    "instructionUrl",
+    "isActive",
+    "isFeatured",
+    "publisherId",
+    "designerId",
+    "collectionType",
+  ] as const;
+
+  for (const key of keys) {
+    const current = existing[key];
+    const next = incoming[key];
+    if (isEmptyImportValue(current) && !isEmptyImportValue(next)) {
+      update[key] = next;
+    }
+  }
+
+  if (!existing.ean && ean) update.ean = ean;
+  return update;
+}
+
 export function formatGamesImportReport(stats: ImportGamesJsonStats): string {
   const lines = [
     stats.dryRun ? "=== DRY RUN games.json (bez zapisu) ===" : "=== IMPORT games.json ===",
+    stats.noOverwrite ? "Tryb: nie nadpisuj wypełnionych pól" : "Tryb: pełna aktualizacja istniejących gier",
     `Plik: ${stats.filePath}`,
     `Odczytano gier: ${stats.read}`,
     `Dodano: ${stats.created}`,

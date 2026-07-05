@@ -19,13 +19,14 @@ export function GamesJsonPanel({ defaultFilePath }: Props) {
   const [pending, start] = useTransition();
   const [importReport, setImportReport] = useState<string | null>(null);
   const [importStats, setImportStats] = useState<ImportGamesJsonStats | null>(null);
+  const [noOverwrite, setNoOverwrite] = useState(false);
   const localPath = defaultFilePath;
 
   const runImport = (dryRun: boolean, formData?: FormData) => {
     start(async () => {
       const result = formData
-        ? await importGamesJsonUploadAction(formData, dryRun)
-        : await importGamesJsonDefaultAction(dryRun);
+        ? await importGamesJsonUploadAction(formData, dryRun, noOverwrite)
+        : await importGamesJsonDefaultAction(dryRun, noOverwrite);
       if (result.success && result.data) {
         setImportReport(result.data.report);
         setImportStats(result.data.stats);
@@ -54,8 +55,21 @@ export function GamesJsonPanel({ defaultFilePath }: Props) {
         <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
           <li>Eksportuj aktualny katalog lub przygotuj plik według wzoru (pole „games”).</li>
           <li>Uruchom dry-run, potem import na żywo.</li>
+          <li>
+            Zaznacz „Nie nadpisuj wypełnionych pól”, aby import uzupełniał tylko puste metadane istniejących gier.
+          </li>
           <li>Format products.json importuj w sekcji poniżej.</li>
         </ol>
+
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={noOverwrite}
+            onChange={(e) => setNoOverwrite(e.target.checked)}
+            data-testid="import-games-no-overwrite"
+          />
+          Nie nadpisuj wypełnionych pól (tylko uzupełnij braki)
+        </label>
 
         {localPath ? (
           <p className="rounded-md bg-muted/50 p-3 font-mono text-xs">Lokalny plik: {localPath}</p>

@@ -1,5 +1,6 @@
 import { HeroSection } from "@/components/home/hero-section";
 import { AvailableGamesSection } from "@/components/home/available-games-section";
+import { HomePublicStats } from "@/components/home/home-public-stats";
 import { HowItWorksSection } from "@/components/home/how-it-works-section";
 import { FAQSection } from "@/components/home/faq-section";
 import { FoundationSection } from "@/components/home/foundation-section";
@@ -7,6 +8,7 @@ import { DbUnavailableBanner } from "@/components/db-unavailable-banner";
 import { isDatabaseAvailable } from "@/lib/db";
 import {
   fetchAvailableNowCached,
+  fetchPublicStatsCached,
   fetchShowcaseGamesCached,
   type GameListItem,
 } from "@/lib/games/queries";
@@ -33,17 +35,20 @@ function toShowcase(games: GameListItem[]): ShowcaseGame[] {
 export default async function HomePage() {
   const empty: GameListItem[] = [];
   const dbOk = await isDatabaseAvailable();
-  const [available, boardShowcase, rpgShowcase] = dbOk
+  const [available, boardShowcase, rpgShowcase, publicStats] = dbOk
     ? await Promise.all([
         fetchAvailableNowCached(6),
         fetchShowcaseGamesCached("BOARD_GAME", 4),
         fetchShowcaseGamesCached("RPG", 4),
+        fetchPublicStatsCached(),
       ])
-    : [empty, empty, empty];
+    : [empty, empty, empty, { games: 0, copies: 0, available: 0, boardGames: 0, rpgGames: 0 }];
 
   return (
     <div className="overflow-x-hidden">
       <HeroSection boardGames={toShowcase(boardShowcase)} rpgGames={toShowcase(rpgShowcase)} />
+
+      {dbOk && <HomePublicStats stats={publicStats} />}
 
       {!dbOk && (
         <div className="mx-auto max-w-7xl px-4 pt-6">

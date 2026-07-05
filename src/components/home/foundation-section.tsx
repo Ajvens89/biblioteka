@@ -3,8 +3,11 @@ import { ArrowRight, Heart, MapPin } from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { Button } from "@/components/ui/button";
 import { MotionReveal } from "@/components/ui/motion-reveal";
+import { getAppSettings } from "@/lib/settings";
 
-export function FoundationSection() {
+export async function FoundationSection() {
+  const settings = await getAppSettings();
+
   return (
     <section className="zf-section-foundation py-16 md:py-20" aria-labelledby="foundation-heading">
       <div className="zf-section-foundation-glow" aria-hidden />
@@ -23,9 +26,7 @@ export function FoundationSection() {
               </p>
               <p className="text-small inline-flex items-start gap-2 text-muted-foreground">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-                <span>
-                  ul. Partyzantów 44, 43-300 Bielsko-Biała
-                </span>
+                <span>{settings.foundationAddress}</span>
               </p>
             </div>
 

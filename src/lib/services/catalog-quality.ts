@@ -15,6 +15,7 @@ export type CatalogQualityReport = {
   missingAuthor: CatalogQualityIssue[];
   missingPublisher: CatalogQualityIssue[];
   missingDescription: CatalogQualityIssue[];
+  missingCover: CatalogQualityIssue[];
   missingYear: CatalogQualityIssue[];
   missingPlayers: CatalogQualityIssue[];
   missingPlayTime: CatalogQualityIssue[];
@@ -44,6 +45,7 @@ export async function buildCatalogQualityReport(db: PrismaClient): Promise<Catal
   const missingAuthor: CatalogQualityIssue[] = [];
   const missingPublisher: CatalogQualityIssue[] = [];
   const missingDescription: CatalogQualityIssue[] = [];
+  const missingCover: CatalogQualityIssue[] = [];
   const missingYear: CatalogQualityIssue[] = [];
   const missingPlayers: CatalogQualityIssue[] = [];
   const missingPlayTime: CatalogQualityIssue[] = [];
@@ -62,6 +64,7 @@ export async function buildCatalogQualityReport(db: PrismaClient): Promise<Catal
     if (!g.designerId) missingAuthor.push(baseIssue(g, "Brak autora/projektanta", "author"));
     if (!g.publisherId) missingPublisher.push(baseIssue(g, "Brak wydawcy", "publisher"));
     if (!g.description?.trim()) missingDescription.push(baseIssue(g, "Brak opisu", "description"));
+    if (!g.coverImageUrl?.trim()) missingCover.push(baseIssue(g, "Brak okładki", "cover"));
     if (!g.yearPublished) missingYear.push(baseIssue(g, "Brak roku wydania", "year"));
     if (g.minPlayers <= 0 || g.maxPlayers <= 0) missingPlayers.push(baseIssue(g, "Brak danych graczy", "players"));
     if (g.minPlayTime <= 0 && g.maxPlayTime <= 0) missingPlayTime.push(baseIssue(g, "Brak czasu rozgrywki", "playtime"));
@@ -85,6 +88,7 @@ export async function buildCatalogQualityReport(db: PrismaClient): Promise<Catal
     missingAuthor,
     missingPublisher,
     missingDescription,
+    missingCover,
     missingYear,
     missingPlayers,
     missingPlayTime,
@@ -98,6 +102,7 @@ export async function buildCatalogQualityReport(db: PrismaClient): Promise<Catal
       missingAuthor: missingAuthor.length,
       missingPublisher: missingPublisher.length,
       missingDescription: missingDescription.length,
+      missingCover: missingCover.length,
       missingYear: missingYear.length,
       missingPlayers: missingPlayers.length,
       missingPlayTime: missingPlayTime.length,
@@ -119,6 +124,7 @@ export function reportToCsv(report: CatalogQualityReport): string {
     ...report.missingAuthor,
     ...report.missingPublisher,
     ...report.missingDescription,
+    ...report.missingCover,
     ...report.missingYear,
     ...report.missingPlayers,
     ...report.missingPlayTime,

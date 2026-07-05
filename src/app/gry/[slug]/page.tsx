@@ -126,8 +126,34 @@ export default async function GameDetailPage({ params }: Props) {
 
   const credits = [game.designer?.name, game.publisher?.name].filter(Boolean);
 
+  const baseUrl = getAppUrl();
+  const coverForSchema = game.coverImageUrl?.startsWith("http")
+    ? game.coverImageUrl
+    : game.coverImageUrl
+      ? `${baseUrl}${game.coverImageUrl.startsWith("/") ? "" : "/"}${game.coverImageUrl}`
+      : undefined;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    name: game.title,
+    description:
+      game.shortDescription?.trim() ||
+      game.description?.slice(0, 500).trim() ||
+      `${game.title} w bibliotece ${APP_NAME}.`,
+    url: `${baseUrl}/gry/${game.slug}`,
+    ...(coverForSchema ? { image: coverForSchema } : {}),
+    ...(game.yearPublished ? { datePublished: String(game.yearPublished) } : {}),
+    ...(game.publisher?.name ? { publisher: { "@type": "Organization", name: game.publisher.name } } : {}),
+    ...(game.designer?.name ? { author: { "@type": "Person", name: game.designer.name } } : {}),
+  };
+
   return (
     <PageShell className="zf-game-page overflow-x-hidden pb-28 lg:pb-10" width="wide">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="mb-6">
         <GameDetailBackLink />
       </div>

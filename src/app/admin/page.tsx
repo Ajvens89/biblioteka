@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ShieldCheck } from "lucide-react";
 import { fetchAdminDashboard } from "@/lib/admin/dashboard";
 import { AdminQuickActions } from "@/components/admin/admin-quick-actions";
 import { DbUnavailableBanner } from "@/components/admin/db-unavailable-banner";
@@ -46,6 +46,46 @@ function DashboardContent({
         <AdminQuickActions />
       </SectionCard>
 
+      <SectionCard
+        title="Centrum jakości katalogu"
+        description="Braki w metadanych i okładkach — szczegóły, eksport CSV i naprawy w jednym miejscu."
+        action={
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/admin/jakosc-danych">
+              <ShieldCheck className="h-4 w-4" aria-hidden />
+              Otwórz centrum jakości
+            </Link>
+          </Button>
+        }
+      >
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            label="Gry bez EAN"
+            value={stats.gamesWithoutEan}
+            href="/admin/jakosc-danych"
+            tone="warning"
+          />
+          <StatCard
+            label="Gry bez okładki"
+            value={stats.gamesWithoutCover}
+            href="/admin/jakosc-danych"
+            tone="warning"
+          />
+          <StatCard
+            label="Gry bez opisu"
+            value={stats.gamesWithoutDescription}
+            href="/admin/jakosc-danych"
+            tone="warning"
+          />
+          <StatCard
+            label="Gry bez egzemplarzy"
+            value={stats.gamesWithoutCopies}
+            href="/admin/jakosc-danych"
+            tone="warning"
+          />
+        </div>
+      </SectionCard>
+
       {data.alerts.length > 0 && (
         <SectionCard title="Alerty" description="Wymaga uwagi">
           <ul className="space-y-2">
@@ -81,6 +121,7 @@ function DashboardContent({
           <StatCard label="Przeterminowane" value={stats.overdueLoans} href="/admin/wypozyczenia?status=OVERDUE" tone="danger" />
           <StatCard label="Gry bez EAN" value={stats.gamesWithoutEan} href="/admin/gry?missingEan=1" tone="warning" />
           <StatCard label="Gry bez okładki" value={stats.gamesWithoutCover} href="/admin/gry?missingCover=1" tone="warning" />
+          <StatCard label="Gry bez opisu" value={stats.gamesWithoutDescription} href="/admin/gry?missingDescription=1" tone="warning" />
           <StatCard label="Gry bez egzemplarzy" value={stats.gamesWithoutCopies} href="/admin/gry?missingCopies=1" tone="warning" />
           <StatCard label="Gry fabularne" value={stats.rpgGames} href="/admin/gry?collectionType=RPG" />
           <StatCard label="Gry planszowe" value={stats.boardGames} href="/admin/gry?collectionType=BOARD_GAME" />

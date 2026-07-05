@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { GameCard } from "@/components/games/game-card";
@@ -15,8 +13,6 @@ type Props = {
 };
 
 export function AvailableGamesSection({ games }: Props) {
-  if (!games.length) return null;
-
   return (
     <section className="zf-section-available" aria-labelledby="available-games-heading">
       <MotionReveal variant="fade-up">
@@ -39,13 +35,29 @@ export function AvailableGamesSection({ games }: Props) {
         </div>
       </MotionReveal>
 
-      <MotionReveal variant="stagger-container" className="zf-catalog-grid mt-10">
-        {games.map((game, index) => (
-          <MotionStaggerItem key={game.id} index={index}>
-            <GameCard game={game} showReserve variant="catalog" />
-          </MotionStaggerItem>
-        ))}
-      </MotionReveal>
+      {games.length === 0 ? (
+        <MotionReveal variant="fade-up" className="mt-10">
+          <div
+            className="rounded-xl border border-dashed border-border/80 bg-muted/20 px-6 py-12 text-center"
+            data-testid="home-available-empty"
+          >
+            <p className="text-body text-muted-foreground">
+              Obecnie wszystkie egzemplarze są wypożyczone lub w rezerwacji.
+            </p>
+            <Button className="mt-4" asChild>
+              <Link href="/katalog">Przeglądaj pełny katalog</Link>
+            </Button>
+          </div>
+        </MotionReveal>
+      ) : (
+        <MotionReveal variant="stagger-container" className="zf-catalog-grid mt-10">
+          {games.map((game, index) => (
+            <MotionStaggerItem key={game.id} index={index}>
+              <GameCard game={game} showReserve variant="catalog" />
+            </MotionStaggerItem>
+          ))}
+        </MotionReveal>
+      )}
     </section>
   );
 }

@@ -17,6 +17,7 @@ import { fail, ok, type ActionResult } from "@/lib/actions/utils";
 
 export async function importGamesJsonDefaultAction(
   dryRun: boolean,
+  noOverwrite = false,
 ): Promise<ActionResult<{ stats: ImportGamesJsonStats; report: string }>> {
   const actorResult = await requireActorAdmin();
   if (!isActorResult(actorResult)) return actorResult;
@@ -29,7 +30,7 @@ export async function importGamesJsonDefaultAction(
   }
 
   try {
-    const stats = await importGamesFromFile(prisma, filePath, { dryRun });
+    const stats = await importGamesFromFile(prisma, filePath, { dryRun, noOverwrite });
     const report = formatGamesImportReport(stats);
 
     if (!dryRun) {
@@ -53,6 +54,7 @@ export async function importGamesJsonDefaultAction(
 export async function importGamesJsonUploadAction(
   formData: FormData,
   dryRun: boolean,
+  noOverwrite = false,
 ): Promise<ActionResult<{ stats: ImportGamesJsonStats; report: string }>> {
   const actorResult = await requireActorAdmin();
   if (!isActorResult(actorResult)) return actorResult;
@@ -67,7 +69,7 @@ export async function importGamesJsonUploadAction(
   await writeFile(filePath, buffer);
 
   try {
-    const stats = await importGamesFromFile(prisma, filePath, { dryRun });
+    const stats = await importGamesFromFile(prisma, filePath, { dryRun, noOverwrite });
     const report = formatGamesImportReport(stats);
 
     if (!dryRun) {

@@ -1,5 +1,5 @@
+import "dotenv/config";
 import { spawnSync } from "node:child_process";
-import { checkDatabaseConnection, hasDatabaseUrl } from "./db-check";
 
 export type CheckStep = {
   label: string;
@@ -8,6 +8,30 @@ export type CheckStep = {
   needsDb?: boolean;
   env?: Record<string, string>;
 };
+
+function hasDatabaseUrl(): boolean {
+  const url = process.env.DATABASE_URL?.trim();
+  return Boolean(url && !url.includes("[") && !url.includes("YOUR_"));
+}
+
+/**
+ * Kontrola połączenia z bazą wykonywana w OSOBNYM procesie (npm run db:ping).
+ *
+ * Świadomie NIE importujemy tu @prisma/client ani nie tworzymy PrismaClient.
+ * Orkiestrator check:code żyje przez cały przebieg — gdyby załadował silnik
+ * Prisma (`query_engine-windows.dll.node`), na Windows zablokowałby plik na
+ * stałe, a późniejszy krok `prisma generate` kończyłby się błędem
+ * `EPERM: ... rename query_engine-windows.dll.node`. Krótki proces potomny
+ * ładuje i zwalnia silnik samodzielnie.
+ */
+function checkDatabaseConnection(): boolean {
+  const result = spawnSync("npm", ["run", "db:ping"], {
+    stdio: "inherit",
+    shell: process.platform === "win32",
+    env: process.env,
+  });
+  return result.status === 0;
+}
 
 function runStep(step: CheckStep): boolean {
   console.log(`\n▶ ${step.label}`);
@@ -33,7 +57,8 @@ export async function runCheckSteps(options: {
 
   let dbOk = false;
   if (hasDatabaseUrl()) {
-    dbOk = await checkDatabaseConnection();
+    console.log("▶ Kontrola połączenia z bazą (db:ping)");
+    dbOk = checkDatabaseConnection();
   } else {
     console.warn("⚠️  DATABASE_URL — pominięto kroki wymagające bazy.\n");
   }

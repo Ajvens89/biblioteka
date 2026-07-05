@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/guards";
+import { WishlistRemoveButton } from "@/components/account/wishlist-remove-button";
 import { ProfileForm } from "@/components/account/profile-form";
 import { ExtensionRequestButton } from "@/components/loans/extension-request-button";
 import { GameCover } from "@/components/ui/game-cover";
@@ -25,7 +26,7 @@ export default async function AccountPage({ searchParams }: PageProps) {
   const { tab } = await searchParams;
   const profile = await prisma.profile.findUniqueOrThrow({ where: { id: user.id } });
 
-  const [stats, notifications, wishlist, loans, activeLoanIds] = await Promise.all([
+  const [stats, notifications, wishlist, ratings, loans, activeLoanIds] = await Promise.all([
     fetchUserLibraryStats(prisma, user.id),
     getNotifications(1),
     prisma.wishlistItem.findMany({
@@ -33,6 +34,16 @@ export default async function AccountPage({ searchParams }: PageProps) {
       include: { game: true },
       orderBy: { createdAt: "desc" },
       take: 20,
+    }),
+    prisma.gameRating.findMany({
+      where: { userId: user.id },
+      include: {
+        game: {
+          select: { title: true, slug: true, coverImageUrl: true, collectionType: true },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+      take: 30,
     }),
     prisma.loan.findMany({
       where: { userId: user.id },
@@ -62,10 +73,16 @@ export default async function AccountPage({ searchParams }: PageProps) {
 
   const tabs = [
     { id: "profil", label: "Profil", href: "/moje-konto?tab=profil" },
+    { id: "zyczenia", label: "Lista odkrywcy", href: "/moje-konto?tab=zyczenia" },
+    { id: "oceny", label: "Moje oceny", href: "/moje-konto?tab=oceny" },
     { id: "statystyki", label: "Statystyki wypraw", href: "/moje-konto?tab=statystyki" },
     { id: "powiadomienia", label: "Wiadomości z Zakątka", href: "/moje-konto?tab=powiadomienia" },
-    { id: "zyczenia", label: "Lista odkrywcy", href: "/moje-konto?tab=zyczenia" },
-    { id: "wypozyczenia", label: "Twoje aktualne przygody", href: "/moje-konto?tab=wypozyczenia" },
+    {
+      id: "wypozyczenia",
+      label: "Twoje aktualne przygody",
+      href: "/moje-konto?tab=wypozyczenia",
+      deemphasized: true,
+    },
   ];
   const activeTab = tab && tabs.some((t) => t.id === tab) ? tab : "profil";
 
@@ -192,9 +209,49 @@ export default async function AccountPage({ searchParams }: PageProps) {
                       sizes="48px"
                     />
                   </Link>
-                  <Link href={`/gry/${w.game.slug}`} className="font-medium hover:text-primary">
+                  <Link href={`/gry/${w.game.slug}`} className="flex-1 font-medium hover:text-primary">
                     {w.game.title}
                   </Link>
+                  <WishlistRemoveButton gameId={w.game.id} gameTitle={w.game.title} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
+      )}
+
+      {activeTab === "oceny" && (
+        <SectionCard title="Moje oceny">
+          {ratings.length === 0 ? (
+            <p className="text-body text-muted-foreground">
+              Nie oceniłeś jeszcze żadnej gry.{" "}
+              <Link href="/katalog" className="text-primary hover:underline">
+                Przeglądaj katalog
+              </Link>
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {ratings.map((r) => (
+                <li key={r.id} className="flex items-center gap-3 rounded-lg border border-border/80 p-3">
+                  <Link href={`/gry/${r.game.slug}`} className="shrink-0">
+                    <GameCover
+                      src={r.game.coverImageUrl}
+                      alt={r.game.title}
+                      collectionType={r.game.collectionType}
+                      aspect="card"
+                      className="h-16 w-12 rounded"
+                      sizes="48px"
+                    />
+                  </Link>
+                  <div className="min-w-0 flex-1">
+                    <Link href={`/gry/${r.game.slug}`} className="font-medium hover:text-primary">
+                      {r.game.title}
+                    </Link>
+                    <p className="text-small text-muted-foreground">
+                      Ocena: {r.rating}/5
+                      {r.comment ? ` · ${r.comment}` : ""}
+                    </p>
+                  </div>
                 </li>
               ))}
             </ul>

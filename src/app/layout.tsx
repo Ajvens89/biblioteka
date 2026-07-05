@@ -21,6 +21,11 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pl_PL",
     siteName: APP_NAME,
+    images: [{ url: "/brand/logo.jpg", width: 1200, height: 630, alt: APP_NAME }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/brand/logo.jpg"],
   },
 };
 

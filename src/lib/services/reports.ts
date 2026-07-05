@@ -20,6 +20,7 @@ export async function buildWeeklyDataGapsReport(db: PrismaClient): Promise<{
     { key: "missingEan", label: "Brak EAN", items: report.missingEan },
     { key: "invalidEan", label: "Błędny EAN", items: report.invalidEan },
     { key: "missingDescription", label: "Brak opisu", items: report.missingDescription },
+    { key: "missingCover", label: "Brak okładki", items: report.missingCover },
     { key: "missingAuthor", label: "Brak autora", items: report.missingAuthor },
     { key: "missingPublisher", label: "Brak wydawcy", items: report.missingPublisher },
     { key: "noCopies", label: "Brak egzemplarzy", items: report.noCopies },

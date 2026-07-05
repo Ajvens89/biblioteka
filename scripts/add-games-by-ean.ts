@@ -1,7 +1,9 @@
 /**
  * Dodaje gry po liście EAN — hurt.csv → Planszeo/Rebel → baza.
- *   npx tsx scripts/add-games-by-ean.ts
- *   npx tsx scripts/add-games-by-ean.ts --dry-run
+ *   npm run add:games-by-ean
+ *   npm run add:games-by-ean -- --dry-run
+ *   npm run add:games-by-ean -- --ean 9788364198045
+ *   npm run add:games-by-ean -- --ean 9788364198045,9788364198175 --dry-run
  */
 import "dotenv/config";
 import type { Difficulty, GameCollectionType, GameType } from "@prisma/client";
@@ -65,6 +67,35 @@ const GAME_SEEDS: GameSeed[] = [
 ];
 
 const dryRun = process.argv.includes("--dry-run");
+
+function parseCliEans(): string[] {
+  const args = process.argv.slice(2);
+  const eans: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--ean" && args[i + 1]) {
+      eans.push(
+        ...args[i + 1]
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+      );
+      i += 1;
+    } else if (/^\d{8,14}$/.test(args[i]!)) {
+      eans.push(args[i]!);
+    }
+  }
+  return [...new Set(eans)];
+}
+
+const cliEans = parseCliEans();
+const ACTIVE_SEEDS: GameSeed[] =
+  cliEans.length > 0
+    ? cliEans.map((ean) => ({
+        ean,
+        title: `EAN ${ean}`,
+        collectionType: "BOARD_GAME",
+      }))
+    : GAME_SEEDS;
 
 function makeSlug(title: string) {
   return slugify(title, { lower: true, strict: true, locale: "pl" });
@@ -242,7 +273,7 @@ async function main() {
   let skipped = 0;
   let failed = 0;
 
-  for (const seed of GAME_SEEDS) {
+  for (const seed of ACTIVE_SEEDS) {
     const ean = canonicalHurtEan(seed.ean);
     const existing = await findGameByEan(prisma, ean);
     if (existing) {

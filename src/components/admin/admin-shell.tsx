@@ -39,7 +39,6 @@ const navGroups = [
     links: [
       { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
       { href: "/admin/statystyki", label: "Statystyki", icon: BarChart3 },
-      { href: "/admin/raporty", label: "Raporty", icon: ScrollText },
     ],
   },
   {
@@ -48,7 +47,7 @@ const navGroups = [
       { href: "/admin/gry", label: "Gry", icon: Gamepad2 },
       { href: "/admin/egzemplarze", label: "Egzemplarze", icon: BookCopy },
       { href: "/admin/import", label: "Import", icon: FileUp },
-      { href: "/admin/jakosc-danych", label: "Jakość danych", icon: ShieldCheck },
+      { href: "/admin/jakosc-danych", label: "Centrum jakości", icon: ShieldCheck },
       { href: "/admin/duplikaty", label: "Duplikaty", icon: BookCopy },
     ],
   },

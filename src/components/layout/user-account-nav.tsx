@@ -5,6 +5,7 @@ export type AccountNavItem = {
   id: string;
   label: string;
   href: string;
+  deemphasized?: boolean;
 };
 
 type Props = {
@@ -23,7 +24,7 @@ export function UserAccountNav({ items, activeId, className }: Props) {
         <Link
           key={item.id}
           href={item.href}
-          className="account-nav-link"
+          className={cn("account-nav-link", item.deemphasized && "opacity-60")}
           aria-current={activeId === item.id ? "page" : undefined}
         >
           {item.label}

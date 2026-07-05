@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BookOpen, Dices, ExternalLink, Mail, MapPin, Scroll, ScrollText } from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { getAppSettings } from "@/lib/settings";
 
 const FOUNDATION_URL = "https://zakatekfantastyki.pl/";
 
@@ -19,7 +20,9 @@ const links = {
   ],
 };
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const settings = await getAppSettings();
+
   return (
     <footer className="zf-footer mt-auto">
       <div className="mx-auto w-full max-w-[90rem] px-4 py-12 md:px-6 md:py-14">
@@ -34,11 +37,7 @@ export function SiteFooter() {
             <p className="text-sm text-muted-foreground">
               <span className="inline-flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--zf-green-500)]" aria-hidden />
-                <span>
-                  ul. Partyzantów 44
-                  <br />
-                  43-300 Bielsko-Biała
-                </span>
+                <span>{settings.foundationAddress}</span>
               </span>
             </p>
             <a
