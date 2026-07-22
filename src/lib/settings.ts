@@ -12,12 +12,9 @@ export async function getAppSettings(): Promise<AppSettingsMap> {
       map[row.key] = row.value;
     }
     return map as AppSettingsMap;
-  } catch (error) {
-    // Cloud SSG (Vercel / Firebase) may not reach the DB; footer/kontakt need defaults.
-    if (isPrismaConnectionError(error)) {
-      return { ...DEFAULT_SETTINGS };
-    }
-    throw error;
+  } catch {
+    // Build/SSG (Firebase App Hosting) uses a placeholder DB URL — never fail the page.
+    return { ...DEFAULT_SETTINGS };
   }
 }
 
