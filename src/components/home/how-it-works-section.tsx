@@ -1,8 +1,9 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { BookOpen, Dices, Layers, MapPin, RotateCcw } from "lucide-react";
+import { BookOpen, Mail, MapPin } from "lucide-react";
 import { MotionReveal, MotionStaggerItem } from "@/components/ui/motion-reveal";
+import { FOUNDATION_LOAN_EMAIL } from "@/lib/constants";
 
 type Step = {
   icon: LucideIcon;
@@ -13,28 +14,18 @@ type Step = {
 const steps: Step[] = [
   {
     icon: BookOpen,
-    title: "Wybierz grę",
-    text: "Przeglądaj katalog planszówek i podręczników RPG z okładkami i opisami.",
+    title: "Przeglądaj katalog",
+    text: "Szukaj planszówek i podręczników RPG — okładki, opisy i parametry są dostępne bez konta.",
   },
   {
-    icon: Layers,
-    title: "Zarezerwuj",
-    text: "Zaloguj się i zarezerwuj wolny egzemplarz w kilka kliknięć.",
+    icon: Mail,
+    title: "Napisz do fundacji",
+    text: `W sprawie wypożyczenia napisz na ${FOUNDATION_LOAN_EMAIL} — podaj tytuł gry.`,
   },
   {
     icon: MapPin,
-    title: "Odbierz",
-    text: "Odbierz grę w siedzibie Fundacji Zakątek Fantastyki.",
-  },
-  {
-    icon: Dices,
-    title: "Graj",
-    text: "Zbierz ekipę i ruszaj w przygodę przy stole.",
-  },
-  {
-    icon: RotateCcw,
-    title: "Zwróć",
-    text: "Oddaj grę na czas — kolejna osoba też zagra.",
+    title: "Odbierz na miejscu",
+    text: "Po ustaleniu szczegółów odbierzesz grę w siedzibie Fundacji Zakątek Fantastyki.",
   },
 ];
 
@@ -44,19 +35,19 @@ export function HowItWorksSection() {
       <div className="mx-auto max-w-7xl px-4">
         <MotionReveal variant="fade-up">
           <div className="mb-12 max-w-xl border-b border-border pb-8">
-            <p className="text-eyebrow">Proces wypożyczenia</p>
+            <p className="text-eyebrow">Jak korzystać</p>
             <h2 id="how-it-works-heading" className="text-h2 mt-2 text-foreground">
-              Jak to działa
+              Katalog w trybie poglądu
             </h2>
             <p className="text-body mt-3 text-muted-foreground">
-              Pięć kroków od wyboru tytułu do zwrotu egzemplarza — całość online.
+              Online przeglądasz zbiór. Wypożyczenie ustalisz mailowo z fundacją.
             </p>
           </div>
         </MotionReveal>
 
         <MotionReveal variant="stagger-container" className="zf-steps-track relative">
           <div className="zf-steps-line hidden lg:block" aria-hidden />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-3">
             {steps.map(({ icon: Icon, title, text }, i) => (
               <MotionStaggerItem key={title} index={i} as="article" className="zf-step-card relative flex flex-col p-5">
                 <span className="zf-step-number mb-4 flex h-8 w-8 items-center justify-center rounded-full text-xs">

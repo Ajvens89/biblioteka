@@ -6,7 +6,6 @@ import {
   BookOpen,
   Dices,
   LayoutDashboard,
-  LogIn,
   Menu,
   Scroll,
   User,
@@ -28,7 +27,6 @@ const ICONS: Record<string, LucideIcon> = {
   rpg: Scroll,
   account: User,
   admin: LayoutDashboard,
-  login: LogIn,
 };
 
 type NavLink = { href: string; label: string; icon?: keyof typeof ICONS };
@@ -41,21 +39,16 @@ type SessionUser = {
 
 type Props = {
   links: NavLink[];
+  /** Tylko personel biblioteki — publicznie null. */
   user: SessionUser | null;
 };
 
 export function MobileNav({ links, user }: Props) {
   const [open, setOpen] = useState(false);
 
-  const accountLinks: NavLink[] = user
-    ? [
-        { href: "/moje-konto", label: "Moje konto", icon: "account" },
-        { href: "/moje-rezerwacje", label: "Rezerwacje", icon: "catalog" },
-        ...(user.role === "ADMIN" || user.role === "LIBRARIAN"
-          ? [{ href: "/admin", label: "Panel administracyjny", icon: "admin" as const }]
-          : []),
-      ]
-    : [{ href: "/login", label: "Zaloguj się", icon: "login" }];
+  const staffLinks: NavLink[] = user
+    ? [{ href: "/admin", label: "Panel administracyjny", icon: "admin" }]
+    : [];
 
   function renderLink({ href, label, icon }: NavLink) {
     const Icon = icon ? ICONS[icon] : null;
@@ -96,10 +89,14 @@ export function MobileNav({ links, user }: Props) {
               Katalog
             </p>
             {links.map(renderLink)}
-            <p className="mt-3 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Konto
-            </p>
-            {accountLinks.map(renderLink)}
+            {staffLinks.length > 0 && (
+              <>
+                <p className="mt-3 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Personel
+                </p>
+                {staffLinks.map(renderLink)}
+              </>
+            )}
             <a
               href="https://zakatekfantastyki.pl/"
               target="_blank"

@@ -2,8 +2,6 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { ExternalLink } from "lucide-react";
 import { GameCard } from "@/components/games/game-card";
-import { GameMobileActionBar } from "@/components/games/game-mobile-action-bar";
-import { GameRatingForm } from "@/components/games/game-rating-form";
 import { GameDetailBackLink } from "@/components/games/game-detail-back-link";
 import { GameDetailCover } from "@/components/games/game-detail-cover";
 import { GameDetailAvailability } from "@/components/games/game-detail-availability";
@@ -11,8 +9,7 @@ import {
   buildGameDetailParams,
   GameDetailParams,
 } from "@/components/games/game-detail-params";
-import { GameDetailReservationPanel } from "@/components/games/game-detail-reservation-panel";
-import { GameDetailPickupInfo } from "@/components/games/game-detail-pickup-info";
+import { GameBorrowContact } from "@/components/games/game-borrow-contact";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GameTypeBadge } from "@/components/ui/game-type-badge";
@@ -20,14 +17,9 @@ import { PageShell } from "@/components/ui/page-shell";
 import { SectionCard } from "@/components/ui/section-card";
 import { MotionReveal } from "@/components/ui/motion-reveal";
 import { APP_NAME, COLLECTION_TYPE_LABELS } from "@/lib/constants";
-import { getSessionUser } from "@/lib/auth/session";
 import { countAvailableCopies } from "@/lib/games/availability";
 import { fetchGameBySlug, fetchSimilarGames } from "@/lib/games/queries";
-import { getWaitlistStatusAction } from "@/lib/actions/waitlist";
-import { getGameRatingSummary, getUserGameRating } from "@/lib/actions/ratings";
 import { getAppUrl } from "@/lib/site-url";
-import { getAppSettings, getSettingNumber } from "@/lib/settings";
-import { prisma } from "@/lib/db";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -81,36 +73,19 @@ export default async function GameDetailPage({ params }: Props) {
 
   const game = result;
 
-  const user = await getSessionUser();
   const available = countAvailableCopies(game.copies);
   const total = game.copies.length;
   const isBoard = game.collectionType !== "RPG";
   const categoryIds = game.categories.map((c) => c.categoryId);
-  const loginHref = `/login?redirect=${encodeURIComponent(`/gry/${game.slug}#rezerwacja`)}`;
 
-  const [similar, waitlistStatus, ratingSummary, userRating, onWishlist, settings, validityDays] =
-    await Promise.all([
-      fetchSimilarGames(
-        game.id,
-        categoryIds,
-        game.collectionType,
-        4,
-        game.publisherId,
-        game.designerId,
-      ),
-      user ? getWaitlistStatusAction(game.id) : Promise.resolve(null),
-      getGameRatingSummary(game.id),
-      user ? getUserGameRating(game.id, user.id) : Promise.resolve(null),
-      user
-        ? prisma.wishlistItem
-            .findUnique({
-              where: { userId_gameId: { userId: user.id, gameId: game.id } },
-            })
-            .then(Boolean)
-        : Promise.resolve(false),
-      getAppSettings(),
-      getSettingNumber("reservationValidityDays", 3),
-    ]);
+  const similar = await fetchSimilarGames(
+    game.id,
+    categoryIds,
+    game.collectionType,
+    4,
+    game.publisherId,
+    game.designerId,
+  );
 
   const paramsList = buildGameDetailParams({
     isBoard,
@@ -149,7 +124,7 @@ export default async function GameDetailPage({ params }: Props) {
   };
 
   return (
-    <PageShell className="zf-game-page overflow-x-hidden pb-28 lg:pb-10" width="wide">
+    <PageShell className="zf-game-page overflow-x-hidden pb-10" width="wide">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -165,10 +140,6 @@ export default async function GameDetailPage({ params }: Props) {
             coverImageUrl={game.coverImageUrl}
             collectionType={game.collectionType}
             isBoard={isBoard}
-            gameId={game.id}
-            onWishlist={onWishlist}
-            isLoggedIn={Boolean(user)}
-            loginHref={loginHref}
             images={game.images}
           />
         </MotionReveal>
@@ -193,20 +164,7 @@ export default async function GameDetailPage({ params }: Props) {
 
           <GameDetailParams params={paramsList} />
 
-          <GameDetailReservationPanel
-            gameId={game.id}
-            gameTitle={game.title}
-            available={available}
-            total={total}
-            isLoggedIn={Boolean(user)}
-            loginHref={loginHref}
-            waitlistStatus={waitlistStatus}
-          />
-
-          <GameDetailPickupInfo
-            validityDays={validityDays}
-            foundationAddress={settings.foundationAddress}
-          />
+          <GameBorrowContact gameTitle={game.title} available={available} />
         </div>
       </div>
 
@@ -249,17 +207,6 @@ export default async function GameDetailPage({ params }: Props) {
         </div>
       )}
 
-      <SectionCard title="Oceny graczy" className="mt-10">
-        <GameRatingForm
-          gameId={game.id}
-          isLoggedIn={Boolean(user)}
-          loginHref={loginHref}
-          initialRating={userRating?.rating}
-          initialComment={userRating?.comment ?? undefined}
-          summary={ratingSummary}
-        />
-      </SectionCard>
-
       {similar.length > 0 && (
         <section className="mt-12 space-y-6" aria-labelledby="similar-games-heading">
           <h2 id="similar-games-heading" className="text-h2">
@@ -267,20 +214,11 @@ export default async function GameDetailPage({ params }: Props) {
           </h2>
           <div className="zf-catalog-grid">
             {similar.map((g) => (
-              <GameCard key={g.id} game={g} variant="catalog" showReserve />
+              <GameCard key={g.id} game={g} variant="catalog" />
             ))}
           </div>
         </section>
       )}
-
-      <GameMobileActionBar
-        gameId={game.id}
-        gameTitle={game.title}
-        available={available}
-        total={total}
-        isLoggedIn={Boolean(user)}
-        loginHref={loginHref}
-      />
     </PageShell>
   );
 }

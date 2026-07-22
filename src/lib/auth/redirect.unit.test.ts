@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { safeRedirectPath } from "./redirect";
 
 describe("safeRedirectPath (SEC-003)", () => {
-  const fallback = "/moje-konto";
+  const fallback = "/admin";
 
   it("akceptuje /moje-konto", () => {
     assert.equal(safeRedirectPath("/moje-konto"), "/moje-konto");
@@ -47,8 +47,13 @@ describe("safeRedirectPath (SEC-003)", () => {
     assert.equal(safeRedirectPath(undefined), fallback);
   });
 
+  it("akceptuje ścieżki panelu admin", () => {
+    assert.equal(safeRedirectPath("/admin"), "/admin");
+    assert.equal(safeRedirectPath("/admin/gry"), "/admin/gry");
+  });
+
   it("odrzuca nieznaną ścieżkę spoza allowlist/prefiksów", () => {
-    assert.equal(safeRedirectPath("/admin/secret"), fallback);
+    assert.equal(safeRedirectPath("/sekretna-strona"), fallback);
   });
 
   it("odrzuca ścieżkę z @ (open redirect)", () => {

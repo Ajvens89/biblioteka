@@ -1,7 +1,8 @@
 import { clearOtherAuthSessions } from "@/lib/auth/clear-sessions";
 import { prisma } from "@/lib/db";
-import { hashPassword, verifyPassword } from "@/lib/auth/password";
+import { verifyPassword } from "@/lib/auth/password";
 import { setLocalSession, clearLocalSession } from "@/lib/auth/local-session";
+import { FOUNDATION_LOAN_EMAIL } from "@/lib/constants";
 
 export function localAuthUserId(email: string) {
   return `local:${email.toLowerCase()}`;
@@ -17,6 +18,12 @@ export async function loginLocal(email: string, password: string): Promise<{ ok:
   if (profile.isBlocked) {
     return { ok: false, error: "Konto jest zablokowane." };
   }
+  if (profile.role !== "ADMIN" && profile.role !== "LIBRARIAN") {
+    return {
+      ok: false,
+      error: `Logowanie jest dostępne tylko dla personelu biblioteki. W sprawie wypożyczeń napisz na ${FOUNDATION_LOAN_EMAIL}.`,
+    };
+  }
   const valid = await verifyPassword(password, profile.passwordHash);
   if (!valid) return { ok: false, error: "Nieprawidłowy e-mail lub hasło." };
 
@@ -26,28 +33,14 @@ export async function loginLocal(email: string, password: string): Promise<{ ok:
 }
 
 export async function registerLocal(
-  email: string,
-  password: string,
-  fullName: string,
+  _email: string,
+  _password: string,
+  _fullName: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const normalized = email.toLowerCase();
-  const existing = await prisma.profile.findUnique({ where: { email: normalized } });
-  if (existing) return { ok: false, error: "Konto z tym adresem e-mail już istnieje." };
-
-  const passwordHash = await hashPassword(password);
-  const profile = await prisma.profile.create({
-    data: {
-      authUserId: localAuthUserId(normalized),
-      email: normalized,
-      fullName,
-      role: "USER",
-      passwordHash,
-    },
-  });
-
-  await clearOtherAuthSessions();
-  await setLocalSession(profile.id);
-  return { ok: true };
+  return {
+    ok: false,
+    error: `Rejestracja publiczna jest wyłączona. Katalog działa w trybie poglądu — napisz na ${FOUNDATION_LOAN_EMAIL}.`,
+  };
 }
 
 export async function logoutLocal() {

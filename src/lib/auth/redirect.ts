@@ -2,6 +2,7 @@
 const ALLOWED_EXACT = new Set([
   "/",
   "/katalog",
+  "/admin",
   "/moje-konto",
   "/moje-rezerwacje",
   "/login",
@@ -11,7 +12,7 @@ const ALLOWED_EXACT = new Set([
 ]);
 
 /** Bezpieczne prefiksy wewnętrznych ścieżek (np. karta gry z hash). */
-const SAFE_PREFIXES = ["/gry/", "/katalog", "/login", "/rejestracja"] as const;
+const SAFE_PREFIXES = ["/gry/", "/katalog", "/admin", "/login", "/rejestracja"] as const;
 
 const DANGEROUS_SCHEME = /^(javascript|data|vbscript):/i;
 
@@ -21,7 +22,7 @@ const DANGEROUS_SCHEME = /^(javascript|data|vbscript):/i;
  */
 export function safeRedirectPath(
   path: string | null | undefined,
-  fallback = "/moje-konto",
+  fallback = "/admin",
 ): string {
   if (!path || typeof path !== "string") return fallback;
 

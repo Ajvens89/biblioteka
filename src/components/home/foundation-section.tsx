@@ -22,7 +22,7 @@ export async function FoundationSection() {
               </h2>
               <p className="text-body text-muted-foreground">
                 Biblioteka jest częścią działalności fundacji promującej kulturę fantastyki, gier planszowych
-                i RPG. Wypożyczając u nas, wspierasz społeczność graczy i czytelników w Bielsku-Białej.
+                i RPG. Katalog możesz przeglądać online — o wypożyczeniu napisz do fundacji.
               </p>
               <p className="text-small inline-flex items-start gap-2 text-muted-foreground">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />

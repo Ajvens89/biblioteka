@@ -52,7 +52,7 @@ export function CatalogResults({
           action={emptyState.action}
         />
       ) : (
-        <CatalogGridAnimated items={items} showReserve />
+        <CatalogGridAnimated items={items} />
       )}
 
       {totalPages > 1 && (

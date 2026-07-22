@@ -28,7 +28,7 @@ export function GameDetailAvailability({ available, total }: Props) {
       <Icon className="h-6 w-6 shrink-0" aria-hidden />
       <div className="min-w-0">
         <p className="font-display text-lg font-semibold leading-tight">
-          {noCopies ? "Brak egzemplarzy" : isAvailable ? "Dostępna do rezerwacji" : "Chwilowo niedostępna"}
+          {noCopies ? "Brak egzemplarzy" : isAvailable ? "W katalogu" : "Obecnie niedostępna"}
         </p>
         <p className="text-sm text-muted-foreground">{label}</p>
       </div>

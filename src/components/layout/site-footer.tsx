@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BookOpen, Dices, ExternalLink, Mail, MapPin, Scroll, ScrollText } from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { FOUNDATION_LOAN_EMAIL } from "@/lib/constants";
 import { getAppSettings } from "@/lib/settings";
 
 const FOUNDATION_URL = "https://zakatekfantastyki.pl/";
@@ -10,8 +11,6 @@ const links = {
     { href: "/katalog", label: "Katalog gier", icon: BookOpen },
     { href: "/katalog?collectionType=BOARD_GAME", label: "Planszówki", icon: Dices },
     { href: "/katalog?collectionType=RPG", label: "Gry fabularne", icon: Scroll },
-    { href: "/login", label: "Logowanie" },
-    { href: "/rejestracja", label: "Rejestracja" },
   ],
   informacje: [
     { href: "/regulamin", label: "Regulamin", icon: ScrollText },
@@ -22,6 +21,7 @@ const links = {
 
 export async function SiteFooter() {
   const settings = await getAppSettings();
+  const loanEmail = settings.contactEmail || FOUNDATION_LOAN_EMAIL;
 
   return (
     <footer className="zf-footer mt-auto">
@@ -32,7 +32,11 @@ export async function SiteFooter() {
             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
               Biblioteka prowadzona przez{" "}
               <strong className="font-medium text-foreground">Fundację Zakątek Fantastyki</strong>.
-              Rezerwuj online, odbieraj na miejscu — wyrusz po kolejną grę z drużyną.
+              Przeglądaj katalog online. W sprawie wypożyczeń napisz na{" "}
+              <a href={`mailto:${loanEmail}`} className="font-medium text-[var(--zf-green-500)] hover:underline">
+                {loanEmail}
+              </a>
+              .
             </p>
             <p className="text-sm text-muted-foreground">
               <span className="inline-flex items-start gap-2">
@@ -94,7 +98,7 @@ export async function SiteFooter() {
 
         <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Biblioteka Zakątka Fantastyki</p>
-          <p>Rzuć kostką · oddawaj na czas</p>
+          <p>Katalog w trybie poglądu</p>
         </div>
       </div>
     </footer>

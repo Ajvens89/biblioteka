@@ -18,16 +18,16 @@ export function AvailableGamesSection({ games }: Props) {
       <MotionReveal variant="fade-up">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border/80 pb-8">
           <div className="space-y-2">
-            <p className="text-eyebrow">Gotowe do wypożyczenia</p>
+            <p className="text-eyebrow">Z katalogu</p>
             <h2 id="available-games-heading" className="text-h2 text-foreground">
-              Dostępne teraz
+              Wybrane tytuły
             </h2>
             <p className="text-body max-w-xl text-muted-foreground">
-              Gry z wolnym egzemplarzem — zarezerwuj online i odbierz w fundacji.
+              Przeglądaj zbiór gier. Informacje o wypożyczeniu uzyskasz mailowo od fundacji.
             </p>
           </div>
           <Button variant="ghost" className="text-primary hover:text-primary" asChild>
-            <Link href="/katalog?availability=available">
+            <Link href="/katalog">
               Zobacz cały katalog
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
@@ -42,10 +42,10 @@ export function AvailableGamesSection({ games }: Props) {
             data-testid="home-available-empty"
           >
             <p className="text-body text-muted-foreground">
-              Obecnie wszystkie egzemplarze są wypożyczone lub w rezerwacji.
+              Brak wyróżnionych tytułów — zajrzyj do pełnego katalogu.
             </p>
             <Button className="mt-4" asChild>
-              <Link href="/katalog">Przeglądaj pełny katalog</Link>
+              <Link href="/katalog">Przeglądaj katalog</Link>
             </Button>
           </div>
         </MotionReveal>
@@ -53,7 +53,7 @@ export function AvailableGamesSection({ games }: Props) {
         <MotionReveal variant="stagger-container" className="zf-catalog-grid mt-10">
           {games.map((game, index) => (
             <MotionStaggerItem key={game.id} index={index}>
-              <GameCard game={game} showReserve variant="catalog" />
+              <GameCard game={game} variant="catalog" />
             </MotionStaggerItem>
           ))}
         </MotionReveal>

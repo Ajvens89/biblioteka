@@ -1,13 +1,15 @@
+import { FOUNDATION_LOAN_EMAIL } from "@/lib/constants";
 import { getAppSettings } from "@/lib/settings";
 import { PageShell } from "@/components/ui/page-shell";
 import { SectionCard } from "@/components/ui/section-card";
 
 export const metadata = { title: "Regulamin" };
 
-const TERMS_UPDATED = "2026-03-01";
+const TERMS_UPDATED = "2026-07-05";
 
 export default async function TermsPage() {
   const settings = await getAppSettings();
+  const loanEmail = settings.contactEmail || FOUNDATION_LOAN_EMAIL;
 
   return (
     <PageShell width="narrow" className="space-y-8 py-8 md:py-12">
@@ -23,15 +25,16 @@ export default async function TermsPage() {
         <div className="prose-game whitespace-pre-wrap text-sm text-muted-foreground">{settings.termsText}</div>
       </SectionCard>
 
-      <SectionCard title="Kontakt i odbiór">
+      <SectionCard title="Wypożyczenia">
         <p className="text-sm text-muted-foreground">
-          Adres fundacji: <span className="font-medium text-foreground">{settings.foundationAddress}</span>
+          Katalog online służy do przeglądania zbiorów. Informacje o wypożyczeniu uzyskasz pod adresem{" "}
+          <a href={`mailto:${loanEmail}`} className="font-medium text-primary hover:underline">
+            {loanEmail}
+          </a>
+          .
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
-          Pytania:{" "}
-          <a href={`mailto:${settings.contactEmail}`} className="text-primary hover:underline">
-            {settings.contactEmail}
-          </a>
+          Adres fundacji: <span className="font-medium text-foreground">{settings.foundationAddress}</span>
         </p>
       </SectionCard>
     </PageShell>

@@ -5,14 +5,15 @@ import { redirect } from "next/navigation";
 import { logAudit } from "@/lib/audit";
 import { clearAllAuthSessions, clearOtherAuthSessions } from "@/lib/auth/clear-sessions";
 import { getAuthProvider } from "@/lib/auth/config";
-import { loginLocal, logoutLocal, registerLocal } from "@/lib/auth/local-auth";
+import { loginLocal, logoutLocal } from "@/lib/auth/local-auth";
 import { getActorFromDb, isActorResult, requireActorAdmin } from "@/lib/auth/actor";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { loginSchema, registerSchema, profileSchema } from "@/lib/validations/auth";
+import { loginSchema, profileSchema } from "@/lib/validations/auth";
 import { updateUserRoleSchema, uuidSchema } from "@/lib/validations/ids";
 import { z } from "zod";
 import { safeRedirectPath } from "@/lib/auth/redirect";
+import { FOUNDATION_LOAN_EMAIL } from "@/lib/constants";
 import { fail, ok, type ActionResult } from "@/lib/actions/utils";
 import {
   checkRateLimit,
@@ -38,7 +39,7 @@ export async function loginAction(
   );
   if (!rl.allowed) return fail(rateLimitErrorMessage(rl.retryAfterMs));
 
-  const redirectTo = safeRedirectPath(formData.get("redirect")?.toString());
+  const redirectTo = safeRedirectPath(formData.get("redirect")?.toString(), "/admin");
 
   if (getAuthProvider() === "local") {
     const result = await loginLocal(parsed.data.email, parsed.data.password);
@@ -52,60 +53,26 @@ export async function loginAction(
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return fail("Nieprawidłowy e-mail lub hasło.");
 
+  const actor = await getActorFromDb();
+  if (!actor || (actor.role !== "ADMIN" && actor.role !== "LIBRARIAN")) {
+    await supabase.auth.signOut();
+    await clearAllAuthSessions();
+    return fail(
+      `Logowanie jest dostępne tylko dla personelu biblioteki. W sprawie wypożyczeń napisz na ${FOUNDATION_LOAN_EMAIL}.`,
+    );
+  }
+
   revalidatePath("/", "layout");
   redirect(redirectTo);
 }
 
 export async function registerAction(
   _prev: unknown,
-  formData: FormData,
+  _formData: FormData,
 ): Promise<ActionResult> {
-  const parsed = registerSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-    confirmPassword: formData.get("confirmPassword"),
-    fullName: formData.get("fullName"),
-  });
-  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd");
-
-  const clientKey = await getRequestClientKey();
-  const rl = await checkRateLimit(prisma, "register", clientKey);
-  if (!rl.allowed) return fail(rateLimitErrorMessage(rl.retryAfterMs));
-
-  if (getAuthProvider() === "local") {
-    const result = await registerLocal(
-      parsed.data.email,
-      parsed.data.password,
-      parsed.data.fullName,
-    );
-    if (!result.ok) return fail(result.error);
-    redirect("/moje-rezerwacje");
-  }
-
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
-    email: parsed.data.email,
-    password: parsed.data.password,
-    options: {
-      data: { full_name: parsed.data.fullName },
-    },
-  });
-  if (error) return fail(error.message);
-
-  if (data.user) {
-    await prisma.profile.upsert({
-      where: { email: parsed.data.email.toLowerCase() },
-      create: {
-        authUserId: data.user.id,
-        email: parsed.data.email.toLowerCase(),
-        fullName: parsed.data.fullName,
-        role: "USER",
-      },
-      update: { fullName: parsed.data.fullName },
-    });
-  }
-
-  redirect("/login?registered=1");
+  return fail(
+    `Rejestracja publiczna jest wyłączona. Katalog działa w trybie poglądu — napisz na ${FOUNDATION_LOAN_EMAIL}.`,
+  );
 }
 
 export async function logoutAction() {

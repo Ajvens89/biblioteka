@@ -25,7 +25,7 @@ export function HeroSection({ boardGames, rpgGames }: Props) {
             <p className="hero-enter hero-enter-1 text-eyebrow mb-4">Fundacja Zakątek Fantastyki</p>
             <h1 className="hero-enter hero-enter-2 zf-hero-title">Znajdź swoją kolejną przygodę</h1>
             <p className="hero-enter hero-enter-3 zf-hero-lead mt-4">
-              Odkryj nasz świat gier — planszówki i RPG do wypożyczenia w Bielsku-Białej.
+              Odkryj nasz świat gier — planszówki i RPG w katalogu biblioteki w Bielsku-Białej.
               Wyszukaj tytuł, autora lub zeskanuj kod EAN.
             </p>
 

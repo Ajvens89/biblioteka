@@ -31,12 +31,12 @@ export function DbUnavailableBanner({ compact }: Props) {
           </p>
           {isProd ? (
             <p>
-              Katalog i rezerwacje mogą być ograniczone — trwa konfiguracja lub restart bazy w
+              Katalog może być ograniczony — trwa konfiguracja lub restart bazy w
               chmurze. Spróbuj ponownie za chwilę.
             </p>
           ) : (
             <>
-              <p>Katalog i rezerwacje chwilowo niedostępne. Uruchom PostgreSQL lokalnie:</p>
+              <p>Katalog chwilowo niedostępny. Uruchom PostgreSQL lokalnie:</p>
               <ol className="list-decimal space-y-1 pl-5 font-mono text-xs text-foreground">
                 <li>npm run dev:db</li>
                 <li>npm run db:patch</li>

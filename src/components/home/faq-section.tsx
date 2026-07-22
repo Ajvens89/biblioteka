@@ -4,24 +4,25 @@ import { useId, useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { MotionReveal } from "@/components/ui/motion-reveal";
+import { FOUNDATION_LOAN_EMAIL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const faq = [
   {
     q: "Czy trzeba mieć konto?",
-    a: "Tak — rezerwacja online wymaga bezpłatnej rejestracji. Przeglądanie katalogu jest dostępne dla wszystkich.",
+    a: "Nie. Katalog możesz przeglądać bez logowania. Logowanie jest przeznaczone wyłącznie dla zespołu biblioteki.",
   },
   {
-    q: "Na ile można wypożyczyć grę?",
-    a: "Standardowy okres wypożyczenia wynosi 14 dni (zgodnie z regulaminem biblioteki). Możliwe jest przedłużenie po kontakcie z bibliotekarzem.",
+    q: "Jak wypożyczyć grę?",
+    a: `Napisz na ${FOUNDATION_LOAN_EMAIL}, podając tytuł gry. Fundacja ustali dostępność i szczegóły odbioru.`,
   },
   {
-    q: "Czy można zarezerwować podręcznik RPG?",
-    a: "Tak. Gry fabularne są w katalogu oznaczone jako „Gry fabularne” i rezerwujesz je tak samo jak planszówki.",
+    q: "Czy w katalogu są też podręczniki RPG?",
+    a: "Tak. Gry fabularne są oznaczone jako „Gry fabularne” — możesz je przeglądać tak samo jak planszówki.",
   },
   {
-    q: "Co jeśli gra jest niedostępna?",
-    a: "Sprawdź katalog później lub skontaktuj się z biblioteką. Status „Dostępna” oznacza wolny egzemplarz do rezerwacji.",
+    q: "Co oznacza status dostępności?",
+    a: "Pokazuje, czy w systemie są wolne egzemplarze. Ostateczne potwierdzenie wypożyczenia odbywa się mailowo.",
   },
 ];
 

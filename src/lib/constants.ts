@@ -10,7 +10,10 @@ import type {
 
 export const APP_NAME = "Biblioteka Zakątka Fantastyki";
 export const APP_DESCRIPTION =
-  "Przeglądaj, rezerwuj i wypożyczaj gry z naszej biblioteki";
+  "Przeglądaj katalog gier planszowych i RPG biblioteki Zakątka Fantastyki";
+
+/** Publiczny kontakt w sprawie wypożyczeń (tryb poglądu katalogu). */
+export const FOUNDATION_LOAN_EMAIL = "fundacja@zakatekfantastyki.pl";
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   GUEST: "Gość",
@@ -27,7 +30,7 @@ export const COLLECTION_TYPE_LABELS: Record<GameCollectionType, string> = {
 export const GAME_SORT_LABELS: Record<string, string> = {
   title: "Tytuł A–Z",
   newest: "Od najnowszych",
-  popular: "Najczęściej rezerwowane",
+  popular: "Najpopularniejsze",
   available: "Dostępne najpierw",
   playtime_asc: "Czas rozgrywki (krótsze)",
   playtime_desc: "Czas rozgrywki (dłuższe)",
@@ -99,10 +102,10 @@ export const DEFAULT_SETTINGS = {
   maxLoanExtensions: "2",
   waitlistValidityDays: "14",
   waitlistNotifyHours: "48",
-  contactEmail: "kontakt@zakatki-fantastyki.pl",
+  contactEmail: "fundacja@zakatekfantastyki.pl",
   contactPhone: "+48 000 000 000",
   foundationAddress: "Fundacja Zakątek Fantastyki",
-  termsText: "Regulamin wypożyczeń biblioteki gier. Prosimy o terminowy zwrot egzemplarzy.",
+  termsText: "Regulamin biblioteki gier. Informacje o wypożyczeniach: fundacja@zakatekfantastyki.pl",
 } as const;
 
 export const STORAGE_BUCKET = "game-images";

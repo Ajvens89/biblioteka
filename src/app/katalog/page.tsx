@@ -27,7 +27,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const title = q ? `Szukaj: ${q}` : "Katalog gier";
   const description = q
     ? `Wyniki wyszukiwania „${q}” w bibliotece ${APP_NAME}.`
-    : "Przeglądaj i rezerwuj gry planszowe oraz podręczniki RPG w bibliotece Zakątka Fantastyki.";
+    : "Przeglądaj gry planszowe oraz podręczniki RPG w bibliotece Zakątka Fantastyki.";
 
   return {
     title,
