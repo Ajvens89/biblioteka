@@ -14,7 +14,7 @@ const widths = {
 
 export function PageShell({ children, className, width = "default" }: Props) {
   return (
-    <div className={cn("mx-auto w-full px-4 py-8 md:py-10", widths[width], className)}>
+    <div className={cn("mx-auto w-full px-4 py-8 md:px-6 md:py-10", widths[width], className)}>
       {children}
     </div>
   );

@@ -88,7 +88,7 @@ export default async function CatalogPage({ searchParams }: PageProps) {
   const activeParams = hasAnyActiveParam(sp);
 
   return (
-    <PageShell className="zf-catalog-page overflow-x-hidden" width="wide">
+    <PageShell className="zf-catalog-page" width="wide">
       <CatalogHeader
         total={globalTotal}
         matching={result.total}
@@ -111,7 +111,7 @@ export default async function CatalogPage({ searchParams }: PageProps) {
         </div>
       )}
 
-      <div className="lg:grid lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-8">
+      <div className="min-w-0 lg:grid lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-8">
         <Suspense>
           <CatalogDesktopFilters lists={lists} />
         </Suspense>
