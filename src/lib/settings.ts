@@ -1,15 +1,24 @@
 import { DEFAULT_SETTINGS } from "@/lib/constants";
 import { prisma } from "@/lib/db";
+import { isPrismaConnectionError } from "@/lib/db-errors";
 
 export type AppSettingsMap = typeof DEFAULT_SETTINGS;
 
 export async function getAppSettings(): Promise<AppSettingsMap> {
-  const rows = await prisma.appSetting.findMany();
-  const map = { ...DEFAULT_SETTINGS } as Record<string, string>;
-  for (const row of rows) {
-    map[row.key] = row.value;
+  try {
+    const rows = await prisma.appSetting.findMany();
+    const map = { ...DEFAULT_SETTINGS } as Record<string, string>;
+    for (const row of rows) {
+      map[row.key] = row.value;
+    }
+    return map as AppSettingsMap;
+  } catch (error) {
+    // Cloud SSG (Vercel / Firebase) may not reach the DB; footer/kontakt need defaults.
+    if (isPrismaConnectionError(error)) {
+      return { ...DEFAULT_SETTINGS };
+    }
+    throw error;
   }
-  return map as AppSettingsMap;
 }
 
 export async function getSettingNumber(key: keyof AppSettingsMap, fallback: number) {
