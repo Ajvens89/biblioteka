@@ -8,7 +8,7 @@ export const loginSchema = z.object({
 export const registerSchema = z
   .object({
     email: z.string().email("Podaj poprawny adres e-mail"),
-    password: z.string().min(8, "Hasło musi mieć co najmniej 8 znaków"),
+    password: z.string().min(12, "Hasło musi mieć co najmniej 12 znaków"),
     confirmPassword: z.string(),
     fullName: z.string().min(2, "Imię i nazwisko są wymagane"),
   })

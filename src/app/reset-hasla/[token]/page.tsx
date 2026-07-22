@@ -14,7 +14,7 @@ export default async function ResetPasswordTokenPage({ params }: Props) {
   return (
     <AuthPageShell
       title="Ustaw nowe hasło"
-      description="Hasło musi mieć co najmniej 8 znaków, w tym literę i cyfrę."
+      description="Hasło musi mieć co najmniej 12 znaków, w tym literę i cyfrę."
     >
       <Card className="card-elevated">
         <CardContent className="pt-6">

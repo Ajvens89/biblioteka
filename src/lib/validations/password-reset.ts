@@ -9,7 +9,7 @@ export const passwordResetConfirmSchema = z
     token: z.string().min(16, "Nieprawidłowy token"),
     password: z
       .string()
-      .min(8, "Hasło musi mieć co najmniej 8 znaków")
+      .min(12, "Hasło musi mieć co najmniej 12 znaków")
       .regex(/[A-Za-z]/, "Hasło musi zawierać literę")
       .regex(/[0-9]/, "Hasło musi zawierać cyfrę"),
     confirmPassword: z.string(),

@@ -43,10 +43,17 @@ describe("passwordResetConfirmSchema", async () => {
     });
     assert.equal(bad.success, false);
 
-    const good = passwordResetConfirmSchema.safeParse({
+    const tooShort = passwordResetConfirmSchema.safeParse({
       token: "x".repeat(20),
       password: "abc12345",
       confirmPassword: "abc12345",
+    });
+    assert.equal(tooShort.success, false);
+
+    const good = passwordResetConfirmSchema.safeParse({
+      token: "x".repeat(20),
+      password: "abc12345xyz!",
+      confirmPassword: "abc12345xyz!",
     });
     assert.equal(good.success, true);
   });

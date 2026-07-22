@@ -50,14 +50,21 @@ export function Combobox({
     return options.filter((o) => o.label.toLowerCase().includes(q));
   }, [options, query]);
 
-  React.useEffect(() => {
-    setActiveIndex(0);
-  }, [query, open]);
+  // Clamp instead of resetting via useEffect (avoids setState-in-effect lint).
+  const safeActiveIndex =
+    filtered.length === 0 ? 0 : Math.min(activeIndex, filtered.length - 1);
 
   const commit = (next: string) => {
     onChange(next);
     setOpen(false);
     setQuery("");
+    setActiveIndex(0);
+  };
+
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (next) setActiveIndex(0);
+    else setQuery("");
   };
 
   const onInputKeyDown = (e: React.KeyboardEvent) => {
@@ -69,20 +76,20 @@ export function Combobox({
       setActiveIndex((i) => Math.max(i - 1, 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      const opt = filtered[activeIndex];
+      const opt = filtered[safeActiveIndex];
       if (opt) commit(opt.value);
     }
   };
 
   React.useEffect(() => {
     if (!open) return;
-    const el = listRef.current?.querySelector<HTMLElement>(`[data-index="${activeIndex}"]`);
+    const el = listRef.current?.querySelector<HTMLElement>(`[data-index="${safeActiveIndex}"]`);
     el?.scrollIntoView({ block: "nearest" });
-  }, [activeIndex, open]);
+  }, [safeActiveIndex, open]);
 
   return (
     <div className={cn("flex items-stretch gap-1", className)}>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <button
             type="button"
@@ -110,13 +117,16 @@ export function Combobox({
             <input
               autoFocus
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setActiveIndex(0);
+              }}
               onKeyDown={onInputKeyDown}
               placeholder={searchPlaceholder}
               aria-label={searchPlaceholder}
               aria-controls={listId}
               aria-activedescendant={
-                filtered[activeIndex] ? `${listId}-opt-${activeIndex}` : undefined
+                filtered[safeActiveIndex] ? `${listId}-opt-${safeActiveIndex}` : undefined
               }
               className="h-10 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
@@ -135,7 +145,7 @@ export function Combobox({
             ) : (
               filtered.map((opt, index) => {
                 const isSelected = opt.value === value;
-                const isActive = index === activeIndex;
+                const isActive = index === safeActiveIndex;
                 return (
                   <li key={opt.value} role="presentation">
                     <button

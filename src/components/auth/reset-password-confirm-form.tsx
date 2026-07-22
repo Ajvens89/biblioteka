@@ -19,7 +19,7 @@ export function ResetPasswordConfirmForm({ token, action }: Props) {
       <input type="hidden" name="token" value={token} />
       <div className="space-y-2">
         <Label htmlFor="password">Nowe hasło</Label>
-        <Input id="password" name="password" type="password" required minLength={8} autoComplete="new-password" />
+        <Input id="password" name="password" type="password" required minLength={12} autoComplete="new-password" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">Powtórz hasło</Label>
@@ -28,7 +28,7 @@ export function ResetPasswordConfirmForm({ token, action }: Props) {
           name="confirmPassword"
           type="password"
           required
-          minLength={8}
+          minLength={12}
           autoComplete="new-password"
         />
       </div>

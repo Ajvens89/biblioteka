@@ -1,6 +1,5 @@
 import { DEFAULT_SETTINGS } from "@/lib/constants";
 import { prisma } from "@/lib/db";
-import { isPrismaConnectionError } from "@/lib/db-errors";
 
 export type AppSettingsMap = typeof DEFAULT_SETTINGS;
 
