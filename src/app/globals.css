@@ -36,6 +36,8 @@
   --surface-interactive: #323036; /* powierzchnia interaktywna (inputy, secondary) */
   --card: #19181b;
   --card-foreground: #f8f8f8;
+  --popover: #232228;
+  --popover-foreground: #f8f8f8;
 
   /* —— Obramowania —— */
   --border: #323036;              /* obramowanie zwykłe */
@@ -105,6 +107,8 @@
   --foreground: #0c0c0e;
   --card: #ffffff;
   --card-foreground: #0c0c0e;
+  --popover: #ffffff;
+  --popover-foreground: #0c0c0e;
   --secondary: #e5e4e7;
   --secondary-foreground: #0c0c0e;
   --muted: #e5e4e7;
@@ -120,6 +124,8 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
@@ -575,6 +581,17 @@ body:has([data-admin-panel]) .site-footer {
 }
 
 .zf-search-suggestions {
+  /* Solid panel — never rely on unresolved Tailwind color tokens alone */
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-elevated);
+  max-height: min(22rem, 60vh);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 60;
   animation: suggestEnter var(--motion-normal) var(--ease-emphasized) both;
 }
 
@@ -711,6 +728,9 @@ body:has([data-admin-panel]) .site-footer {
 }
 
 .zf-catalog-search {
+  position: relative;
+  /* Above sticky filter sidebar + game grid so suggestions aren't layered under them */
+  z-index: 30;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--card);

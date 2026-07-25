@@ -123,7 +123,7 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
         aria-label="Podpowiedzi wyszukiwania"
         aria-labelledby={inputId}
         aria-busy={isFetching}
-        className="zf-search-suggestions absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-lg border border-border bg-popover py-1 shadow-lg"
+        className="zf-search-suggestions absolute left-0 right-0 top-full z-[60] mt-2 w-full max-w-full rounded-lg border border-border bg-popover py-1 text-popover-foreground shadow-lg"
         data-testid="game-search-suggestions"
       >
         {loading ? (

@@ -91,7 +91,7 @@ export function CatalogSearch({
           Szukaj w katalogu po tytule, autorze, wydawcy lub kodzie EAN
         </label>
         <div className="flex flex-col gap-2.5 sm:flex-row">
-          <div className="relative min-w-0 flex-1">
+          <div className="relative z-10 min-w-0 flex-1">
             <Search
               className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary"
               aria-hidden
