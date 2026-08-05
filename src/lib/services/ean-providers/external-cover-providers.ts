@@ -36,8 +36,10 @@ function aleHitToCandidate(hit: {
   title: string;
   ean: string;
   productUrl: string;
+  description?: string;
 }): CoverCandidate {
   const cover = validateCoverImageUrl(hit.coverUrl);
+  const description = hit.description?.trim() || undefined;
   return {
     source: "aleplanszowki",
     title: hit.title,
@@ -48,6 +50,8 @@ function aleHitToCandidate(hit: {
     confidence: "high",
     notes: COVER_SOURCE_LABELS.aleplanszowki,
     collectionTypeSuggestion: "BOARD_GAME",
+    description,
+    shortDescription: description,
   };
 }
 

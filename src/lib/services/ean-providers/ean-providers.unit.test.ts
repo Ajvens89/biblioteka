@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { buildEan13, isIsbn13, normalizeEan } from "../ean";
-import { pickAutoSelectedCandidate } from "./index";
+import { enrichCandidateDescriptions, pickAutoSelectedCandidate } from "./index";
 import { EAN_SOURCE_UI_LABELS } from "./types";
 import { validateCoverImageUrl } from "./image-utils";
 import type { CoverCandidate } from "./types";
@@ -50,5 +50,47 @@ describe("ean-providers — kolejność i reguły", () => {
       },
     ];
     assert.equal(pickAutoSelectedCandidate(candidates)?.source, "google_books");
+  });
+
+  it("uzupełnia opis high-cover z BGG bez nadpisywania okładki", () => {
+    const ale: CoverCandidate = {
+      source: "aleplanszowki",
+      title: "ADELE",
+      confidence: "high",
+      coverImageUrl: "https://aleplanszowki.pl/cover.jpg",
+    };
+    const bgg: CoverCandidate = {
+      source: "bgg",
+      title: "Adele",
+      confidence: "medium",
+      description: "Przygodowa gra planszowa o budowaniu. Drugie zdanie dłuższe.",
+      coverImageUrl: "https://cf.geekdo-static.com/other.jpg",
+    };
+    const enriched = enrichCandidateDescriptions(ale, [ale, bgg]);
+    assert.equal(enriched.source, "aleplanszowki");
+    assert.equal(enriched.coverImageUrl, ale.coverImageUrl);
+    assert.equal(enriched.description, bgg.description);
+    assert.ok(enriched.shortDescription?.startsWith("Przygodowa gra planszowa"));
+  });
+
+  it("preferuje shortDescription z hurt przy merge opisów", () => {
+    const rebel: CoverCandidate = {
+      source: "rebel",
+      title: "Gra",
+      confidence: "high",
+      coverImageUrl: "https://files.rebel.pl/cover.jpg",
+    };
+    const hurt: CoverCandidate = {
+      source: "hurt",
+      title: "Gra",
+      confidence: "high",
+      shortDescription: "Krótki blurb",
+      description: "Pełny opis z hurt.csv",
+      coverImageUrl: "https://files.rebel.pl/other.jpg",
+    };
+    const enriched = enrichCandidateDescriptions(rebel, [rebel, hurt]);
+    assert.equal(enriched.shortDescription, "Krótki blurb");
+    assert.equal(enriched.description, "Pełny opis z hurt.csv");
+    assert.equal(enriched.coverImageUrl, rebel.coverImageUrl);
   });
 });

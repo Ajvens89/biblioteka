@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   extractAleplanszowkiCoverFromHtml,
+  extractAleplanszowkiDescriptionFromHtml,
   extractAleplanszowkiGtinFromHtml,
   extractAleplanszowkiProductLinks,
   extractAleplanszowkiTitleFromHtml,
@@ -21,6 +22,7 @@ describe("aleplanszowki-provider — parsowanie HTML", () => {
 
   const productHtml = `
     <meta property="og:title" content="A.D.E.L.E. (edycja polska)" />
+    <meta property="og:description" content="Gra pełna emocji z gatunku jeden kontra wszyscy, dziejąca się w kosmosie." />
     <meta property="og:image" content="https://aleplanszowki.pl/58751-home_default/adele-edycja-polska.jpg" />
     <meta itemprop="gtin13" content="5902259207450" />
   `;
@@ -37,6 +39,13 @@ describe("aleplanszowki-provider — parsowanie HTML", () => {
     assert.equal(
       extractAleplanszowkiCoverFromHtml(productHtml),
       "https://aleplanszowki.pl/58751-large_default/adele-edycja-polska.jpg",
+    );
+  });
+
+  it("wyciąga og:description do pól opisu", () => {
+    assert.equal(
+      extractAleplanszowkiDescriptionFromHtml(productHtml),
+      "Gra pełna emocji z gatunku jeden kontra wszyscy, dziejąca się w kosmosie.",
     );
   });
 });

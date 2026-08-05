@@ -31,6 +31,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.firebasestorage.app" },
       { protocol: "https", hostname: "aleplanszowki.pl" },
       { protocol: "https", hostname: "planszeo.pl" },
+      { protocol: "https", hostname: "files.rebel.pl" },
+      { protocol: "https", hostname: "**.rebel.pl" },
       { protocol: "https", hostname: "**.your-objectstorage.com" },
     ],
   },

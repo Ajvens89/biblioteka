@@ -52,6 +52,13 @@ describe("safeRedirectPath (SEC-003)", () => {
     assert.equal(safeRedirectPath("/admin/gry"), "/admin/gry");
   });
 
+  it("zachowuje query string (np. mode=ean)", () => {
+    assert.equal(
+      safeRedirectPath("/admin/gry/nowa?mode=ean"),
+      "/admin/gry/nowa?mode=ean",
+    );
+  });
+
   it("odrzuca nieznaną ścieżkę spoza allowlist/prefiksów", () => {
     assert.equal(safeRedirectPath("/sekretna-strona"), fallback);
   });

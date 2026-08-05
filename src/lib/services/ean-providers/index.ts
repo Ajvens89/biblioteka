@@ -47,6 +47,7 @@ function mergeCandidates(existing: CoverCandidate[], incoming: CoverCandidate[])
       coverImageUrl: c.coverImageUrl ?? prev.coverImageUrl,
       thumbnailUrl: c.thumbnailUrl ?? prev.thumbnailUrl,
       description: c.description ?? prev.description,
+      shortDescription: c.shortDescription ?? prev.shortDescription,
       confidence:
         c.confidence === "high" || prev.confidence === "high"
           ? "high"
@@ -56,6 +57,83 @@ function mergeCandidates(existing: CoverCandidate[], incoming: CoverCandidate[])
     });
   }
   return [...map.values()];
+}
+
+function hasText(value?: string): boolean {
+  return Boolean(value?.trim());
+}
+
+/** Prefer sources that typically carry catalog blurbs. */
+const DESCRIPTION_SOURCE_PRIORITY: CoverCandidate["source"][] = [
+  "hurt",
+  "bgg",
+  "google_books",
+  "open_library",
+  "upcitemdb",
+  "planszeo",
+  "aleplanszowki",
+  "local",
+];
+
+function deriveShortDescription(description?: string): string | undefined {
+  const trimmed = description?.trim();
+  if (!trimmed) return undefined;
+  const sentence = trimmed.split(/(?<=[.!?])\s+/)[0] ?? trimmed;
+  if (sentence.length <= 280) return sentence;
+  return `${sentence.slice(0, 277)}…`;
+}
+
+/**
+ * Keep cover/title from `target`, fill missing description fields from the pool.
+ * Used after a high-confidence cover hit (e.g. ALE/Rebel) so BGG/hurt can still supply opis.
+ * Longer catalog blurbs (hurt/BGG) can replace a short shop teaser.
+ */
+export function enrichCandidateDescriptions(
+  target: CoverCandidate,
+  pool: CoverCandidate[],
+): CoverCandidate {
+  let description = target.description?.trim() || undefined;
+  let shortDescription = target.shortDescription?.trim() || undefined;
+
+  const ordered = [...pool].sort((a, b) => {
+    const ai = DESCRIPTION_SOURCE_PRIORITY.indexOf(a.source);
+    const bi = DESCRIPTION_SOURCE_PRIORITY.indexOf(b.source);
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  });
+
+  for (const c of ordered) {
+    if (c === target) continue;
+    const incomingDesc = c.description?.trim();
+    const incomingShort = c.shortDescription?.trim();
+    if (incomingDesc) {
+      if (!description || incomingDesc.length > description.length + 40) {
+        description = incomingDesc;
+      }
+    }
+    if (incomingShort && !shortDescription) {
+      shortDescription = incomingShort;
+    }
+  }
+
+  if (!shortDescription && description) {
+    shortDescription = deriveShortDescription(description);
+  }
+  if (!description && shortDescription) {
+    description = shortDescription;
+  }
+
+  if (description === target.description && shortDescription === target.shortDescription) {
+    return target;
+  }
+  return { ...target, description, shortDescription };
+}
+
+function replaceCandidate(
+  candidates: CoverCandidate[],
+  previous: CoverCandidate,
+  next: CoverCandidate,
+): CoverCandidate[] {
+  return candidates.map((c) => (c === previous ? next : c));
 }
 
 /** Auto-wybór tylko przy jednym kandydacie high (nie BGG). */
@@ -152,21 +230,11 @@ export async function lookupGameByEanWithFallback(
   providerAttempts.push(...external.attempts);
   if (external.candidates.length > 0) {
     candidates = mergeCandidates(candidates, external.candidates);
-    const highCover = pickHighCoverCandidate(candidates);
-    if (highCover && !candidates.some((c) => c.source === "hurt")) {
-      return {
-        status: "found_external",
-        normalizedEan: normalized,
-        checksumValid,
-        collectionTypeSuggestion:
-          highCover.collectionTypeSuggestion ?? collectionDefault,
-        selectedCandidate: highCover,
-        candidates,
-        message: highCover.notes ?? COVER_SOURCE_LABELS[highCover.source],
-        providerAttempts,
-      };
-    }
   }
+
+  // Keep high-cover candidate for title/enrichment; do NOT early-return here —
+  // BGG/ISBN may still supply a fuller description after ALE/Rebel cover hit.
+  const earlyHighCover = pickHighCoverCandidate(candidates);
 
   let googleHadCover = false;
 
@@ -183,8 +251,16 @@ export async function lookupGameByEanWithFallback(
     }
   }
 
-  const titleHint = options?.titleHint?.trim();
+  const titleHint =
+    options?.titleHint?.trim() ||
+    earlyHighCover?.title?.trim() ||
+    candidates.find((c) => hasText(c.title))?.title?.trim();
+  // Prefer BGG when cover hit left a thin/missing description (e.g. ALE shop teaser).
+  const needsDescriptionEnrichment =
+    Boolean(earlyHighCover) ||
+    !candidates.some((c) => hasText(c.description) && hasText(c.shortDescription));
   const needsBgg =
+    needsDescriptionEnrichment ||
     !isHurtCatalogEnabled() ||
     !candidates.some((c) => c.source === "hurt") ||
     (!isIsbn13(normalized) &&
@@ -212,10 +288,23 @@ export async function lookupGameByEanWithFallback(
       status: "skipped",
       detail: "wymaga tytułu",
     });
+  } else if (!needsBgg) {
+    providerAttempts.push({
+      provider: "bgg",
+      status: "skipped",
+      detail: "niepotrzebne",
+    });
   }
 
   if (candidates.length === 0) {
     candidates = buildManualCandidates(normalized, collectionDefault, titleHint);
+  }
+
+  // After enrichment providers ran, merge opis into the high-confidence cover pick.
+  const highCoverAfterEnrichment = pickHighCoverCandidate(candidates);
+  if (highCoverAfterEnrichment) {
+    const enriched = enrichCandidateDescriptions(highCoverAfterEnrichment, candidates);
+    candidates = replaceCandidate(candidates, highCoverAfterEnrichment, enriched);
   }
 
   const selected = pickAutoSelectedCandidate(candidates);
@@ -238,14 +327,16 @@ export async function lookupGameByEanWithFallback(
       };
     }
     if (selected) {
+      const enrichedSelected = enrichCandidateDescriptions(selected, candidates);
+      candidates = replaceCandidate(candidates, selected, enrichedSelected);
       return {
         status: "found_external",
         normalizedEan: normalized,
         checksumValid,
-        collectionTypeSuggestion: selected.collectionTypeSuggestion ?? "RPG",
-        selectedCandidate: selected,
+        collectionTypeSuggestion: enrichedSelected.collectionTypeSuggestion ?? "RPG",
+        selectedCandidate: enrichedSelected,
         candidates,
-        message: selected.notes ?? COVER_SOURCE_LABELS.google_books,
+        message: enrichedSelected.notes ?? COVER_SOURCE_LABELS.google_books,
         providerAttempts,
       };
     }
@@ -256,6 +347,22 @@ export async function lookupGameByEanWithFallback(
       collectionTypeSuggestion: "RPG",
       candidates,
       message: "Znaleziono dane książki/RPG. Sprawdź tytuł i okładkę przed zapisem.",
+      providerAttempts,
+    };
+  }
+
+  // High cover (ALE/Rebel/…) wins even if BGG added description-only candidates.
+  const preferredHigh = pickHighCoverCandidate(candidates);
+  if (preferredHigh) {
+    return {
+      status: "found_external",
+      normalizedEan: normalized,
+      checksumValid,
+      collectionTypeSuggestion:
+        preferredHigh.collectionTypeSuggestion ?? collectionDefault,
+      selectedCandidate: preferredHigh,
+      candidates,
+      message: preferredHigh.notes ?? COVER_SOURCE_LABELS[preferredHigh.source],
       providerAttempts,
     };
   }
@@ -275,20 +382,22 @@ export async function lookupGameByEanWithFallback(
     };
   }
 
-  // Kandydat z okładką (np. medium Planszeo / ALEplanszówki) — nie kończ na „not_found”.
+  // Kandydat z okładką (np. medium Planszeo) — nie kończ na „not_found”.
   const withCover = candidates.find((c) => c.coverImageUrl && c.source !== "manual");
   if (withCover) {
     const auto = pickAutoSelectedCandidate(candidates.filter((c) => c.coverImageUrl)) ?? withCover;
+    const enrichedAuto = enrichCandidateDescriptions(auto, candidates);
+    candidates = replaceCandidate(candidates, auto, enrichedAuto);
     return {
       status: candidates.filter((c) => c.coverImageUrl).length > 1 ? "candidates" : "found_external",
       normalizedEan: normalized,
       checksumValid,
-      collectionTypeSuggestion: auto.collectionTypeSuggestion ?? collectionDefault,
-      selectedCandidate: auto.confidence === "high" || candidates.filter((c) => c.coverImageUrl).length === 1
-        ? auto
+      collectionTypeSuggestion: enrichedAuto.collectionTypeSuggestion ?? collectionDefault,
+      selectedCandidate: enrichedAuto.confidence === "high" || candidates.filter((c) => c.coverImageUrl).length === 1
+        ? enrichedAuto
         : undefined,
       candidates,
-      message: auto.notes ?? COVER_SOURCE_LABELS[auto.source],
+      message: enrichedAuto.notes ?? COVER_SOURCE_LABELS[enrichedAuto.source],
       providerAttempts,
     };
   }

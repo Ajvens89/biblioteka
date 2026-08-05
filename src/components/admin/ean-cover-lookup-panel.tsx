@@ -212,7 +212,7 @@ export function EanCoverLookupPanel({
         )}
       </div>
 
-      {(showTitleHint || lookupResult?.candidates.some((c) => c.source === "bgg")) && (
+      {(showTitleHint || lookupResult?.candidates?.some((c) => c.source === "bgg")) && (
         <div className="space-y-2">
           <Label htmlFor="titleHint">Tytuł do wyszukania okładki</Label>
           <Input

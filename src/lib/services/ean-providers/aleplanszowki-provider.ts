@@ -10,6 +10,8 @@ export type AleplanszowkiHit = {
   title: string;
   coverUrl: string;
   productUrl: string;
+  /** Krótki opis ze sklepu (og:description / meta), jeśli dostępny. */
+  description?: string;
 };
 
 /** Wyszukiwanie PrestaShop: /search?s=EAN */
@@ -61,6 +63,31 @@ export function extractAleplanszowkiTitleFromHtml(html: string): string | null {
   const name = html.match(/itemprop=["']name["'][^>]*content=["']([^"']+)["']/i)?.[1]
     ?? html.match(/content=["']([^"']+)["'][^>]*itemprop=["']name["']/i)?.[1];
   if (name?.trim()) return decodeHtmlEntities(name.trim());
+
+  return null;
+}
+
+/** Opis produktu z meta / og:description (często jedyny tekst poza tytułem). */
+export function extractAleplanszowkiDescriptionFromHtml(html: string): string | null {
+  const og =
+    html.match(/property=["']og:description["']\s+content=["']([^"']+)["']/i)?.[1] ??
+    html.match(/content=["']([^"']+)["']\s+property=["']og:description["']/i)?.[1];
+  if (og?.trim()) return decodeHtmlEntities(og.trim());
+
+  const meta =
+    html.match(/name=["']description["']\s+content=["']([^"']+)["']/i)?.[1] ??
+    html.match(/content=["']([^"']+)["']\s+name=["']description["']/i)?.[1];
+  if (meta?.trim()) return decodeHtmlEntities(meta.trim());
+
+  const shortHtml = html.match(
+    /id=["']product-description-short["'][^>]*>([\s\S]*?)<\/div>/i,
+  )?.[1];
+  if (shortHtml) {
+    const text = decodeHtmlEntities(
+      shortHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
+    );
+    if (text) return text;
+  }
 
   return null;
 }
@@ -134,12 +161,14 @@ export async function lookupAleplanszowkiByEan(ean: string): Promise<Aleplanszow
   const coverUrl = extractAleplanszowkiCoverFromHtml(productHtml);
   const title = extractAleplanszowkiTitleFromHtml(productHtml);
   if (!coverUrl || !title) return null;
+  const description = extractAleplanszowkiDescriptionFromHtml(productHtml) ?? undefined;
 
   return {
     ean: pageEan ?? digits,
     title,
     coverUrl,
     productUrl,
+    description,
   };
 }
 
@@ -178,6 +207,7 @@ export async function lookupAleplanszowkiByTitle(title: string): Promise<Aleplan
       title: pageTitle,
       coverUrl,
       productUrl,
+      description: extractAleplanszowkiDescriptionFromHtml(productHtml) ?? undefined,
     };
   }
 
