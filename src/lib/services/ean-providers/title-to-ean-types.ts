@@ -1,6 +1,6 @@
 import type { CoverConfidence } from "./types";
 
-export type TitleEanSource = "local" | "hurt" | "planszeo" | "upcitemdb" | "gemini";
+export type TitleEanSource = "local" | "hurt" | "planszeo" | "aleplanszowki" | "upcitemdb" | "gemini";
 
 export type TitleToEanCandidate = {
   source: TitleEanSource;
@@ -32,6 +32,7 @@ export const TITLE_EAN_SOURCE_LABELS: Record<TitleEanSource, string> = {
   local: "Biblioteka lokalna",
   hurt: "hurt.csv",
   planszeo: "Planszeo",
+  aleplanszowki: "ALEplanszówki",
   upcitemdb: "UPCitemdb",
   gemini: "Gemini (Google AI + wyszukiwanie)",
 };

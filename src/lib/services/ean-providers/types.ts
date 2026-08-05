@@ -7,6 +7,7 @@ export type CoverSource =
   | "open_library"
   | "upcitemdb"
   | "planszeo"
+  | "aleplanszowki"
   | "rebel"
   | "hurt"
   | "bgg"
@@ -68,6 +69,12 @@ export type EanLookupResult = {
   };
   /** Czy potrzebny tytuł do Planu C (BGG). */
   needsTitleHintForBgg?: boolean;
+  /** Diagnostyka providerów — co sprawdzono i dlaczego nie znaleziono. */
+  providerAttempts?: Array<{
+    provider: string;
+    status: "hit" | "miss" | "skipped" | "error";
+    detail?: string;
+  }>;
 };
 
 export const COVER_SOURCE_LABELS: Record<CoverSource, string> = {
@@ -77,6 +84,7 @@ export const COVER_SOURCE_LABELS: Record<CoverSource, string> = {
   open_library: "Okładka pobrana z Open Library — sprawdź przed zapisem.",
   upcitemdb: "Okładka z katalogu produktów (UPCitemdb) — sprawdź przed zapisem.",
   planszeo: "Okładka pobrana z Planszeo i zapisana lokalnie na serwerze.",
+  aleplanszowki: "Okładka z ALEplanszówki (EAN sklepu PL) — sprawdź przed zapisem.",
   rebel: "Okładka z licencjonowanego katalogu Rebel (images.csv) — zapisana na serwerze.",
   hurt: "Dane i okładka z lokalnego katalogu hurt.csv.",
   bgg: "Propozycja z BoardGameGeek — wybierz poprawną okładkę.",

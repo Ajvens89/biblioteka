@@ -25,6 +25,7 @@ import {
   isRebelImagesEnabled,
   lookupRebelCoverUrl,
 } from "@/lib/services/ean-providers/rebel-images-provider";
+import { lookupAleplanszowkiByEan, lookupAleplanszowkiByTitle } from "@/lib/services/ean-providers/aleplanszowki-provider";
 import {
   findHurtProductByEan,
   findHurtProductByTitle,
@@ -182,6 +183,28 @@ async function fromPlanszeo(title: string, ean?: string | null): Promise<CoverFe
   return { coverImageUrl: local, coverImageSource: "planszeo" };
 }
 
+async function fromAleplanszowki(
+  title: string,
+  ean: string | null,
+): Promise<CoverFetchResult | null> {
+  let resolved = ean ? await lookupAleplanszowkiByEan(ean) : null;
+  if (!resolved && title) {
+    resolved = await lookupAleplanszowkiByTitle(title);
+  }
+  if (!resolved) return null;
+
+  const local = await downloadCoverToPublic(resolved.coverUrl, resolved.title);
+  if (!local) {
+    return {
+      coverImageUrl: null,
+      coverImageSource: null,
+      message: "ALEplanszówki: znaleziono okładkę, ale zapis na serwer się nie powiódł.",
+    };
+  }
+
+  return { coverImageUrl: local, coverImageSource: "aleplanszowki" };
+}
+
 async function fromBgg(title: string): Promise<CoverFetchResult | null> {
   if (!isBggConfigured()) return null;
 
@@ -228,6 +251,9 @@ export async function fetchCoverForGame(input: CoverFetchInput): Promise<CoverFe
 
   const planszeo = await fromPlanszeo(title, ean);
   if (planszeo?.coverImageUrl) return planszeo;
+
+  const ale = await fromAleplanszowki(title, ean);
+  if (ale?.coverImageUrl) return ale;
 
   if (ean && isIsbn13(ean)) {
     const openLib = await resolveOpenLibraryCover(ean);
@@ -298,7 +324,7 @@ export function formatCoverBackfillReport(stats: CoverBackfillStats, dryRun: boo
   ];
   lines.push(
     "",
-    "Źródła: hurt.csv, Rebel images.csv, Planszeo, UPCitemdb, Google CSE, Open Library, BGG.",
+    "Źródła: hurt.csv, Rebel images.csv, Planszeo, ALEplanszówki, UPCitemdb, Google CSE, Open Library, BGG.",
     isRebelImagesEnabled()
       ? "Rebel images.csv: włączone — okładki z licencjonowanego katalogu."
       : "Rebel: brak pliku (data/rebel-images.csv lub REBEL_IMAGES_CSV).",

@@ -4,6 +4,7 @@ import { normalizeEan, validateEanChecksum } from "@/lib/services/ean";
 import { isHurtCatalogEnabled } from "./hurt-catalog-config";
 import { lookupGeminiEanByTitle, isGeminiTitleEanEnabled } from "./gemini-title-ean-provider";
 import { lookupPlanszeoEanByTitle } from "./planszeo-ean";
+import { lookupAleplanszowkiByTitle } from "./aleplanszowki-provider";
 import { lookupUpcitemdbEanByTitle } from "./upcitemdb-provider";
 import type { CoverConfidence } from "./types";
 import {
@@ -62,7 +63,17 @@ function rankConfidence(c: TitleToEanCandidate): number {
   const checksum = c.checksumValid ? 1 : 0;
   const polish = isPolishEan(c.ean) ? 2 : 0;
   const source =
-    c.source === "hurt" ? 5 : c.source === "planszeo" ? 4 : c.source === "gemini" ? 3 : c.source === "upcitemdb" ? 2 : 1;
+    c.source === "hurt"
+      ? 5
+      : c.source === "aleplanszowki"
+        ? 5
+        : c.source === "planszeo"
+          ? 4
+          : c.source === "gemini"
+            ? 3
+            : c.source === "upcitemdb"
+              ? 2
+              : 1;
   return source * 10 + conf * 3 + checksum + polish * 5;
 }
 
@@ -141,6 +152,17 @@ export async function lookupEanByTitle(
         title: planszeo.title,
         confidence: "high",
         notes: `${TITLE_EAN_SOURCE_LABELS.planszeo} (/gry-planszowe/${planszeo.slug}).`,
+      }),
+    );
+  }
+
+  const ale = await lookupAleplanszowkiByTitle(queryTitle);
+  if (ale) {
+    candidates.push(
+      toCandidate("aleplanszowki", ale.ean, {
+        title: ale.title,
+        confidence: "high",
+        notes: `${TITLE_EAN_SOURCE_LABELS.aleplanszowki} — ${ale.productUrl}`,
       }),
     );
   }

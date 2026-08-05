@@ -29,6 +29,9 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.jet.com" },
       { protocol: "https", hostname: "zakatekfantastyki.pl" },
       { protocol: "https", hostname: "**.firebasestorage.app" },
+      { protocol: "https", hostname: "aleplanszowki.pl" },
+      { protocol: "https", hostname: "planszeo.pl" },
+      { protocol: "https", hostname: "**.your-objectstorage.com" },
     ],
   },
   async headers() {

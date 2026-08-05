@@ -1,8 +1,8 @@
 import { normalizeEan, validateEanChecksum } from "@/lib/services/ean";
 import {
-  extractPlanszeoSlugs,
+  extractPlanszeoSearchHits,
   fetchPlanszeoHtml,
-  pickBestPlanszeoSlug,
+  pickBestPlanszeoHit,
 } from "./planszeo-provider";
 
 const GTIN_PATTERNS = [
@@ -46,17 +46,14 @@ export async function lookupPlanszeoEanByTitle(title: string): Promise<{
   const searchHtml = await fetchPlanszeoHtml(`/szukaj?q=${encodeURIComponent(trimmed)}`);
   if (!searchHtml) return null;
 
-  const slug = pickBestPlanszeoSlug(trimmed, extractPlanszeoSlugs(searchHtml));
-  if (!slug) return null;
+  const hit = pickBestPlanszeoHit(trimmed, extractPlanszeoSearchHits(searchHtml));
+  if (!hit) return null;
 
-  const gameHtml = await fetchPlanszeoHtml(`/gry-planszowe/${slug}/oferty`);
+  const gameHtml = await fetchPlanszeoHtml(`/gry-planszowe/${hit.slug}/oferty`);
   if (!gameHtml) return null;
 
   const ean = extractGtinFromHtml(gameHtml);
   if (!ean) return null;
 
-  const titleMatch = gameHtml.match(/<title>([^<]+)<\/title>/i);
-  const pageTitle = titleMatch?.[1]?.split("|")[0]?.trim();
-
-  return { ean, title: pageTitle || undefined, slug };
+  return { ean, title: hit.displayTitle || undefined, slug: hit.slug };
 }

@@ -7,8 +7,10 @@ import { lookupLocalProvider } from "./local-provider";
 import { buildManualCandidates } from "./manual-provider";
 import { lookupOpenLibraryProvider } from "./open-library-provider";
 import {
+  formatProviderAttempts,
   lookupExternalCoverCandidates,
   pickHighCoverCandidate,
+  type CoverProviderAttempt,
 } from "./external-cover-providers";
 import {
   COVER_SOURCE_LABELS,
@@ -98,6 +100,7 @@ export async function lookupGameByEanWithFallback(
   const checksumValid = validateEanChecksum(normalized);
   const collectionDefault = resolveCollectionDefault(normalized, options);
   let candidates: CoverCandidate[] = [];
+  const providerAttempts: CoverProviderAttempt[] = [];
 
   const local = await lookupLocalProvider(prisma, normalized);
   if (local.candidate && local.game) {
@@ -118,13 +121,16 @@ export async function lookupGameByEanWithFallback(
         collectionType: local.game.collectionType,
         ean: local.game.ean,
       },
+      providerAttempts: [{ provider: "local", status: "hit" }],
     };
   }
+  providerAttempts.push({ provider: "local", status: "miss" });
 
   const { lookupHurtProvider } = await import("./hurt-provider");
   const hurt = await lookupHurtProvider(normalized, options?.titleHint);
   if (hurt.candidate) {
     candidates = mergeCandidates(candidates, [hurt.candidate]);
+    providerAttempts.push({ provider: "hurt", status: "hit" });
     if (hurt.candidate.confidence === "high") {
       return {
         status: "found_external",
@@ -135,13 +141,17 @@ export async function lookupGameByEanWithFallback(
         selectedCandidate: hurt.candidate,
         candidates,
         message: hurt.candidate.notes ?? COVER_SOURCE_LABELS.hurt,
+        providerAttempts,
       };
     }
+  } else {
+    providerAttempts.push({ provider: "hurt", status: "miss" });
   }
 
   const external = await lookupExternalCoverCandidates(normalized, options?.titleHint);
-  if (external.length > 0) {
-    candidates = mergeCandidates(candidates, external);
+  providerAttempts.push(...external.attempts);
+  if (external.candidates.length > 0) {
+    candidates = mergeCandidates(candidates, external.candidates);
     const highCover = pickHighCoverCandidate(candidates);
     if (highCover && !candidates.some((c) => c.source === "hurt")) {
       return {
@@ -153,6 +163,7 @@ export async function lookupGameByEanWithFallback(
         selectedCandidate: highCover,
         candidates,
         message: highCover.notes ?? COVER_SOURCE_LABELS[highCover.source],
+        providerAttempts,
       };
     }
   }
@@ -183,7 +194,24 @@ export async function lookupGameByEanWithFallback(
     const bgg = await lookupBggProvider(titleHint);
     if (bgg.candidates.length > 0) {
       candidates = mergeCandidates(candidates, bgg.candidates);
+      providerAttempts.push({
+        provider: "bgg",
+        status: "hit",
+        detail: `${bgg.candidates.length} kandydat(ów)`,
+      });
+    } else {
+      providerAttempts.push({
+        provider: "bgg",
+        status: "miss",
+        detail: bgg.error ?? undefined,
+      });
     }
+  } else if (!titleHint) {
+    providerAttempts.push({
+      provider: "bgg",
+      status: "skipped",
+      detail: "wymaga tytułu",
+    });
   }
 
   if (candidates.length === 0) {
@@ -193,6 +221,8 @@ export async function lookupGameByEanWithFallback(
   const selected = pickAutoSelectedCandidate(candidates);
   const hasBgg = candidates.some((c) => c.source === "bgg");
   const bggCount = candidates.filter((c) => c.source === "bgg").length;
+
+  const attemptsNote = formatProviderAttempts(providerAttempts);
 
   if (isIsbn13(normalized) && candidates.some((c) => c.source === "google_books" || c.source === "open_library")) {
     if (hasBgg && bggCount > 1) {
@@ -204,6 +234,7 @@ export async function lookupGameByEanWithFallback(
         candidates,
         message: "Znaleziono dane książki/RPG. Sprawdź tytuł i okładkę przed zapisem.",
         needsTitleHintForBgg: false,
+        providerAttempts,
       };
     }
     if (selected) {
@@ -215,6 +246,7 @@ export async function lookupGameByEanWithFallback(
         selectedCandidate: selected,
         candidates,
         message: selected.notes ?? COVER_SOURCE_LABELS.google_books,
+        providerAttempts,
       };
     }
     return {
@@ -224,6 +256,7 @@ export async function lookupGameByEanWithFallback(
       collectionTypeSuggestion: "RPG",
       candidates,
       message: "Znaleziono dane książki/RPG. Sprawdź tytuł i okładkę przed zapisem.",
+      providerAttempts,
     };
   }
 
@@ -238,6 +271,25 @@ export async function lookupGameByEanWithFallback(
         bggCount > 1
           ? "Znaleziono kilka możliwych gier. Wybierz poprawną okładkę."
           : COVER_SOURCE_LABELS.bgg,
+      providerAttempts,
+    };
+  }
+
+  // Kandydat z okładką (np. medium Planszeo / ALEplanszówki) — nie kończ na „not_found”.
+  const withCover = candidates.find((c) => c.coverImageUrl && c.source !== "manual");
+  if (withCover) {
+    const auto = pickAutoSelectedCandidate(candidates.filter((c) => c.coverImageUrl)) ?? withCover;
+    return {
+      status: candidates.filter((c) => c.coverImageUrl).length > 1 ? "candidates" : "found_external",
+      normalizedEan: normalized,
+      checksumValid,
+      collectionTypeSuggestion: auto.collectionTypeSuggestion ?? collectionDefault,
+      selectedCandidate: auto.confidence === "high" || candidates.filter((c) => c.coverImageUrl).length === 1
+        ? auto
+        : undefined,
+      candidates,
+      message: auto.notes ?? COVER_SOURCE_LABELS[auto.source],
+      providerAttempts,
     };
   }
 
@@ -249,8 +301,10 @@ export async function lookupGameByEanWithFallback(
       collectionTypeSuggestion: collectionDefault,
       candidates: buildManualCandidates(normalized, collectionDefault),
       message:
-        "Nie znaleziono danych po EAN. Wpisz tytuł, a spróbujemy znaleźć okładkę w BGG.",
+        `Nie znaleziono danych po EAN. Wpisz tytuł (pole „Tytuł do wyszukania okładki”), a spróbujemy Planszeo/BGG.` +
+        (attemptsNote ? ` Sprawdzono: ${attemptsNote}` : ""),
       needsTitleHintForBgg: true,
+      providerAttempts,
     };
   }
 
@@ -261,8 +315,11 @@ export async function lookupGameByEanWithFallback(
     collectionTypeSuggestion: collectionDefault,
     candidates,
     selectedCandidate: selected,
-    message: COVER_SOURCE_LABELS.manual,
+    message:
+      COVER_SOURCE_LABELS.manual +
+      (attemptsNote ? ` Sprawdzono: ${attemptsNote}` : ""),
     needsTitleHintForBgg: !titleHint && collectionDefault === "BOARD_GAME",
+    providerAttempts,
   };
 }
 

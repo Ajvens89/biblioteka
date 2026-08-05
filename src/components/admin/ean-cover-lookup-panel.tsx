@@ -18,6 +18,7 @@ import { COLLECTION_TYPE_LABELS } from "@/lib/constants";
 const SOURCE_LABEL: Record<string, string> = {
   local: "Biblioteka lokalna",
   planszeo: "Planszeo (serwer)",
+  aleplanszowki: "ALEplanszówki",
   rebel: "Rebel images.csv (serwer)",
   hurt: "hurt.csv (katalog lokalny)",
   google_books: "Google Books",
@@ -119,7 +120,7 @@ export function EanCoverLookupPanel({
       <div className="space-y-2 rounded-md border border-dashed p-3">
         <p className="text-sm font-medium">Znam tytuł — szukam EAN</p>
         <p className="text-xs text-muted-foreground">
-          hurt.csv → Planszeo → UPCitemdb → Gemini (jeśli skonfigurowany).
+          hurt.csv → Planszeo → ALEplanszówki → UPCitemdb → Gemini (jeśli skonfigurowany).
         </p>
         <div className="space-y-2">
           <Label htmlFor="titleEanSearch">Tytuł gry</Label>
@@ -239,9 +240,32 @@ export function EanCoverLookupPanel({
       )}
 
       {lookupResult && (
-        <p className="rounded-md bg-muted/60 p-3 text-sm" data-testid="ean-source-banner">
-          {lookupResult.message}
-        </p>
+        <div className="space-y-2" data-testid="ean-source-banner">
+          <p className="rounded-md bg-muted/60 p-3 text-sm">{lookupResult.message}</p>
+          {lookupResult.providerAttempts && lookupResult.providerAttempts.length > 0 && (
+            <details className="rounded-md border border-dashed p-2 text-xs text-muted-foreground">
+              <summary className="cursor-pointer font-medium text-foreground">
+                Szczegóły wyszukiwania okładki ({lookupResult.providerAttempts.length} źródeł)
+              </summary>
+              <ul className="mt-2 list-inside list-disc space-y-1" data-testid="cover-provider-attempts">
+                {lookupResult.providerAttempts.map((a, i) => (
+                  <li key={`${a.provider}-${i}`}>
+                    <span className="font-medium">{SOURCE_LABEL[a.provider] ?? a.provider}</span>
+                    {": "}
+                    {a.status === "hit"
+                      ? "znaleziono"
+                      : a.status === "miss"
+                        ? "brak"
+                        : a.status === "skipped"
+                          ? "pominięto"
+                          : "błąd"}
+                    {a.detail ? ` — ${a.detail}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </div>
       )}
 
       {existingGame && lookupResult?.game && (
