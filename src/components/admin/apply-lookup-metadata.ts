@@ -18,6 +18,11 @@ export type LookupMetadataSetters = {
   setMaxPlayTime: (v: number) => void;
   setPublisherId: (v: string) => void;
   matchPublisherId: (name?: string) => string;
+  setDesignerId?: (v: string) => void;
+  matchDesignerId?: (name?: string) => string;
+  /** Nazwa z katalogu, gdy brak dopasowania w bazie — utworzona przy zapisie. */
+  setPublisherNameHint?: (v: string) => void;
+  setDesignerNameHint?: (v: string) => void;
 };
 
 /** Uzupełnia formularz danymi z katalogu / lookup EAN. */
@@ -45,6 +50,24 @@ export function applyLookupMetadata(candidate: CoverCandidate, setters: LookupMe
 
   if (candidate.publisher) {
     const publisherId = setters.matchPublisherId(candidate.publisher);
-    if (publisherId) setters.setPublisherId(publisherId);
+    if (publisherId) {
+      setters.setPublisherId(publisherId);
+      setters.setPublisherNameHint?.("");
+    } else {
+      setters.setPublisherId("");
+      setters.setPublisherNameHint?.(candidate.publisher.trim());
+    }
+  }
+
+  const authorName = candidate.authors?.find((a) => a.trim())?.trim();
+  if (authorName && setters.matchDesignerId && setters.setDesignerId) {
+    const designerId = setters.matchDesignerId(authorName);
+    if (designerId) {
+      setters.setDesignerId(designerId);
+      setters.setDesignerNameHint?.("");
+    } else {
+      setters.setDesignerId("");
+      setters.setDesignerNameHint?.(authorName);
+    }
   }
 }

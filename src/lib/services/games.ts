@@ -67,6 +67,65 @@ function makeSlug(title: string) {
   return slugify(title, { lower: true, strict: true, locale: "pl" });
 }
 
+type DbClient = PrismaClient | Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
+
+async function ensureNamedEntity(
+  tx: DbClient,
+  kind: "publisher" | "designer",
+  name: string,
+): Promise<string> {
+  const trimmed = name.trim();
+  const baseSlug = makeSlug(trimmed) || kind;
+  if (kind === "publisher") {
+    const byName = await tx.publisher.findFirst({
+      where: { name: { equals: trimmed, mode: "insensitive" } },
+      select: { id: true },
+    });
+    if (byName) return byName.id;
+    let slug = baseSlug;
+    for (let i = 0; i < 8; i++) {
+      const clash = await tx.publisher.findUnique({ where: { slug }, select: { id: true } });
+      if (!clash) {
+        const created = await tx.publisher.create({ data: { name: trimmed, slug } });
+        return created.id;
+      }
+      slug = `${baseSlug}-${i + 2}`;
+    }
+    throw new ServiceError("Nie udało się utworzyć wydawcy.", "PUBLISHER_CREATE");
+  }
+
+  const byName = await tx.designer.findFirst({
+    where: { name: { equals: trimmed, mode: "insensitive" } },
+    select: { id: true },
+  });
+  if (byName) return byName.id;
+  let slug = baseSlug;
+  for (let i = 0; i < 8; i++) {
+    const clash = await tx.designer.findUnique({ where: { slug }, select: { id: true } });
+    if (!clash) {
+      const created = await tx.designer.create({ data: { name: trimmed, slug } });
+      return created.id;
+    }
+    slug = `${baseSlug}-${i + 2}`;
+  }
+  throw new ServiceError("Nie udało się utworzyć autora.", "DESIGNER_CREATE");
+}
+
+/** Numer inwentarzowy startowego egzemplarza (ZF-EGZ-0001) — bez wymuszania półki. */
+async function nextWizardInventoryNumber(tx: DbClient): Promise<string> {
+  const prefix = "ZF-EGZ-";
+  const existing = await tx.gameCopy.findMany({
+    where: { inventoryNumber: { startsWith: prefix } },
+    select: { inventoryNumber: true },
+  });
+  let maxSeq = 0;
+  for (const row of existing) {
+    const m = row.inventoryNumber.match(/^ZF-EGZ-(\d+)$/);
+    if (m) maxSeq = Math.max(maxSeq, parseInt(m[1], 10));
+  }
+  return `${prefix}${String(maxSeq + 1).padStart(4, "0")}`;
+}
+
 export async function createGameFromEan(
   prisma: PrismaClient,
   input: CreateGameFromEanInput,
@@ -87,6 +146,15 @@ export async function createGameFromEan(
   const slug = input.slug || makeSlug(input.title);
 
   const game = await prisma.$transaction(async (tx) => {
+    let publisherId = input.publisherId?.trim() || null;
+    let designerId = input.designerId?.trim() || null;
+    if (!publisherId && input.publisherName?.trim()) {
+      publisherId = await ensureNamedEntity(tx, "publisher", input.publisherName);
+    }
+    if (!designerId && input.designerName?.trim()) {
+      designerId = await ensureNamedEntity(tx, "designer", input.designerName);
+    }
+
     const created = await tx.game.create({
       data: {
         title: input.title,
@@ -102,8 +170,8 @@ export async function createGameFromEan(
         maxPlayTime: input.maxPlayTime,
         difficulty: input.difficulty,
         type: input.type,
-        publisherId: input.publisherId || null,
-        designerId: input.designerId || null,
+        publisherId,
+        designerId,
         yearPublished: input.yearPublished ?? null,
         coverImageUrl: validateCoverImageUrl(input.coverImageUrl || "") || null,
         coverImageSource: input.coverImageSource || null,
@@ -120,15 +188,17 @@ export async function createGameFromEan(
       },
     });
 
-    if (input.addCopy && input.copyInventoryNumber?.trim()) {
+    if (input.addCopy) {
+      const inventoryNumber =
+        input.copyInventoryNumber?.trim() || (await nextWizardInventoryNumber(tx));
       await assertBarcodeNotProductEan(tx, created.id, input.copyBarcode);
       await tx.gameCopy.create({
         data: {
           gameId: created.id,
-          inventoryNumber: input.copyInventoryNumber.trim(),
+          inventoryNumber,
           barcode: input.copyBarcode?.trim() || null,
           status: "AVAILABLE",
-          condition: input.copyCondition ?? "GOOD",
+          condition: input.copyCondition ?? "NEW",
           location: input.copyLocation?.trim() || null,
         },
       });

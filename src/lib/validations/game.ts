@@ -35,6 +35,10 @@ const baseGameFields = {
   type: gameTypeEnum,
   publisherId: z.string().optional().nullable(),
   designerId: z.string().optional().nullable(),
+  /** Gdy brak publisherId — utwórz / dopasuj wydawcę po nazwie z lookupu. */
+  publisherName: z.string().max(200).optional().nullable(),
+  /** Gdy brak designerId — utwórz / dopasuj autora po nazwie z lookupu. */
+  designerName: z.string().max(200).optional().nullable(),
   yearPublished: z.coerce.number().int().optional().nullable(),
   coverImageUrl: safeCoverUrl,
   coverImageSource: z.string().max(64).optional().nullable(),

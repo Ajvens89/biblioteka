@@ -67,6 +67,21 @@ function extractTagCdata(xml: string, tag: string): string | undefined {
   return simple?.[1]?.trim();
 }
 
+/** BGG `<link type="boardgamepublisher" … value="Albi"/>` (kolejność atrybutów bywa różna). */
+function extractLinkValues(xml: string, linkType: string): string[] {
+  const re = /<link\b[^>]*>/gi;
+  const out: string[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(xml)) !== null) {
+    const tag = m[0];
+    const type = /\btype="([^"]*)"/i.exec(tag)?.[1];
+    if (type !== linkType) continue;
+    const value = /\bvalue="([^"]*)"/i.exec(tag)?.[1];
+    if (value?.trim()) out.push(decodeXmlText(value.trim()));
+  }
+  return out;
+}
+
 type BggSearchHit = { id: string; title: string; year?: number };
 
 function parseSearch(xml: string): BggSearchHit[] {
@@ -98,6 +113,8 @@ async function fetchThing(id: string): Promise<CoverCandidate | null> {
   const image = validateCoverImageUrl(extractTagCdata(xml, "image"));
   const thumb = validateCoverImageUrl(extractTagCdata(xml, "thumbnail"));
   const description = extractTagCdata(xml, "description");
+  const publishers = extractLinkValues(xml, "boardgamepublisher");
+  const designers = extractLinkValues(xml, "boardgamedesigner");
 
   if (!title && !image && !thumb) return null;
 
@@ -105,6 +122,8 @@ async function fetchThing(id: string): Promise<CoverCandidate | null> {
     source: "bgg",
     title,
     year: yearStr ? parseInt(yearStr, 10) : undefined,
+    publisher: publishers[0],
+    authors: designers.length ? designers : undefined,
     description: description?.slice(0, 2000),
     coverImageUrl: image ?? thumb ?? undefined,
     thumbnailUrl: thumb ?? image ?? undefined,

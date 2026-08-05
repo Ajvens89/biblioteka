@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { Category, Designer, Publisher, Tag } from "@prisma/client";
 import type { CoverCandidate, EanLookupResult } from "@/lib/services/ean-providers/types";
@@ -11,6 +11,7 @@ import { createGame, lookupEanAction, lookupEanByTitleAction } from "@/lib/actio
 import { EanScanner } from "@/components/barcode/ean-scanner";
 import { EanCoverLookupPanel } from "@/components/admin/ean-cover-lookup-panel";
 import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,11 +36,11 @@ const WIZARD_STEPS = [
   { id: 2, label: "EAN" },
   { id: 3, label: "Dane gry" },
   { id: 4, label: "Okładka" },
-  { id: 5, label: "Egzemplarz" },
+  { id: 5, label: "Parametry" },
   { id: 6, label: "Podsumowanie" },
 ] as const;
 
-function normalizePublisherName(value: string): string {
+function normalizePersonName(value: string): string {
   return value
     .toLowerCase()
     .normalize("NFD")
@@ -48,13 +49,13 @@ function normalizePublisherName(value: string): string {
     .trim();
 }
 
-function matchPublisherId(name: string | undefined, publishers: Publisher[]): string {
+function matchByName(name: string | undefined, items: { id: string; name: string }[]): string {
   if (!name?.trim()) return "";
-  const norm = normalizePublisherName(name);
-  const exact = publishers.find((p) => normalizePublisherName(p.name) === norm);
+  const norm = normalizePersonName(name);
+  const exact = items.find((p) => normalizePersonName(p.name) === norm);
   if (exact) return exact.id;
-  const partial = publishers.find((p) => {
-    const pn = normalizePublisherName(p.name);
+  const partial = items.find((p) => {
+    const pn = normalizePersonName(p.name);
     return pn.includes(norm) || norm.includes(pn);
   });
   return partial?.id ?? "";
@@ -93,11 +94,6 @@ export function AdminGameWizard({
   const [coverImageSource, setCoverImageSource] = useState("");
   const [coverImageExternalId, setCoverImageExternalId] = useState("");
   const [yearPublished, setYearPublished] = useState("");
-  const [addCopy, setAddCopy] = useState(false);
-  const [copyInventory, setCopyInventory] = useState("");
-  const [copyBarcode, setCopyBarcode] = useState("");
-  const [copyLocation, setCopyLocation] = useState("");
-  const [copyCondition, setCopyCondition] = useState<"NEW" | "GOOD" | "FAIR" | "POOR">("GOOD");
 
   const [difficulty, setDifficulty] = useState<"EASY" | "MEDIUM" | "HARD" | "EXPERT">("MEDIUM");
   const [gameType, setGameType] = useState<
@@ -110,6 +106,8 @@ export function AdminGameWizard({
   const [maxPlayTime, setMaxPlayTime] = useState(60);
   const [publisherId, setPublisherId] = useState("");
   const [designerId, setDesignerId] = useState("");
+  const [publisherNameHint, setPublisherNameHint] = useState("");
+  const [designerNameHint, setDesignerNameHint] = useState("");
   const [instructionUrl, setInstructionUrl] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
@@ -118,6 +116,36 @@ export function AdminGameWizard({
 
   const isRpg = collectionType === "RPG";
   const skipEanStep = mode === "manual";
+
+  const publisherOptions = useMemo(() => {
+    const opts = publishers.map((p) => ({ value: p.id, label: p.name }));
+    if (
+      publisherNameHint &&
+      !publisherId &&
+      !opts.some((o) => normalizePersonName(o.label) === normalizePersonName(publisherNameHint))
+    ) {
+      opts.unshift({
+        value: `__hint__:publisher:${publisherNameHint}`,
+        label: `${publisherNameHint} (z katalogu)`,
+      });
+    }
+    return opts;
+  }, [publishers, publisherId, publisherNameHint]);
+
+  const designerOptions = useMemo(() => {
+    const opts = designers.map((d) => ({ value: d.id, label: d.name }));
+    if (
+      designerNameHint &&
+      !designerId &&
+      !opts.some((o) => normalizePersonName(o.label) === normalizePersonName(designerNameHint))
+    ) {
+      opts.unshift({
+        value: `__hint__:designer:${designerNameHint}`,
+        label: `${designerNameHint} (z katalogu)`,
+      });
+    }
+    return opts;
+  }, [designers, designerId, designerNameHint]);
 
   const onCollectionTypeChange = (value: "BOARD_GAME" | "RPG") => {
     setCollectionType(value);
@@ -154,7 +182,11 @@ export function AdminGameWizard({
     setMinPlayTime,
     setMaxPlayTime,
     setPublisherId,
-    matchPublisherId: (name?: string) => matchPublisherId(name, publishers),
+    matchPublisherId: (name?: string) => matchByName(name, publishers),
+    setDesignerId,
+    matchDesignerId: (name?: string) => matchByName(name, designers),
+    setPublisherNameHint,
+    setDesignerNameHint,
   };
 
   const handleLookupResult = (data: EanLookupResult) => {
@@ -261,6 +293,21 @@ export function AdminGameWizard({
   };
 
   const submit = () => {
+    const resolvedPublisherId = publisherId.startsWith("__hint__:") ? "" : publisherId;
+    const resolvedDesignerId = designerId.startsWith("__hint__:") ? "" : designerId;
+    const publisherName =
+      !resolvedPublisherId && publisherNameHint.trim()
+        ? publisherNameHint.trim()
+        : publisherId.startsWith("__hint__:publisher:")
+          ? publisherId.slice("__hint__:publisher:".length)
+          : undefined;
+    const designerName =
+      !resolvedDesignerId && designerNameHint.trim()
+        ? designerNameHint.trim()
+        : designerId.startsWith("__hint__:designer:")
+          ? designerId.slice("__hint__:designer:".length)
+          : undefined;
+
     const input = {
       title,
       ean: ean || null,
@@ -274,8 +321,10 @@ export function AdminGameWizard({
       maxPlayTime,
       difficulty,
       type: gameType,
-      publisherId: publisherId || null,
-      designerId: designerId || null,
+      publisherId: resolvedPublisherId || null,
+      designerId: resolvedDesignerId || null,
+      publisherName: publisherName || null,
+      designerName: designerName || null,
       yearPublished: yearPublished ? Number(yearPublished) : null,
       coverImageUrl: coverImageUrl || "",
       coverImageSource: coverImageSource || null,
@@ -286,17 +335,15 @@ export function AdminGameWizard({
       categoryIds: selectedCategoryIds,
       tagIds: selectedTagIds,
       skipEanChecksum: skipChecksum,
-      addCopy,
-      copyInventoryNumber: addCopy ? copyInventory : undefined,
-      copyBarcode: addCopy ? copyBarcode : undefined,
-      copyLocation: addCopy ? copyLocation : undefined,
-      copyCondition: addCopy ? copyCondition : undefined,
+      // Startowy egzemplarz zawsze — bez pytania o półkę / numer.
+      addCopy: true,
+      copyCondition: "NEW" as const,
     };
 
     start(async () => {
       const result = await createGame(input);
       if (result.success) {
-        toast.success("Utworzono grę.");
+        toast.success("Utworzono grę z egzemplarzem startowym.");
         router.push("/admin/gry");
         router.refresh();
       } else toast.error(result.error);
@@ -612,33 +659,63 @@ export function AdminGameWizard({
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="publisherId">Wydawca</Label>
-            <select
+            <Combobox
               id="publisherId"
-              name="publisherId"
-              className="h-10 w-full rounded-md border px-2"
-              value={publisherId}
-              onChange={(e) => setPublisherId(e.target.value)}
-            >
-              <option value="">—</option>
-              {publishers.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+              ariaLabel="Wydawca"
+              testId="game-form-publisher"
+              options={publisherOptions}
+              value={
+                publisherId ||
+                (publisherNameHint ? `__hint__:publisher:${publisherNameHint}` : "")
+              }
+              onChange={(v) => {
+                if (v.startsWith("__hint__:publisher:")) {
+                  setPublisherId("");
+                  setPublisherNameHint(v.slice("__hint__:publisher:".length));
+                  return;
+                }
+                setPublisherId(v);
+                setPublisherNameHint("");
+              }}
+              placeholder="Szukaj wydawcy…"
+              searchPlaceholder="Wpisz nazwę wydawcy…"
+              emptyText="Brak wydawcy — wybierz z listy lub uzupełnij z EAN"
+            />
+            {publisherNameHint && !publisherId && (
+              <p className="text-xs text-muted-foreground">
+                Z katalogu: {publisherNameHint} — zostanie dodany przy zapisie.
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="designerId">Autor</Label>
-            <select
+            <Combobox
               id="designerId"
-              name="designerId"
-              className="h-10 w-full rounded-md border px-2"
-              value={designerId}
-              onChange={(e) => setDesignerId(e.target.value)}
-            >
-              <option value="">—</option>
-              {designers.map((d) => (
-                <option key={d.id} value={d.id}>{d.name}</option>
-              ))}
-            </select>
+              ariaLabel="Autor"
+              testId="game-form-designer"
+              options={designerOptions}
+              value={
+                designerId ||
+                (designerNameHint ? `__hint__:designer:${designerNameHint}` : "")
+              }
+              onChange={(v) => {
+                if (v.startsWith("__hint__:designer:")) {
+                  setDesignerId("");
+                  setDesignerNameHint(v.slice("__hint__:designer:".length));
+                  return;
+                }
+                setDesignerId(v);
+                setDesignerNameHint("");
+              }}
+              placeholder="Szukaj autora…"
+              searchPlaceholder="Wpisz nazwisko / nazwę…"
+              emptyText="Brak autora — wybierz z listy lub uzupełnij z EAN"
+            />
+            {designerNameHint && !designerId && (
+              <p className="text-xs text-muted-foreground">
+                Z katalogu: {designerNameHint} — zostanie dodany przy zapisie.
+              </p>
+            )}
           </div>
         </div>
         <div className="space-y-2">
@@ -694,63 +771,10 @@ export function AdminGameWizard({
           </div>
         </div>
         </SectionCard>
-
-        <SectionCard title="Egzemplarz startowy" description="Opcjonalnie utwórz pierwszy egzemplarz przy zapisie gry.">
-          <label className="flex items-center gap-2 text-sm font-medium">
-            <input type="checkbox" checked={addCopy} onChange={(e) => setAddCopy(e.target.checked)} />
-            Od razu dodać egzemplarz?
-          </label>
-          {addCopy && (
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="copyInventory">Numer inwentarzowy</Label>
-                <Input
-                  id="copyInventory"
-                  value={copyInventory}
-                  onChange={(e) => setCopyInventory(e.target.value)}
-                  required={addCopy}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="copyBarcode">Kod egzemplarza</Label>
-                <Input
-                  id="copyBarcode"
-                  data-testid="copy-form-barcode"
-                  value={copyBarcode}
-                  onChange={(e) => setCopyBarcode(e.target.value)}
-                  placeholder="Nie EAN produktu"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="copyLocation">Lokalizacja</Label>
-                <Input
-                  id="copyLocation"
-                  value={copyLocation}
-                  onChange={(e) => setCopyLocation(e.target.value)}
-                  placeholder="np. Regał A3"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="copyCondition">Stan</Label>
-                <select
-                  id="copyCondition"
-                  className="h-10 w-full rounded-md border px-2"
-                  value={copyCondition}
-                  onChange={(e) => setCopyCondition(e.target.value as typeof copyCondition)}
-                >
-                  <option value="NEW">Nowy</option>
-                  <option value="GOOD">Dobry</option>
-                  <option value="FAIR">Średni</option>
-                  <option value="POOR">Słaby</option>
-                </select>
-              </div>
-            </div>
-          )}
           <div className="mt-4 flex gap-2">
             <Button type="button" variant="outline" onClick={() => setStep(4)}>Wstecz</Button>
             <Button type="button" onClick={() => setStep(6)}>Dalej</Button>
           </div>
-        </SectionCard>
         </>
         )}
 
@@ -762,7 +786,26 @@ export function AdminGameWizard({
             <div><dt className="text-muted-foreground">Typ zbioru</dt><dd>{COLLECTION_TYPE_LABELS[collectionType]}</dd></div>
             <div><dt className="text-muted-foreground">Rodzaj gry</dt><dd>{GAME_TYPE_LABELS[gameType]}</dd></div>
             <div><dt className="text-muted-foreground">Okładka</dt><dd>{coverImageUrl ? "Tak" : "Brak"}</dd></div>
-            <div><dt className="text-muted-foreground">Egzemplarz</dt><dd>{addCopy ? copyInventory || "Tak (bez numeru)" : "Nie"}</dd></div>
+            <div>
+              <dt className="text-muted-foreground">Wydawca</dt>
+              <dd>
+                {publishers.find((p) => p.id === publisherId)?.name ||
+                  publisherNameHint ||
+                  "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Autor</dt>
+              <dd>
+                {designers.find((d) => d.id === designerId)?.name ||
+                  designerNameHint ||
+                  "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Egzemplarz</dt>
+              <dd>Tak (automatycznie, stan: nowy)</dd>
+            </div>
           </dl>
           {existingGame && (
             <p className="mt-4 text-sm text-destructive">Nie można zapisać — gra z tym EAN już istnieje.</p>

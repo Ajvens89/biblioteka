@@ -48,6 +48,8 @@ function mergeCandidates(existing: CoverCandidate[], incoming: CoverCandidate[])
       thumbnailUrl: c.thumbnailUrl ?? prev.thumbnailUrl,
       description: c.description ?? prev.description,
       shortDescription: c.shortDescription ?? prev.shortDescription,
+      publisher: c.publisher ?? prev.publisher,
+      authors: c.authors?.length ? c.authors : prev.authors,
       confidence:
         c.confidence === "high" || prev.confidence === "high"
           ? "high"
@@ -84,8 +86,8 @@ function deriveShortDescription(description?: string): string | undefined {
 }
 
 /**
- * Keep cover/title from `target`, fill missing description fields from the pool.
- * Used after a high-confidence cover hit (e.g. ALE/Rebel) so BGG/hurt can still supply opis.
+ * Keep cover/title from `target`, fill missing description / publisher / authors from the pool.
+ * Used after a high-confidence cover hit (e.g. ALE/Rebel) so BGG/hurt can still supply opis + wydawca.
  * Longer catalog blurbs (hurt/BGG) can replace a short shop teaser.
  */
 export function enrichCandidateDescriptions(
@@ -94,6 +96,10 @@ export function enrichCandidateDescriptions(
 ): CoverCandidate {
   let description = target.description?.trim() || undefined;
   let shortDescription = target.shortDescription?.trim() || undefined;
+  let publisher = target.publisher?.trim() || undefined;
+  let authors = target.authors?.filter((a) => a.trim()).length
+    ? target.authors.filter((a) => a.trim())
+    : undefined;
 
   const ordered = [...pool].sort((a, b) => {
     const ai = DESCRIPTION_SOURCE_PRIORITY.indexOf(a.source);
@@ -113,6 +119,12 @@ export function enrichCandidateDescriptions(
     if (incomingShort && !shortDescription) {
       shortDescription = incomingShort;
     }
+    if (!publisher && c.publisher?.trim()) {
+      publisher = c.publisher.trim();
+    }
+    if (!authors?.length && c.authors?.some((a) => a.trim())) {
+      authors = c.authors.filter((a) => a.trim());
+    }
   }
 
   if (!shortDescription && description) {
@@ -122,10 +134,15 @@ export function enrichCandidateDescriptions(
     description = shortDescription;
   }
 
-  if (description === target.description && shortDescription === target.shortDescription) {
+  if (
+    description === target.description &&
+    shortDescription === target.shortDescription &&
+    publisher === target.publisher &&
+    authors === target.authors
+  ) {
     return target;
   }
-  return { ...target, description, shortDescription };
+  return { ...target, description, shortDescription, publisher, authors };
 }
 
 function replaceCandidate(

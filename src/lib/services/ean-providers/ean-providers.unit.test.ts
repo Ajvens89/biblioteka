@@ -93,4 +93,25 @@ describe("ean-providers — kolejność i reguły", () => {
     assert.equal(enriched.description, "Pełny opis z hurt.csv");
     assert.equal(enriched.coverImageUrl, rebel.coverImageUrl);
   });
+
+  it("uzupełnia wydawcę i autora z BGG przy high-cover bez metadanych", () => {
+    const ale: CoverCandidate = {
+      source: "aleplanszowki",
+      title: "Adele",
+      confidence: "high",
+      coverImageUrl: "https://aleplanszowki.pl/cover.jpg",
+    };
+    const bgg: CoverCandidate = {
+      source: "bgg",
+      title: "Adele",
+      confidence: "medium",
+      publisher: "Albi",
+      authors: ["Antoine Bauza"],
+      description: "Opis z BGG.",
+    };
+    const enriched = enrichCandidateDescriptions(ale, [ale, bgg]);
+    assert.equal(enriched.publisher, "Albi");
+    assert.deepEqual(enriched.authors, ["Antoine Bauza"]);
+    assert.equal(enriched.coverImageUrl, ale.coverImageUrl);
+  });
 });
