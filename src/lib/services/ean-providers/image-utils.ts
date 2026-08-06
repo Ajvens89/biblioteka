@@ -2,11 +2,17 @@ export const PROVIDER_TIMEOUT_MS = 5000;
 
 const BLOCKED_URL_PROTOCOLS = /^(javascript|data|file|blob):/i;
 
-/** Akceptuje tylko http/https. */
+/**
+ * Akceptuje http/https oraz lokalne okładki z `public/covers`
+ * (ścieżki względne `/covers/...` po downloadCoverToPublic).
+ */
 export function validateCoverImageUrl(url: string | null | undefined): string | null {
   if (!url?.trim()) return null;
   const trimmed = url.trim();
   if (BLOCKED_URL_PROTOCOLS.test(trimmed)) return null;
+  if (/^\/covers\/[A-Za-z0-9._\-/%]+$/i.test(trimmed) && !trimmed.includes("..")) {
+    return trimmed;
+  }
   try {
     const parsed = new URL(trimmed);
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;

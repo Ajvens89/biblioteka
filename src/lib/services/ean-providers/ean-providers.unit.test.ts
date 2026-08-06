@@ -32,6 +32,15 @@ describe("ean-providers — kolejność i reguły", () => {
     assert.equal(validateCoverImageUrl("https://cdn.example/cover.png"), "https://cdn.example/cover.png");
   });
 
+  it("akceptuje lokalne ścieżki /covers/ po pobraniu okładki", () => {
+    assert.equal(
+      validateCoverImageUrl("/covers/zaginiony-kod.4a9d5531e0.jpg"),
+      "/covers/zaginiony-kod.4a9d5531e0.jpg",
+    );
+    assert.equal(validateCoverImageUrl("/covers/../secret.jpg"), null);
+    assert.equal(validateCoverImageUrl("/other/path.jpg"), null);
+  });
+
   it("nie wybiera automatycznie wielu kandydatów BGG", () => {
     const candidates: CoverCandidate[] = [
       { source: "bgg", title: "A", confidence: "high", coverImageUrl: "https://a.test/1.jpg", externalId: "1" },
