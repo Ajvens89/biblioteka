@@ -352,6 +352,9 @@ async function main() {
           difficulty: seed.difficulty ?? "MEDIUM",
           skipEanChecksum: true,
           isActive: true,
+          // Jedna sztuka w magazynie — bez tego katalog pokazuje „Brak egzemplarzy”.
+          addCopy: true,
+          copyCondition: "NEW",
         },
         admin.id,
       );
