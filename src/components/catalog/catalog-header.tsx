@@ -10,14 +10,16 @@ export function CatalogHeader({ total, matching, hasActiveParams, dbOk }: Props)
     ? null
     : hasActiveParams
       ? `${matching} z ${total} pozycji pasuje do wyboru`
-      : `${total} pozycji w bibliotece`;
+      : `${total} światów w bibliotece`;
 
   return (
     <header className="zf-catalog-header">
       <div className="zf-catalog-header-ambient" aria-hidden />
       <div className="relative space-y-2.5">
-        <p className="text-eyebrow">Biblioteka Zakątka Fantastyki</p>
-        <h1 className="zf-catalog-header-title">Znajdź grę dla swojej ekipy</h1>
+        <p className="text-eyebrow">Pulpit odkryć</p>
+        <h1 className="zf-catalog-header-title">
+          Katalog {dbOk && total > 0 ? `${total} światów` : "światów"}
+        </h1>
         <p className="text-body max-w-2xl text-muted-foreground">
           {dbOk
             ? "Filtruj po liczbie graczy, czasie i klimacie albo po prostu wpisz tytuł — resztą zajmie się katalog."

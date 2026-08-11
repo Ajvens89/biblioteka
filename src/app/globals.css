@@ -11,74 +11,77 @@
   }
 }
 
-/* —— Zakątek Fantastyki brand tokens (zakatekfantastyki.pl) —— */
+/* —— Biblioteka „Wieczór przy stole” (Lovable) —— */
 
 :root {
-  /* —— Paleta marki (zakatekfantastyki.pl) — niezmienna identyfikacja —— */
-  --zf-green-900: #4b6006;
-  --zf-green-700: #709009;
-  --zf-green-500: #bcf010;
-  --zf-green-300: #e4f99f;
-  --zf-purple-900: #3a1a7f;
-  --zf-purple-700: #612bd4;
-  --zf-purple-500: #4d22aa;
-  --zf-ink: #0c0c0e;
-  --zf-surface: #19181b;
-  --zf-surface-elevated: #323036;
-  --zf-muted: #b0adb8;
-  --zf-text: #f8f8f8;
+  /* Marka wieczorna — amber / atrament (zachowujemy aliasy --zf-* dla legacy CSS) */
+  --brand-amber: oklch(83% 0.14 74);
+  --brand-rust: oklch(63% 0.15 38);
+  --brand-teal: oklch(72% 0.1 190);
+  --zf-green-900: oklch(55% 0.12 74);
+  --zf-green-700: oklch(70% 0.13 74);
+  --zf-green-500: oklch(83% 0.14 74);
+  --zf-green-300: oklch(90% 0.1 85);
+  --zf-purple-900: oklch(45% 0.12 38);
+  --zf-purple-700: oklch(63% 0.15 38);
+  --zf-purple-500: oklch(72% 0.1 190);
+  --zf-ink: oklch(15.5% 0.013 55);
+  --zf-surface: oklch(21.2% 0.016 58);
+  --zf-surface-elevated: oklch(25% 0.018 58);
+  --zf-muted: oklch(78% 0.02 75);
+  --zf-text: oklch(96% 0.018 85);
 
   /* —— Powierzchnie —— */
-  --background: #0c0c0e;          /* tło strony */
-  --foreground: #f8f8f8;
-  --surface: #19181b;             /* powierzchnia podstawowa (karty) */
-  --surface-elevated: #232228;    /* powierzchnia podniesiona (dialog, popover, hover) */
-  --surface-interactive: #323036; /* powierzchnia interaktywna (inputy, secondary) */
-  --card: #19181b;
-  --card-foreground: #f8f8f8;
-  --popover: #232228;
-  --popover-foreground: #f8f8f8;
+  --background: oklch(15.5% 0.013 55);
+  --foreground: oklch(96% 0.018 85);
+  --surface: oklch(21.2% 0.016 58);
+  --surface-elevated: oklch(25% 0.018 58);
+  --surface-interactive: oklch(28% 0.02 58);
+  --card: oklch(21.2% 0.016 58);
+  --card-foreground: oklch(96% 0.018 85);
+  --popover: oklch(22% 0.016 58);
+  --popover-foreground: oklch(96% 0.018 85);
 
   /* —— Obramowania —— */
-  --border: #323036;              /* obramowanie zwykłe */
-  --border-strong: #4a4850;       /* obramowanie aktywne / wyróżnione */
-  --input: #323036;
+  --border: oklch(85% 0.05 78 / 0.16);
+  --border-strong: oklch(85% 0.05 78 / 0.28);
+  --input: oklch(85% 0.05 78 / 0.22);
 
   /* —— Tekst —— */
-  --text: #f8f8f8;                /* tekst główny */
-  --text-secondary: #cbc8d2;      /* tekst drugorzędny */
-  --text-muted: #b0adb8;          /* tekst wyciszony */
+  --text: oklch(96% 0.018 85);
+  --text-secondary: oklch(88% 0.02 85);
+  --text-muted: oklch(78% 0.02 75);
 
   /* —— Akcenty i stany —— */
-  --primary: #bcf010;
-  --primary-foreground: #0c0c0e;
-  --secondary: #323036;
-  --secondary-foreground: #f8f8f8;
-  --muted: #323036;
-  --muted-foreground: #b0adb8;
-  --accent: #612bd4;
-  --accent-foreground: #f8f8f8;
-  --success: #709009;
-  --success-foreground: #f1fccf;
-  --warning: #fcb900;
-  --warning-foreground: #0c0c0e;
-  --destructive: #ee2a2d;
-  --destructive-foreground: #fef2f2;
+  --primary: oklch(83% 0.14 74);
+  --primary-foreground: oklch(18% 0.02 55);
+  --secondary: oklch(25% 0.018 58);
+  --secondary-foreground: oklch(96% 0.018 85);
+  --muted: oklch(25% 0.018 58);
+  --muted-foreground: oklch(78% 0.02 75);
+  --accent: oklch(83% 0.14 74);
+  --accent-foreground: oklch(18% 0.02 55);
+  --success: oklch(72% 0.1 190);
+  --success-foreground: oklch(18% 0.02 55);
+  --warning: oklch(83% 0.14 74);
+  --warning-foreground: oklch(18% 0.02 55);
+  --destructive: oklch(63% 0.18 25);
+  --destructive-foreground: oklch(96% 0.02 85);
 
   /* —— Focus —— */
-  --ring: #bcf010;
-  --focus-ring: #bcf010;
+  --ring: oklch(83% 0.14 74);
+  --focus-ring: oklch(83% 0.14 74);
 
-  /* —— Promienie (skala 4px: kontrolki 0.75rem, karty 1rem, panele 1.25rem) —— */
-  --radius: 1rem;
-  --radius-control: 0.75rem;
-  --radius-card: 1rem;
-  --radius-panel: 1.25rem;
+  /* —— Promienie —— */
+  --radius: 1.15rem;
+  --radius-control: 0.85rem;
+  --radius-card: 1.15rem;
+  --radius-panel: 1.35rem;
 
   /* —— Cienie —— */
-  --shadow-soft: 0 4px 24px rgb(0 0 0 / 0.35);
-  --shadow-card: 0 8px 32px rgb(0 0 0 / 0.45);
-  --shadow-elevated: 0 24px 64px rgb(0 0 0 / 0.55);
+  --shadow-soft: 0 4px 24px oklch(0% 0 0 / 0.35);
+  --shadow-card: 0 8px 32px oklch(0% 0 0 / 0.45);
+  --shadow-elevated: 0 24px 64px oklch(0% 0 0 / 0.55);
 
   /* —— Odstępy komponentów —— */
   --space-1: 0.25rem;
@@ -88,9 +91,9 @@
   --space-5: 1.5rem;
   --space-6: 2rem;
 
-  /* —— Gradienty (używane oszczędnie) —— */
-  --gradient-brand: linear-gradient(135deg, #709009 0%, #3a1a7f 48%, #612bd4 100%);
-  --gradient-hero: linear-gradient(160deg, #4b6006 0%, #3a1a7f 42%, #0c0c0e 88%);
+  /* —— Gradienty —— */
+  --gradient-brand: linear-gradient(135deg, oklch(70% 0.13 74) 0%, oklch(55% 0.12 38) 55%, oklch(15.5% 0.013 55) 100%);
+  --gradient-hero: linear-gradient(160deg, oklch(28% 0.04 55) 0%, oklch(18% 0.02 50) 42%, oklch(15.5% 0.013 55) 88%);
 
   /* —— Motion —— */
   --motion-fast: 120ms;
@@ -147,8 +150,8 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 4px);
   --radius-sm: calc(var(--radius) - 8px);
-  --font-sans: var(--font-poppins), system-ui, sans-serif;
-  --font-display: var(--font-poppins), system-ui, sans-serif;
+  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
   --shadow-soft: var(--shadow-soft);
   --shadow-card: var(--shadow-card);
 }
@@ -411,7 +414,7 @@ body:has([data-admin-panel]) .site-footer {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 70% 55% at 25% 15%, rgb(188 240 16 / 0.1), transparent 55%);
+  background: radial-gradient(ellipse 70% 55% at 25% 15%, oklch(83% 0.14 74 / 0.12), transparent 55%);
 }
 
 .zf-hero-ambient {
@@ -427,16 +430,17 @@ body:has([data-admin-panel]) .site-footer {
   height: min(42vw, 420px);
   left: -8%;
   top: 10%;
-  background: rgb(112 144 9 / 0.35);
+  background: oklch(83% 0.14 74 / 0.28);
   animation: heroAmbientDrift 18s var(--ease-standard) infinite alternate;
 }
 
-.zf-hero-ambient--purple {
+.zf-hero-ambient--purple,
+.zf-hero-ambient--warm {
   width: min(36vw, 360px);
   height: min(36vw, 360px);
   right: 5%;
   bottom: 8%;
-  background: rgb(97 43 212 / 0.28);
+  background: oklch(63% 0.15 38 / 0.22);
   animation: heroAmbientDrift 16s var(--ease-standard) infinite alternate-reverse;
 }
 

@@ -13,26 +13,27 @@ type Props = {
 
 export function HomePublicStats({ stats }: Props) {
   const items = [
-    { label: "Gier w katalogu", value: stats.games, href: "/katalog" },
+    { label: "Gry planszowe", value: stats.boardGames, href: "/katalog?collectionType=BOARD_GAME" },
+    { label: "Gry fabularne", value: stats.rpgGames, href: "/katalog?collectionType=RPG" },
     { label: "Egzemplarzy", value: stats.copies, href: "/katalog" },
     { label: "Dostępnych teraz", value: stats.available, href: "/katalog?availability=available" },
-    { label: "Planszówki", value: stats.boardGames, href: "/katalog?collectionType=BOARD_GAME" },
-    { label: "RPG", value: stats.rpgGames, href: "/katalog?collectionType=RPG" },
   ];
 
   return (
-    <section className="border-y border-border/80 bg-muted/20 py-10" aria-label="Statystyki biblioteki">
+    <section className="border-y border-border/80 bg-muted/15 py-10" aria-label="Biblioteka w liczbach">
       <div className="mx-auto max-w-7xl px-4">
         <MotionReveal variant="fade-up">
-          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {items.map(({ label, value, href }) => (
               <li key={label}>
                 <Link
                   href={href}
-                  className="block rounded-lg border border-border/60 bg-card/50 px-4 py-3 transition-colors hover:border-primary/30 hover:bg-card"
+                  className="block rounded-[var(--radius-card)] border border-border/60 bg-card/50 px-4 py-4 transition-colors hover:border-primary/35 hover:bg-card"
                 >
-                  <p className="text-2xl font-semibold tabular-nums">{value}</p>
-                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="font-display text-3xl font-semibold tabular-nums text-foreground">
+                    {value}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">{label}</p>
                 </Link>
               </li>
             ))}

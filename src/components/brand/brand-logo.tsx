@@ -36,9 +36,10 @@ export function BrandLogo({
       />
       {showSubtitle && (
         <span className="hidden min-w-0 flex-col leading-tight sm:flex">
-          <span className="truncate text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-[var(--zf-green-500)]">
-            {subtitle}
+          <span className="truncate text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-primary">
+            Zakątek Fantastyki
           </span>
+          <span className="truncate text-sm font-medium text-foreground">{subtitle}</span>
         </span>
       )}
     </Link>

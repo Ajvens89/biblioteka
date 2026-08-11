@@ -18,17 +18,14 @@ export function AvailableGamesSection({ games }: Props) {
       <MotionReveal variant="fade-up">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border/80 pb-8">
           <div className="space-y-2">
-            <p className="text-eyebrow">Z katalogu</p>
+            <p className="text-eyebrow">Na stole w tym tygodniu</p>
             <h2 id="available-games-heading" className="text-h2 text-foreground">
-              Wybrane tytuły
+              Świeżo z półki
             </h2>
-            <p className="text-body max-w-xl text-muted-foreground">
-              Przeglądaj zbiór gier. Informacje o wypożyczeniu uzyskasz mailowo od fundacji.
-            </p>
           </div>
           <Button variant="ghost" className="text-primary hover:text-primary" asChild>
             <Link href="/katalog">
-              Zobacz cały katalog
+              Wszystkie
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </Button>

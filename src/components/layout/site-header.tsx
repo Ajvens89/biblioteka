@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { ExternalLink, LayoutDashboard, LogOut } from "lucide-react";
+import { LayoutDashboard, LogOut } from "lucide-react";
 import { logoutAction } from "@/lib/actions/auth";
 import { getSessionUser, isStaff } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
@@ -10,16 +10,15 @@ import { HeaderSearch } from "@/components/layout/header-search";
 import { SiteHeaderShell } from "@/components/layout/site-header-shell";
 import { SiteNavLink } from "@/components/layout/site-nav-link";
 
-const FOUNDATION_URL = "https://zakatekfantastyki.pl/";
-
 export async function SiteHeader() {
   const user = await getSessionUser();
   const staff = user ? isStaff(user.role) : false;
 
   const navLinks = [
-    { href: "/katalog", label: "Katalog", icon: "catalog" as const },
     { href: "/katalog?collectionType=BOARD_GAME", label: "Planszówki", icon: "board" as const },
     { href: "/katalog?collectionType=RPG", label: "RPG", icon: "rpg" as const },
+    { href: "/katalog", label: "Katalog", icon: "catalog" as const },
+    { href: "/jak-wypozyczyc", label: "Jak wypożyczyć", icon: "account" as const },
     { href: "/kontakt", label: "Kontakt", icon: "account" as const },
   ];
 
@@ -28,24 +27,16 @@ export async function SiteHeader() {
       <div className="site-header-inner mx-auto flex h-[3.75rem] w-full max-w-[90rem] items-center justify-between gap-3 px-4 md:h-16 md:px-6">
         <div className="flex min-w-0 items-center gap-2">
           <MobileNav links={navLinks} user={staff ? user : null} />
-          <BrandLogo size="sm" />
+          <BrandLogo size="sm" subtitle="Biblioteka gier" />
         </div>
 
         <Suspense fallback={null}>
-          <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Główna nawigacja">
+          <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Nawigacja główna">
             {navLinks.map(({ href, label }) => (
-              <SiteNavLink key={href} href={href} className="min-h-11 px-3.5 py-2">
+              <SiteNavLink key={`${href}-${label}`} href={href} className="min-h-11 px-3.5 py-2">
                 {label}
               </SiteNavLink>
             ))}
-            <SiteNavLink
-              href={FOUNDATION_URL}
-              external
-              className="site-foundation-link inline-flex min-h-11 items-center gap-1.5 px-3.5 py-2"
-            >
-              Strona Fundacji
-              <ExternalLink className="site-nav-icon h-3.5 w-3.5 opacity-70" aria-hidden />
-            </SiteNavLink>
           </nav>
         </Suspense>
 
@@ -65,7 +56,11 @@ export async function SiteHeader() {
                 </Button>
               </form>
             </>
-          ) : null}
+          ) : (
+            <Button size="sm" className="hidden sm:inline-flex" asChild>
+              <Link href="/katalog">Otwórz portal</Link>
+            </Button>
+          )}
         </div>
       </div>
       <div className="site-header-search border-t border-border/40 px-4 pb-3 pt-2 lg:hidden">

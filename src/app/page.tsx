@@ -1,6 +1,7 @@
 import { HeroSection } from "@/components/home/hero-section";
 import { AvailableGamesSection } from "@/components/home/available-games-section";
 import { HomePublicStats } from "@/components/home/home-public-stats";
+import { MoodPicksSection } from "@/components/home/mood-picks-section";
 import { HowItWorksSection } from "@/components/home/how-it-works-section";
 import { FAQSection } from "@/components/home/faq-section";
 import { FoundationSection } from "@/components/home/foundation-section";
@@ -37,7 +38,7 @@ export default async function HomePage() {
   const dbOk = await isDatabaseAvailable();
   const [available, boardShowcase, rpgShowcase, publicStats] = dbOk
     ? await Promise.all([
-        fetchAvailableNowCached(6),
+        fetchAvailableNowCached(8),
         fetchShowcaseGamesCached("BOARD_GAME", 4),
         fetchShowcaseGamesCached("RPG", 4),
         fetchPublicStatsCached(),
@@ -46,7 +47,11 @@ export default async function HomePage() {
 
   return (
     <div className="overflow-x-hidden">
-      <HeroSection boardGames={toShowcase(boardShowcase)} rpgGames={toShowcase(rpgShowcase)} />
+      <HeroSection
+        boardGames={toShowcase(boardShowcase)}
+        rpgGames={toShowcase(rpgShowcase)}
+        copiesOnShelves={publicStats.copies}
+      />
 
       {dbOk && <HomePublicStats stats={publicStats} />}
 
@@ -55,6 +60,8 @@ export default async function HomePage() {
           <DbUnavailableBanner />
         </div>
       )}
+
+      <MoodPicksSection />
 
       <div className="zf-section-catalog px-4 py-16 md:py-24">
         <div className="mx-auto w-full max-w-[90rem]">

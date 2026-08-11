@@ -10,19 +10,15 @@ import { cn } from "@/lib/utils";
 const faq = [
   {
     q: "Czy trzeba mieć konto?",
-    a: "Nie. Katalog możesz przeglądać bez logowania. Logowanie jest przeznaczone wyłącznie dla zespołu biblioteki.",
+    a: "Nie. Katalog online jest w pełni otwarty — przeglądasz zbiory bez rejestracji i bez logowania.",
   },
   {
     q: "Jak wypożyczyć grę?",
-    a: `Napisz na ${FOUNDATION_LOAN_EMAIL}, podając tytuł gry. Fundacja ustali dostępność i szczegóły odbioru.`,
+    a: `Znajdź tytuł w katalogu, sprawdź dostępność i wyślij wiadomość z karty gry na ${FOUNDATION_LOAN_EMAIL}. Grę odbierzesz osobiście w siedzibie Zakątka.`,
   },
   {
-    q: "Czy w katalogu są też podręczniki RPG?",
-    a: "Tak. Gry fabularne są oznaczone jako „Gry fabularne” — możesz je przeglądać tak samo jak planszówki.",
-  },
-  {
-    q: "Co oznacza status dostępności?",
-    a: "Pokazuje, czy w systemie są wolne egzemplarze. Ostateczne potwierdzenie wypożyczenia odbywa się mailowo.",
+    q: "Czy są też podręczniki RPG?",
+    a: "Tak. Poza planszówkami biblioteka gromadzi także gry fabularne — znajdziesz je w kolekcji RPG.",
   },
 ];
 
@@ -62,9 +58,8 @@ export function FAQSection() {
     <section className="zf-section-faq py-16 md:py-24" aria-labelledby="faq-heading">
       <div className="mx-auto max-w-2xl px-4">
         <MotionReveal variant="fade-up" className="mb-10 text-center">
-          <p className="text-eyebrow">Pomoc</p>
-          <h2 id="faq-heading" className="text-h2 mt-2 text-foreground">
-            Najczęstsze pytania
+          <h2 id="faq-heading" className="text-h2 text-foreground">
+            Częste pytania
           </h2>
         </MotionReveal>
 

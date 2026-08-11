@@ -8,9 +8,9 @@ import type {
   UserRole,
 } from "@prisma/client";
 
-export const APP_NAME = "Biblioteka Zakątka Fantastyki";
+export const APP_NAME = "Wieczór przy stole — Biblioteka gier Zakątka Fantastyki";
 export const APP_DESCRIPTION =
-  "Przeglądaj katalog gier planszowych i RPG biblioteki Zakątka Fantastyki";
+  "540 planszówek i podręczników RPG do bezpłatnego wypożyczenia w Bielsku-Białej. Znajdź grę na dziś wieczór, sprawdź dostępność i zarezerwuj mailem.";
 
 /** Publiczny kontakt w sprawie wypożyczeń (tryb poglądu katalogu). */
 export const FOUNDATION_LOAN_EMAIL = "fundacja@zakatekfantastyki.pl";

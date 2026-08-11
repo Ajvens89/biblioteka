@@ -17,26 +17,27 @@ export function GameBorrowContact({ gameTitle, available }: Props) {
   return (
     <section
       id="wypozyczenie"
-      className="zf-game-reservation rounded-xl border border-border/80 bg-card/60 p-5"
+      className="zf-game-reservation rounded-[var(--radius-card)] border border-border/80 bg-card/60 p-5"
       data-testid="game-borrow-contact"
       aria-labelledby="borrow-contact-heading"
     >
       <div className="space-y-3">
         <p className="text-eyebrow">Wypożyczenie</p>
         <h2 id="borrow-contact-heading" className="font-display text-xl font-bold text-foreground">
-          Katalog w trybie poglądu
+          Zarezerwuj mailowo
         </h2>
         <p className="text-body text-muted-foreground">
           {available > 0
-            ? "Gra jest w zbiorach biblioteki. Aby wypożyczyć egzemplarz, napisz do fundacji."
+            ? "Gra jest w zbiorach biblioteki. Wyślij gotową wiadomość — ustalimy odbiór w Bielsku-Białej."
             : "Aby zapytać o dostępność i wypożyczenie, napisz do fundacji."}
         </p>
         <Button size="lg" className="min-h-12 w-full sm:w-auto" asChild>
           <a href={mailto}>
             <Mail className="h-4 w-4" aria-hidden />
-            Napisz: {FOUNDATION_LOAN_EMAIL}
+            Zarezerwuj mailowo
           </a>
         </Button>
+        <p className="text-xs text-muted-foreground">{FOUNDATION_LOAN_EMAIL}</p>
       </div>
     </section>
   );
