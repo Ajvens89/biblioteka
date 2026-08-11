@@ -20,20 +20,15 @@ export function HomePublicStats({ stats }: Props) {
   ];
 
   return (
-    <section className="border-y border-border/80 bg-muted/15 py-10" aria-label="Biblioteka w liczbach">
+    <section className="zf-stats-strip" aria-label="Biblioteka w liczbach">
       <div className="mx-auto max-w-7xl px-4">
         <MotionReveal variant="fade-up">
-          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <ul className="zf-stats-row">
             {items.map(({ label, value, href }) => (
-              <li key={label}>
-                <Link
-                  href={href}
-                  className="block rounded-[var(--radius-card)] border border-border/60 bg-card/50 px-4 py-4 transition-colors hover:border-primary/35 hover:bg-card"
-                >
-                  <p className="font-display text-3xl font-semibold tabular-nums text-foreground">
-                    {value}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">{label}</p>
+              <li key={label} className="zf-stats-item">
+                <Link href={href} className="zf-stats-link">
+                  <span className="zf-stats-value">{value}</span>
+                  <span className="zf-stats-label">{label}</span>
                 </Link>
               </li>
             ))}

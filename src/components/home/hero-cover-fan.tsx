@@ -8,68 +8,75 @@ type Props = {
   className?: string;
 };
 
-/** Desktop: dominująca okładka + tło — głębia przez scale, translate, cień. */
+/** Desktop: trzy okładki w wachlarzu (środek z amber border jak Lovable). */
 export function HeroCoverFan({ games, className }: Props) {
-  const [hero, ...rest] = games.slice(0, 4);
-  if (!hero) return null;
+  const picks = games.filter((g) => g.coverImageUrl).slice(0, 3);
+  if (picks.length === 0) return null;
 
-  const bgPositions = [
-    { className: "zf-hero-cover-bg zf-hero-cover-bg--1", rotate: -12, scale: 0.88 },
-    { className: "zf-hero-cover-bg zf-hero-cover-bg--2", rotate: 8, scale: 0.82 },
-    { className: "zf-hero-cover-bg zf-hero-cover-bg--3", rotate: -5, scale: 0.78 },
-  ] as const;
+  const center = picks[0]!;
+  const left = picks[1];
+  const right = picks[2] ?? picks[1];
 
   return (
     <div className={cn("zf-hero-cover-stage hidden lg:block", className)} aria-hidden>
-      {rest.slice(0, 3).map((game, i) => {
-        const pos = bgPositions[i];
-        if (!pos) return null;
-        return (
-          <Link
-            key={game.id}
-            href={`/gry/${game.slug}`}
-            className={cn("zf-hero-cover-bg-link", pos.className)}
-            style={{ transform: `rotate(${pos.rotate}deg) scale(${pos.scale})` }}
-            tabIndex={-1}
-          >
-            <GameCover
-              src={game.coverImageUrl}
-              alt=""
-              collectionType={game.collectionType}
-              fill
-              className="rounded-lg"
-              sizes="200px"
-            />
-          </Link>
-        );
-      })}
+      {left && (
+        <Link
+          href={`/gry/${left.slug}`}
+          className="zf-hero-cover-bg-link zf-hero-cover-bg--1"
+          style={{ transform: "rotate(-14deg) translateY(8px)" }}
+          tabIndex={-1}
+        >
+          <GameCover
+            src={left.coverImageUrl}
+            alt=""
+            collectionType={left.collectionType}
+            fill
+            className="rounded-[1.2rem]"
+            sizes="210px"
+          />
+        </Link>
+      )}
 
-      <Link
-        href={`/gry/${hero.slug}`}
-        className="zf-hero-cover-hero relative block"
-        tabIndex={-1}
-      >
+      {right && (
+        <Link
+          href={`/gry/${right.slug}`}
+          className="zf-hero-cover-bg-link zf-hero-cover-bg--2"
+          style={{ transform: "rotate(12deg) translateY(12px)" }}
+          tabIndex={-1}
+        >
+          <GameCover
+            src={right.coverImageUrl}
+            alt=""
+            collectionType={right.collectionType}
+            fill
+            className="rounded-[1.2rem]"
+            sizes="210px"
+          />
+        </Link>
+      )}
+
+      <Link href={`/gry/${center.slug}`} className="zf-hero-cover-hero relative block" tabIndex={-1}>
         <GameCover
-          src={hero.coverImageUrl}
+          src={center.coverImageUrl}
           alt=""
-          collectionType={hero.collectionType}
+          collectionType={center.collectionType}
           fill
           priority
-          className="rounded-xl"
-          sizes="(min-width: 1024px) 320px, 0px"
+          className="rounded-[1.35rem]"
+          sizes="(min-width: 1024px) 260px, 0px"
         />
       </Link>
     </div>
   );
 }
 
-/** Mobile: kompaktowa jedna okładka — nie wypycha wyszukiwarki. */
+/** Mobile: kompaktowa jedna okładka. */
 export function HeroCoverMobile({ games }: { games: ShowcaseGame[] }) {
-  const game = games[0];
+  const game = games.find((g) => g.coverImageUrl) ?? games[0];
   if (!game) return null;
 
   return (
-    <div className="zf-hero-cover-mobile relative mx-auto mt-6 h-36 w-28 sm:h-40 sm:w-32 lg:hidden" aria-hidden>
+    <div className="zf-hero-cover-mobile relative mx-auto mt-6 h-40 w-28 sm:h-44 sm:w-32 lg:hidden" aria-hidden>
       <Link href={`/gry/${game.slug}`} className="zf-hero-cover-mobile-link block h-full w-full" tabIndex={-1}>
         <GameCover
           src={game.coverImageUrl}
@@ -77,7 +84,7 @@ export function HeroCoverMobile({ games }: { games: ShowcaseGame[] }) {
           collectionType={game.collectionType}
           fill
           priority
-          className="rounded-lg shadow-lg"
+          className="rounded-[1.1rem]"
           sizes="128px"
         />
       </Link>

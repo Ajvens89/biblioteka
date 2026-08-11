@@ -203,9 +203,11 @@ export async function fetchAvailableNow(limit = 6) {
       isActive: true,
       deletedAt: null,
       copies: { some: { status: "AVAILABLE" } },
+      coverImageUrl: { not: null },
+      NOT: { coverImageUrl: "" },
     },
     include: gameListInclude,
-    orderBy: { title: "asc" },
+    orderBy: [{ isFeatured: "desc" }, { popularityCount: "desc" }, { title: "asc" }],
     take: limit,
   });
 }
@@ -251,7 +253,7 @@ export async function fetchShowcaseGames(
       copies: { some: { status: "AVAILABLE" } },
     },
     include: gameListInclude,
-    orderBy: [{ isFeatured: "desc" }, { title: "asc" }],
+    orderBy: [{ isFeatured: "desc" }, { popularityCount: "desc" }, { title: "asc" }],
     take: limit,
   });
 
@@ -265,7 +267,7 @@ export async function fetchShowcaseGames(
       copies: { some: {} },
     },
     include: gameListInclude,
-    orderBy: [{ isFeatured: "desc" }, { title: "asc" }],
+    orderBy: [{ isFeatured: "desc" }, { popularityCount: "desc" }, { title: "asc" }],
     take: limit - withAvailable.length,
   });
 
@@ -335,19 +337,19 @@ export async function fetchPublicStats() {
 
 const HOME_CACHE_SECONDS = 60;
 
-export const fetchPublicStatsCached = unstable_cache(fetchPublicStats, ["home-public-stats-v2"], {
+export const fetchPublicStatsCached = unstable_cache(fetchPublicStats, ["home-public-stats-v3"], {
   revalidate: HOME_CACHE_SECONDS,
 });
 
 export const fetchAvailableNowCached = unstable_cache(
   (limit = 6) => fetchAvailableNow(limit),
-  ["home-available-now"],
+  ["home-available-now-v3"],
   { revalidate: HOME_CACHE_SECONDS },
 );
 
 export const fetchShowcaseGamesCached = unstable_cache(
   (collectionType: "BOARD_GAME" | "RPG", limit = 4) =>
     fetchShowcaseGames(collectionType, limit),
-  ["home-showcase"],
+  ["home-showcase-v3"],
   { revalidate: HOME_CACHE_SECONDS },
 );

@@ -522,50 +522,121 @@ body:has([data-admin-panel]) .site-footer {
   }
 }
 
-/* Hero cover stage */
+/* Hero cover stage — wachlarz jak Lovable */
 .zf-hero-cover-stage {
   position: relative;
-  min-height: 380px;
+  min-height: 420px;
   width: 100%;
+  perspective: 900px;
 }
 
 .zf-hero-cover-hero {
   position: absolute;
-  right: 0;
+  left: 50%;
   top: 50%;
-  width: min(72%, 300px);
+  width: min(58%, 260px);
   aspect-ratio: 3 / 4;
-  transform: translateY(-50%);
-  border-radius: var(--radius-card);
+  transform: translate(-50%, -50%);
+  border-radius: 1.35rem;
   overflow: hidden;
-  border: 2px solid rgb(255 255 255 / 0.12);
-  box-shadow: var(--shadow-elevated);
+  border: 1.5px solid color-mix(in oklch, var(--brand-amber) 70%, white);
+  box-shadow:
+    0 24px 60px oklch(0% 0 0 / 0.55),
+    0 0 0 1px oklch(83% 0.14 74 / 0.15);
+  z-index: 3;
   transition: transform var(--motion-slow) var(--ease-standard);
 }
 
 .zf-hero-cover-hero:hover {
-  transform: translateY(-50%) scale(1.02);
+  transform: translate(-50%, -52%) scale(1.03);
 }
 
 .zf-hero-cover-bg-link {
   position: absolute;
   display: block;
   aspect-ratio: 3 / 4;
-  width: 38%;
-  border-radius: var(--radius-control);
+  width: min(48%, 210px);
+  border-radius: 1.2rem;
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 0.08);
-  box-shadow: var(--shadow-card);
-  opacity: 0.72;
+  border: 1px solid oklch(85% 0.05 78 / 0.2);
+  box-shadow: 0 18px 40px oklch(0% 0 0 / 0.45);
+  opacity: 0.88;
+  z-index: 1;
+  background: oklch(21% 0.016 58);
 }
 
-.zf-hero-cover-bg--1 { left: 0; top: 18%; }
-.zf-hero-cover-bg--2 { left: 12%; bottom: 4%; }
-.zf-hero-cover-bg--3 { right: 28%; top: 4%; }
+.zf-hero-cover-bg--1 {
+  left: 4%;
+  top: 18%;
+  z-index: 1;
+}
+
+.zf-hero-cover-bg--2 {
+  right: 4%;
+  top: 22%;
+  z-index: 1;
+}
+
+.zf-hero-cover-bg--3 {
+  left: 18%;
+  bottom: 6%;
+  z-index: 0;
+  opacity: 0.55;
+}
 
 .zf-hero-cover-mobile-link {
   transform: rotate(-3deg);
+  border-radius: 1.1rem;
+  overflow: hidden;
+  border: 1.5px solid color-mix(in oklch, var(--brand-amber) 55%, white);
+  box-shadow: var(--shadow-card);
   transition: transform var(--motion-normal) var(--ease-standard);
+}
+
+/* Stats strip — jak Lovable: amber / caps / bez kart */
+.zf-stats-strip {
+  border-top: 1px solid oklch(85% 0.05 78 / 0.14);
+  border-bottom: 1px solid oklch(85% 0.05 78 / 0.14);
+  padding: 2.25rem 0;
+}
+
+.zf-stats-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.75rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .zf-stats-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.zf-stats-link {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  text-decoration: none;
+}
+
+.zf-stats-value {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--brand-amber);
+  font-variant-numeric: tabular-nums;
+}
+
+.zf-stats-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--brand-amber) 78%, white);
 }
 
 .zf-hero-search {
