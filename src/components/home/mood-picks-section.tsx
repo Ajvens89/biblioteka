@@ -5,27 +5,27 @@ const MOODS = [
   {
     title: "Wieczór we dwoje",
     description: "Gry dla dwóch osób, dostępne od ręki",
-    href: "/katalog?minPlayers=2&maxPlayers=2&availability=available",
+    href: "/katalog?mood=duo",
   },
   {
     title: "Mam 30 minut",
     description: "Krótkie partie bez rozstawiania świata",
-    href: "/katalog?maxPlayTime=30",
+    href: "/katalog?mood=short",
   },
   {
     title: "Cała rodzina",
     description: "Tytuły rodzinne dla różnych pokoleń",
-    href: "/katalog?category=rodzinne",
+    href: "/katalog?mood=family",
   },
   {
     title: "Gramy przeciw grze",
     description: "Kooperacja — wygrywacie albo przegrywacie razem",
-    href: "/katalog?category=kooperacja",
+    href: "/katalog?mood=coop",
   },
   {
     title: "Prowadzę sesję",
     description: "Podręczniki i dodatki do gier fabularnych",
-    href: "/katalog?collectionType=RPG",
+    href: "/katalog?mood=rpg",
   },
 ] as const;
 

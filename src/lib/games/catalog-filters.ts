@@ -5,9 +5,11 @@ import {
   GAME_TYPE_LABELS,
 } from "@/lib/constants";
 import type { GameFilterInput } from "@/lib/validations/game";
+import { CATALOG_MOOD_LABELS, isCatalogMood } from "@/lib/games/mood-filters";
 
 /** Parametry sterowane przez panel filtrów (bez wyszukiwarki, sortowania i paginacji). */
 export const CATALOG_FILTER_KEYS = [
+  "mood",
   "collectionType",
   "availability",
   "minPlayers",
@@ -95,6 +97,15 @@ export function buildFilterChips(
 ): CatalogChip[] {
   const chips: CatalogChip[] = [];
 
+  if (values.mood && isCatalogMood(values.mood)) {
+    const label = CATALOG_MOOD_LABELS[values.mood];
+    chips.push({
+      keys: ["mood"],
+      label: `Nastrój: ${label}`,
+      srLabel: `Nastrój: ${label}`,
+    });
+  }
+
   if (values.collectionType) {
     const label =
       CATALOG_COLLECTION_LABELS[
@@ -153,7 +164,11 @@ export function buildFilterChips(
   }
 
   if (values.category) {
-    const name = lookup(lists.categories, values.category);
+    const slugs = values.category.split(",").map((s) => s.trim()).filter(Boolean);
+    const name =
+      slugs.length <= 1
+        ? lookup(lists.categories, slugs[0] ?? values.category)
+        : slugs.map((slug) => lookup(lists.categories, slug)).join(", ");
     chips.push({ keys: ["category"], label: `Kategoria: ${name}`, srLabel: `Kategoria: ${name}` });
   }
 

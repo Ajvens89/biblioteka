@@ -140,6 +140,8 @@ export const gameFilterSchema = z.object({
   tag: z.string().optional(),
   publisher: z.string().optional(),
   designer: z.string().optional(),
+  /** Preset nastroju z homepage („Jaki macie dziś wieczór?”). */
+  mood: z.enum(["duo", "short", "family", "coop", "rpg"]).optional(),
   sort: z
     .enum([
       "title",

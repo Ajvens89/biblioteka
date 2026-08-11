@@ -53,6 +53,7 @@ export default async function CatalogPage({ searchParams }: PageProps) {
     tag: params.tag,
     publisher: params.publisher,
     designer: params.designer,
+    mood: params.mood,
     sort: params.sort,
     page: params.page,
   });

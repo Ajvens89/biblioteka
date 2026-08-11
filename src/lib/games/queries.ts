@@ -6,6 +6,7 @@ import { ACTIVE_CATALOG_GAME_WHERE } from "@/lib/games/catalog-scope";
 import { normalizeEan } from "@/lib/services/ean";
 import { paginateIds, sortGamesByAvailableCopies } from "@/lib/games/sort-games-by-availability";
 import type { GameFilterInput } from "@/lib/validations/game";
+import { buildMoodWhere, isCatalogMood } from "@/lib/games/mood-filters";
 
 export const gameListInclude = {
   publisher: true,
@@ -17,11 +18,20 @@ export const gameListInclude = {
 
 export type GameListItem = Prisma.GameGetPayload<{ include: typeof gameListInclude }>;
 
+function parseCategorySlugs(raw: string): string[] {
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 export function buildGameWhere(filters: GameFilterInput): Prisma.GameWhereInput {
   const where: Prisma.GameWhereInput = {
     deletedAt: null,
     isActive: true,
   };
+
+  const andClauses: Prisma.GameWhereInput[] = [];
 
   if (filters.ean) {
     try {
@@ -47,19 +57,31 @@ export function buildGameWhere(filters: GameFilterInput): Prisma.GameWhereInput 
       { designer: { name: { contains: filters.q, mode: "insensitive" } } },
     ];
     if (eanClause) textClauses.push(eanClause);
-    where.OR = textClauses;
+    andClauses.push({ OR: textClauses });
+  }
+
+  if (filters.mood && isCatalogMood(filters.mood)) {
+    andClauses.push(buildMoodWhere(filters.mood));
   }
 
   if (filters.collectionType) where.collectionType = filters.collectionType;
 
   if (filters.category) {
-    where.categories = { some: { category: { slug: filters.category } } };
+    const slugs = parseCategorySlugs(filters.category);
+    if (slugs.length === 1) {
+      where.categories = { some: { category: { slug: slugs[0] } } };
+    } else if (slugs.length > 1) {
+      where.categories = { some: { category: { slug: { in: slugs } } } };
+    }
   }
   if (filters.type) where.type = filters.type;
   if (filters.difficulty) where.difficulty = filters.difficulty;
   if (filters.minPlayers) where.maxPlayers = { gte: filters.minPlayers };
   if (filters.maxPlayers) where.minPlayers = { lte: filters.maxPlayers };
-  if (filters.maxPlayTime) where.minPlayTime = { lte: filters.maxPlayTime };
+  // „Do X min” = partia kończy się w ≤ X minut (pole maxPlayTime gry).
+  if (filters.maxPlayTime) {
+    where.maxPlayTime = { lte: filters.maxPlayTime, gt: 0 };
+  }
   if (filters.minAge) where.minAge = { lte: filters.minAge };
   if (filters.tag) {
     where.tags = { some: { tag: { slug: filters.tag } } };
@@ -72,6 +94,12 @@ export function buildGameWhere(filters: GameFilterInput): Prisma.GameWhereInput 
   }
   if (filters.availability === "available") {
     where.copies = { some: { status: "AVAILABLE" } };
+  }
+
+  if (andClauses.length === 1) {
+    Object.assign(where, andClauses[0]);
+  } else if (andClauses.length > 1) {
+    where.AND = andClauses;
   }
 
   return where;

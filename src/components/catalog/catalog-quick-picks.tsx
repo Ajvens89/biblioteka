@@ -14,13 +14,25 @@ type QuickPick = {
 
 const QUICK_PICKS: QuickPick[] = [
   { label: "Dostępne teraz", icon: CheckCircle2, params: { availability: "available" } },
-  { label: "Dla 2 osób", icon: Users, params: { minPlayers: "2", maxPlayers: "2" } },
-  { label: "Do 30 minut", icon: Clock, params: { maxPlayTime: "30" } },
+  { label: "Dla 2 osób", icon: Users, params: { mood: "duo" } },
+  { label: "Do 30 minut", icon: Clock, params: { mood: "short" } },
+  { label: "Rodzinne", icon: PartyPopper, params: { mood: "family" } },
   { label: "Strategiczne", icon: Crown, params: { category: "strategia" } },
-  { label: "Imprezowe", icon: PartyPopper, params: { category: "imprezowe" } },
-  { label: "Kooperacyjne", icon: Sparkles, params: { category: "kooperacja" } },
-  { label: "RPG", icon: Scroll, params: { collectionType: "RPG" } },
+  { label: "Kooperacyjne", icon: Sparkles, params: { mood: "coop" } },
+  { label: "RPG", icon: Scroll, params: { mood: "rpg" } },
 ];
+
+/** Parametry nadpisywane przez preset nastroju — nie mieszamy ich z mood. */
+const MOOD_OWNED_KEYS = [
+  "mood",
+  "minPlayers",
+  "maxPlayers",
+  "maxPlayTime",
+  "category",
+  "collectionType",
+  "type",
+  "availability",
+] as const;
 
 export function CatalogQuickPicks() {
   const router = useRouter();
@@ -33,9 +45,16 @@ export function CatalogQuickPicks() {
   const toggle = (pick: QuickPick) => {
     const params = new URLSearchParams(searchParams.toString());
     const active = isActive(pick);
+    const usesMood = "mood" in pick.params;
+
     if (active) {
       Object.keys(pick.params).forEach((key) => params.delete(key));
     } else {
+      if (usesMood) {
+        for (const key of MOOD_OWNED_KEYS) params.delete(key);
+      } else {
+        params.delete("mood");
+      }
       Object.entries(pick.params).forEach(([key, value]) => params.set(key, value));
     }
     params.delete("page");
