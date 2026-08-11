@@ -2,7 +2,8 @@
 # Sekrety (DATABASE_URL) → Firebase Console → Environment lub: firebase apphosting:secrets:set
 
 runConfig:
-  minInstances: 1
+  # 0 = scale to zero (tanio). NIGDY nie ustawiaj 1 — to trzyma Cloud Run 24/7 (~40 zł/mies).
+  minInstances: 0
   maxInstances: 10
   concurrency: 80
   cpu: 1

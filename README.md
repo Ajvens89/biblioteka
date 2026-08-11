@@ -182,14 +182,15 @@ PLAYWRIGHT_BASE_URL=https://twoj-preview.vercel.app npm run test:e2e:staging
 
 ## Wdrożenie
 
-- **[docs/FIREBASE-WDROZENIE.md](docs/FIREBASE-WDROZENIE.md)** — **Firebase App Hosting** (krok po kroku, bez Vercela)
-- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** — alternatywa: Vercel + Supabase, Docker, migracje
-- **[docs/SUPABASE.md](docs/SUPABASE.md)** — Auth Supabase
-- **[docs/LOCAL_AUTH.md](docs/LOCAL_AUTH.md)** — Auth lokalne (dev)
+- **Produkcja (Vercel Hobby):** https://biblioteka-seven.vercel.app — **[docs/VERCEL.md](docs/VERCEL.md)**
+- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** — Vercel + env, Docker, migracje
+- **[docs/FIREBASE-WDROZENIE.md](docs/FIREBASE-WDROZENIE.md)** — legacy Firebase App Hosting (nie używaj na co dzień)
+- **[docs/SUPABASE.md](docs/SUPABASE.md)** — Auth Supabase (opcjonalnie)
+- **[docs/LOCAL_AUTH.md](docs/LOCAL_AUTH.md)** — Auth lokalne (obecnie na produkcji)
 - **[docs/SECURITY.md](docs/SECURITY.md)** — model bezpieczeństwa
 - **[docs/SECURITY_CHECKLIST.md](docs/SECURITY_CHECKLIST.md)** — checklist przed prod
 
-Skrót produkcji: `AUTH_PROVIDER=supabase`, silne `AUTH_SECRET`, `prisma migrate deploy`, redirect URLs w Supabase Auth.
+Skrót produkcji: Vercel + Neon, `AUTH_PROVIDER=local`, silne `AUTH_SECRET`, push na `master` = deploy.
 
 ## Architektura
 

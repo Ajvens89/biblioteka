@@ -1,0 +1,12 @@
+# Nie wysyłaj sekretów / lokalnych artefaktów przy `vercel deploy`
+.env
+.env.*
+!.env.example
+!.env.local.example
+!.env.firebase.example
+.vercel
+node_modules
+.next
+coverage
+*.log
+backfill-covers.log

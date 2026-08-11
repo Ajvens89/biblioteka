@@ -1,6 +1,15 @@
-# Wdrożenie na Firebase — krok po kroku
+# Wdrożenie na Firebase — LEGACY (nie używaj na co dzień)
 
-Przewodnik dla osób, które **wolą Firebase** zamiast Vercel + Supabase.  
+> **Stan 2026-08:** Produkcja działa na **Vercel Hobby** → https://biblioteka-seven.vercel.app  
+> Firebase App Hosting wymaga planu **Blaze** i przy `minInstances: 1` generowało ~40 zł/mies.  
+> Projekt Firebase może zostać na **Spark** (darmowy); backend `bookshelf` jest zbędny — możesz go usunąć w konsoli.  
+> Jeśli kiedyś wrócisz do App Hosting: **zawsze** `minInstances: 0` w `apphosting.yaml`.
+
+Poniższy przewodnik zostawiony dla historii. Na co dzień: push do `master` → Vercel.
+
+---
+
+Przewodnik dla osób, które **wolą Firebase** zamiast Vercel.  
 Aplikacja to **Next.js** — na Firebase używamy **App Hosting** (oficjalne, GA od 2025).
 
 > **Ważne:** Firebase **nie ma** bazy PostgreSQL. Dane gier nadal muszą mieszkać w Postgresie gdzieś w chmurze.  
@@ -20,7 +29,7 @@ Aplikacja to **Next.js** — na Firebase używamy **App Hosting** (oficjalne, GA
 
 1. Konto [Firebase](https://console.firebase.google.com/) (to samo co Google Cloud z kluczem API)
 2. Konto [GitHub](https://github.com/) — kod musi być w repozytorium
-3. Plan **Blaze** (płatność za użycie) — App Hosting tego wymaga; mały ruch biblioteki = grosze
+3. Plan **Blaze** (płatność za użycie) — App Hosting tego wymaga. **Uwaga kosztowa:** w `apphosting.yaml` ustaw `minInstances: 0` (nie `1`), inaczej Cloud Run działa 24/7.
 
 ---
 
