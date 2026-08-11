@@ -104,6 +104,8 @@ export async function editCopy(input: CopyInput & { copyId: string }): Promise<A
 
   revalidatePath("/admin/egzemplarze");
   revalidatePath(`/admin/egzemplarze/${parsed.data.copyId}`);
+  revalidatePath("/");
+  revalidatePath("/katalog");
   return ok(undefined, "Zapisano egzemplarz.");
 }
 

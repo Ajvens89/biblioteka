@@ -365,19 +365,20 @@ export async function fetchPublicStats() {
 
 const HOME_CACHE_SECONDS = 60;
 
-export const fetchPublicStatsCached = unstable_cache(fetchPublicStats, ["home-public-stats-v3"], {
+export const fetchPublicStatsCached = unstable_cache(fetchPublicStats, ["home-public-stats-v4"], {
   revalidate: HOME_CACHE_SECONDS,
+  tags: ["public-stats"],
 });
 
 export const fetchAvailableNowCached = unstable_cache(
   (limit = 6) => fetchAvailableNow(limit),
-  ["home-available-now-v3"],
-  { revalidate: HOME_CACHE_SECONDS },
+  ["home-available-now-v4"],
+  { revalidate: HOME_CACHE_SECONDS, tags: ["home-available"] },
 );
 
 export const fetchShowcaseGamesCached = unstable_cache(
   (collectionType: "BOARD_GAME" | "RPG", limit = 4) =>
     fetchShowcaseGames(collectionType, limit),
-  ["home-showcase-v3"],
-  { revalidate: HOME_CACHE_SECONDS },
+  ["home-showcase-v4"],
+  { revalidate: HOME_CACHE_SECONDS, tags: ["home-showcase"] },
 );

@@ -203,6 +203,8 @@ export async function createCopy(input: CopyInput): Promise<ActionResult<{ id: s
   });
 
   revalidatePath("/admin/egzemplarze");
+  revalidatePath("/");
+  revalidatePath("/katalog");
   return ok({ id: copy.id });
 }
 
@@ -233,5 +235,7 @@ export async function updateCopy(id: string, input: CopyInput): Promise<ActionRe
   });
 
   revalidatePath("/admin/egzemplarze");
+  revalidatePath("/");
+  revalidatePath("/katalog");
   return ok();
 }
