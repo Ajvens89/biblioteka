@@ -1,5 +1,7 @@
 "use server";
 
+import { CATALOG_ONLY_MODE, circulationDisabledResult } from "@/lib/catalog-mode";
+
 import { revalidatePath } from "next/cache";
 import { getActorFromDb, isActorResult, requireActor } from "@/lib/auth/actor";
 import { prisma } from "@/lib/db";
@@ -10,6 +12,7 @@ import { uuidSchema } from "@/lib/validations/ids";
 const PAGE_SIZE = 20;
 
 export async function getUnreadNotificationCount(): Promise<number> {
+  if (CATALOG_ONLY_MODE) return 0;
   const user = await getActorFromDb();
   if (!user) return 0;
   return prisma.notification.count({
@@ -18,6 +21,7 @@ export async function getUnreadNotificationCount(): Promise<number> {
 }
 
 export async function getNotifications(page = 1) {
+  if (CATALOG_ONLY_MODE) return { items: [], total: 0, page: 1, pages: 0 };
   const user = await requireActor();
   if (!isActorResult(user)) return { items: [], total: 0, page: 1, pages: 0 };
 
@@ -41,6 +45,7 @@ export async function getNotifications(page = 1) {
 }
 
 export async function markNotificationRead(notificationId: string): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = z.object({ notificationId: uuidSchema }).safeParse({ notificationId });
   if (!parsed.success) return fail("Nieprawidłowy identyfikator.");
 
@@ -58,6 +63,7 @@ export async function markNotificationRead(notificationId: string): Promise<Acti
 }
 
 export async function markAllNotificationsRead(): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const user = await requireActor();
   if (!isActorResult(user)) return user;
 

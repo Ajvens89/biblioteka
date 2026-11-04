@@ -1,5 +1,7 @@
 "use server";
 
+import { CATALOG_ONLY_MODE, circulationDisabledResult } from "@/lib/catalog-mode";
+
 import { revalidatePath } from "next/cache";
 import { isActorResult, requireActor, requireActorStaff } from "@/lib/auth/actor";
 import { prisma } from "@/lib/db";
@@ -19,6 +21,7 @@ import * as reservationService from "@/lib/services/reservations";
 export async function createReservation(
   gameId: string,
 ): Promise<ActionResult<{ id: string }>> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = createReservationSchema.safeParse({ gameId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -82,6 +85,7 @@ export async function createReservationAsStaff(input: {
   reason: string;
   bypassLimits?: boolean;
 }): Promise<ActionResult<{ id: string }>> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = createReservationAsStaffSchema.safeParse(input);
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -159,6 +163,7 @@ export async function createReservationAsStaff(input: {
 export async function cancelReservation(
   reservationId: string,
 ): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = reservationIdSchema.safeParse({ reservationId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -199,6 +204,7 @@ export async function cancelReservation(
 }
 
 export async function approveReservation(reservationId: string): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = reservationIdSchema.safeParse({ reservationId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -218,6 +224,7 @@ export async function approveReservation(reservationId: string): Promise<ActionR
 }
 
 export async function markReadyForPickup(reservationId: string): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = reservationIdSchema.safeParse({ reservationId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -254,6 +261,7 @@ export async function rejectReservation(
   reservationId: string,
   reason: string,
 ): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = rejectReservationSchema.safeParse({ reservationId, reason });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -278,6 +286,7 @@ export async function extendReservationPickup(
   reservationId: string,
   days = 3,
 ): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = extendPickupSchema.safeParse({ reservationId, days });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useCatalogSearchParams } from "./use-catalog-search-params";
 import { X } from "lucide-react";
 import {
   buildFilterChips,
@@ -13,7 +14,7 @@ type Props = { lists: CatalogOptionLists };
 
 export function CatalogActiveChips({ lists }: Props) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useCatalogSearchParams();
   const [, startTransition] = useTransition();
 
   const params = new URLSearchParams(searchParams.toString());

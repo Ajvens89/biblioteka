@@ -1,11 +1,14 @@
 "use server";
 
+import { CATALOG_ONLY_MODE, circulationDisabledResult } from "@/lib/catalog-mode";
+
 import { revalidatePath } from "next/cache";
 import { isActorResult, requireActorStaff } from "@/lib/auth/actor";
 import { prisma } from "@/lib/db";
 import { fail, fromServiceError, ok, type ActionResult } from "@/lib/actions/utils";
 import { logAudit } from "@/lib/audit";
 import { assertCopyStatusTransition } from "@/lib/services/copy-status";
+import { updateCopyIfUnchanged } from "@/lib/services/copy-update";
 import * as loanService from "@/lib/services/loans";
 import {
   circulationLookupSchema,
@@ -20,6 +23,7 @@ const ACTIVE_LOAN_STATUSES = ["ACTIVE", "OVERDUE"] as const;
 export async function issueLoanFromReservation(
   reservationId: string,
 ): Promise<ActionResult<{ loanId: string }>> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = reservationIdSchema.safeParse({ reservationId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -45,6 +49,7 @@ export async function issueLoanFromReservation(
 }
 
 export async function issueWalkInLoan(userId: string, copyId: string): Promise<ActionResult<{ loanId: string }>> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = walkInLoanSchema.safeParse({ userId, copyId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -74,6 +79,7 @@ export async function returnLoan(
   loanId: string,
   options?: { damageNotes?: string; markDamaged?: boolean; markRepair?: boolean },
 ): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = loanIdSchema.safeParse({ loanId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -114,6 +120,7 @@ export async function returnLoanByCopyScan(
   copyQuery: string,
   options?: { markDamaged?: boolean; markRepair?: boolean },
 ): Promise<ActionResult<{ loanId: string }>> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const lookup = circulationLookupSchema.safeParse({ query: copyQuery });
   if (!lookup.success) return fail(lookup.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -144,6 +151,7 @@ export async function lookupUserForCirculation(query: string): Promise<
     users: Array<{ id: string; email: string; fullName: string | null; isBlocked: boolean }>;
   }>
 > {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = circulationLookupSchema.safeParse({ query });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -184,6 +192,7 @@ export async function lookupCopyForCirculation(query: string): Promise<
     };
   }>
 > {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = circulationLookupSchema.safeParse({ query });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -225,47 +234,18 @@ export async function lookupCopyForCirculation(query: string): Promise<
 }
 
 export async function extendLoan(loanId: string, days = 7): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = loanIdSchema.safeParse({ loanId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
   const actorResult = await requireActorStaff();
   if (!isActorResult(actorResult)) return actorResult;
 
-  const { getSettingNumber } = await import("@/lib/settings");
-  const maxExt = await getSettingNumber("maxLoanExtensions", 2);
-  const loan = await prisma.loan.findUnique({ where: { id: parsed.data.loanId } });
-  if (!loan || !["ACTIVE", "OVERDUE"].includes(loan.status)) {
-    return fail("Nie można przedłużyć.");
+  try {
+    await loanService.extendLoan(prisma, parsed.data.loanId, days, { actorId: actorResult.id });
+  } catch (error) {
+    return fromServiceError(error);
   }
-  if (loan.extensionCount >= maxExt) {
-    return fail(`Osiągnięto limit przedłużeń (${maxExt}).`);
-  }
-
-  const newDue = new Date(loan.dueAt);
-  newDue.setDate(newDue.getDate() + days);
-
-  await prisma.$transaction([
-    prisma.loanExtension.create({
-      data: {
-        loanId: parsed.data.loanId,
-        previousDue: loan.dueAt,
-        newDue,
-        reason: "Przedłużenie przez bibliotekarza",
-      },
-    }),
-    prisma.loan.update({
-      where: { id: parsed.data.loanId },
-      data: { dueAt: newDue, extensionCount: { increment: 1 }, status: "ACTIVE" },
-    }),
-  ]);
-
-  await logAudit({
-    actorId: actorResult.id,
-    action: "UPDATE",
-    entityType: "loan",
-    entityId: parsed.data.loanId,
-    metadata: { newDue: newDue.toISOString() },
-  });
 
   revalidatePath("/admin/wypozyczenia");
   return ok();
@@ -275,6 +255,7 @@ export async function updateCopyStatus(
   copyId: string,
   status: "AVAILABLE" | "RESERVED" | "BORROWED" | "DAMAGED" | "LOST" | "REPAIR" | "RETIRED",
 ): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = updateCopyStatusSchema.safeParse({ copyId, status });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -310,10 +291,11 @@ export async function updateCopyStatus(
     return fromServiceError(e);
   }
 
-  await prisma.gameCopy.update({
-    where: { id: parsed.data.copyId },
-    data: { status: parsed.data.status },
-  });
+  try {
+    await updateCopyIfUnchanged(prisma, parsed.data.copyId, existing.status, { status: parsed.data.status });
+  } catch (error) {
+    return fromServiceError(error);
+  }
 
   await logAudit({
     actorId: actorResult.id,
@@ -328,6 +310,7 @@ export async function updateCopyStatus(
 }
 
 export async function markOverdueLoans(): Promise<ActionResult<{ count: number }>> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const { isActorResult: isActor, requireActorAdmin } = await import("@/lib/auth/actor");
   const actorResult = await requireActorAdmin();
   if (!isActor(actorResult)) return actorResult;
@@ -338,6 +321,7 @@ export async function markOverdueLoans(): Promise<ActionResult<{ count: number }
 }
 
 export async function sendReturnReminders(): Promise<ActionResult<{ count: number }>> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const { isActorResult: isActor, requireActorAdmin } = await import("@/lib/auth/actor");
   const actorResult = await requireActorAdmin();
   if (!isActor(actorResult)) return actorResult;

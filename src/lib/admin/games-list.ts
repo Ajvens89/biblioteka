@@ -1,6 +1,7 @@
 import type { CopyStatus, GameCollectionType, Prisma } from "@prisma/client";
 import { countAvailableCopies } from "@/lib/games/availability";
 import { normalizeEan } from "@/lib/services/ean";
+import { CATALOG_ONLY_MODE } from "@/lib/catalog-mode";
 
 export type AdminGamesSearchParams = {
   q?: string;
@@ -8,6 +9,7 @@ export type AdminGamesSearchParams = {
   collectionType?: string;
   missingEan?: string;
   missingCover?: string;
+  missingDescription?: string;
   missingCopies?: string;
   availability?: string;
   sort?: string;
@@ -15,9 +17,13 @@ export type AdminGamesSearchParams = {
 
 export function buildAdminGamesWhere(params: AdminGamesSearchParams): Prisma.GameWhereInput {
   const where: Prisma.GameWhereInput = { deletedAt: null };
+  const clauses: Prisma.GameWhereInput[] = [];
 
   if (params.q?.trim()) {
-    where.title = { contains: params.q.trim(), mode: "insensitive" };
+    clauses.push({ OR: [
+      { title: { contains: params.q.trim(), mode: "insensitive" } },
+      { publisher: { name: { contains: params.q.trim(), mode: "insensitive" } } },
+    ] });
   }
 
   if (params.ean?.trim()) {
@@ -37,20 +43,24 @@ export function buildAdminGamesWhere(params: AdminGamesSearchParams): Prisma.Gam
   }
 
   if (params.missingCover === "1") {
-    where.OR = [{ coverImageUrl: null }, { coverImageUrl: "" }];
+    clauses.push({ OR: [{ coverImageUrl: null }, { coverImageUrl: "" }] });
+  }
+  if (params.missingDescription === "1") {
+    clauses.push({ OR: [{ description: null }, { description: "" }] });
   }
 
-  if (params.missingCopies === "1") {
+  if (!CATALOG_ONLY_MODE && params.missingCopies === "1") {
     where.copies = { none: {} };
   }
 
-  if (params.availability === "available") {
+  if (!CATALOG_ONLY_MODE && params.availability === "available") {
     where.copies = { some: { status: "AVAILABLE" } };
-  } else if (params.availability === "unavailable") {
+  } else if (!CATALOG_ONLY_MODE && params.availability === "unavailable") {
     where.NOT = { copies: { some: { status: "AVAILABLE" } } };
     where.copies = { some: {} };
   }
 
+  if (clauses.length) where.AND = clauses;
   return where;
 }
 

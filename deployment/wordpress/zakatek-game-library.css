@@ -1,0 +1,15 @@
+.zakatek-library-entry { margin: 0; }
+.zakatek-library-entry__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem 1rem;
+  padding: .75rem 1rem;
+  background: #fff;
+  color: #252025;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.zakatek-library-entry__toolbar a { text-decoration: underline; }
+#zakatek-game-library { display: block; width: 100%; height: 1200px; border: 0; }

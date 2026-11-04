@@ -1,168 +1,103 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
 import { Search, X } from "lucide-react";
-import { toast } from "sonner";
-import {
-  GameSearchSuggestions,
-  type GameSearchSuggestionsHandle,
-} from "@/components/games/game-search-suggestions";
-import { EanScannerLazy } from "@/components/barcode/ean-scanner-lazy";
+import { useCatalogSearchParams } from "./use-catalog-search-params";
+import { GameSearchSuggestions, type GameSearchSuggestionsHandle } from "@/components/games/game-search-suggestions";
 import { SearchQueryShell } from "@/components/search/search-query-shell";
 import { SUGGEST_MIN_QUERY_LENGTH } from "@/lib/games/suggest-games.types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ScannerButton } from "@/components/ui/scanner-button";
 
-const SUGGEST_DEBOUNCE_MS = 300;
-
-export function CatalogSearch({
-  defaultQ = "",
-  defaultEan = "",
-}: {
+type Props = {
   defaultQ?: string;
-  defaultEan?: string;
-}) {
+  defaultPublisher?: string;
+  publishers: { slug: string; name: string }[];
+};
+
+export function CatalogSearch({ defaultQ = "", defaultPublisher = "", publishers }: Props) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [q, setQ] = useState(defaultQ || searchParams.get("q") || defaultEan || "");
+  const searchParams = useCatalogSearchParams();
+  const [q, setQ] = useState(defaultQ);
   const [debouncedQ, setDebouncedQ] = useState(q);
-  const [scannerOpen, setScannerOpen] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
   const [activeDescendant, setActiveDescendant] = useState<string>();
-  const [isPending, startTransition] = useTransition();
-  const suggestListId = useId();
+  const [pending, startTransition] = useTransition();
+  const listId = useId();
   const suggestRef = useRef<GameSearchSuggestionsHandle>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Debounce dla podpowiedzi — wpisywanie pozostaje natychmiastowe, zapytanie nie.
   useEffect(() => {
-    const id = window.setTimeout(() => setDebouncedQ(q), SUGGEST_DEBOUNCE_MS);
-    return () => window.clearTimeout(id);
+    const timeout = window.setTimeout(() => setDebouncedQ(q), 300);
+    return () => window.clearTimeout(timeout);
   }, [q]);
 
   const closeSuggestions = useCallback(() => setSuggestOpen(false), []);
-
-  const submit = useCallback(
-    (opts?: { ean?: string; query?: string }) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (opts?.ean) {
-        params.set("ean", opts.ean);
-        params.delete("q");
-      } else {
-        const text = (opts?.query ?? q).trim();
-        if (text) params.set("q", text);
-        else params.delete("q");
-        params.delete("ean");
-      }
-      params.delete("page");
-      startTransition(() => {
-        router.push(`/katalog?${params.toString()}`, { scroll: false });
-      });
-    },
-    [q, router, searchParams],
-  );
-
-  const clear = () => {
-    setQ("");
+  const submit = (publisher = defaultPublisher, query = q) => {
     setSuggestOpen(false);
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("q");
-    params.delete("ean");
-    params.delete("page");
+    const params = new URLSearchParams();
+    if (query.trim()) params.set("q", query.trim());
+    if (publisher) params.set("publisher", publisher);
+    const pageSize = searchParams.get("pageSize");
+    if (pageSize) params.set("pageSize", pageSize);
+    const collectionType = searchParams.get("collectionType");
+    if (collectionType) params.set("collectionType", collectionType);
     const qs = params.toString();
-    startTransition(() => {
-      router.push(qs ? `/katalog?${qs}` : "/katalog", { scroll: false });
-    });
-    inputRef.current?.focus();
-  };
-
-  const onScan = (code: string) => {
-    setQ(code);
-    submit({ ean: code });
-    toast.message(`Szukam gry po EAN ${code}`);
+    startTransition(() => router.push(qs ? `/katalog?${qs}` : "/katalog", { scroll: false }));
   };
 
   return (
     <SearchQueryShell>
-      <div className="zf-catalog-search" data-testid="catalog-toolbar">
-        <label htmlFor="catalog-search-input" className="sr-only">
-          Szukaj w katalogu po tytule, autorze, wydawcy lub kodzie EAN
-        </label>
+      <div className="zf-catalog-search space-y-3" data-testid="catalog-toolbar">
         <div className="flex flex-col gap-2.5 sm:flex-row">
           <div className="relative z-10 min-w-0 flex-1">
-            <Search
-              className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary"
-              aria-hidden
-            />
+            <label htmlFor="catalog-search-input" className="sr-only">Tytuł gry lub wydawca</label>
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" aria-hidden />
             <Input
               ref={inputRef}
               id="catalog-search-input"
               data-testid="catalog-search-input"
               className="zf-search-input h-12 rounded-xl pl-12 pr-11 text-base"
-              placeholder="Szukaj gry — tytuł, autor, wydawca, EAN…"
+              placeholder="Wpisz tytuł gry lub wydawcę…"
               value={q}
-              onChange={(e) => {
-                setQ(e.target.value);
-                setSuggestOpen(e.target.value.trim().length >= SUGGEST_MIN_QUERY_LENGTH);
+              onChange={(event) => {
+                setQ(event.target.value);
+                setSuggestOpen(event.target.value.trim().length >= SUGGEST_MIN_QUERY_LENGTH);
               }}
-              onKeyDown={(e) => {
-                if (suggestRef.current?.handleKeyDown(e)) return;
-                if (e.key === "Enter") {
-                  closeSuggestions();
-                  submit();
-                }
+              onKeyDown={(event) => {
+                if (suggestRef.current?.handleKeyDown(event)) return;
+                if (event.key === "Enter") submit();
               }}
-              onFocus={() => {
-                if (q.trim().length >= SUGGEST_MIN_QUERY_LENGTH) setSuggestOpen(true);
-              }}
+              onFocus={() => q.trim().length >= SUGGEST_MIN_QUERY_LENGTH && setSuggestOpen(true)}
               onBlur={() => window.setTimeout(closeSuggestions, 150)}
+              role="combobox"
               aria-autocomplete="list"
-              aria-controls={suggestListId}
+              aria-controls={listId}
               aria-expanded={suggestOpen}
               aria-haspopup="listbox"
               aria-activedescendant={activeDescendant}
-              aria-busy={isPending}
+              aria-busy={pending}
             />
-            {q && (
-              <button
-                type="button"
-                onClick={clear}
-                aria-label="Wyczyść wyszukiwanie"
-                data-testid="catalog-search-clear"
-                className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <X className="h-4 w-4" aria-hidden />
-              </button>
-            )}
-            <GameSearchSuggestions
-              ref={suggestRef}
-              query={debouncedQ}
-              open={suggestOpen}
-              onClose={closeSuggestions}
-              onSelect={(title) => setQ(title)}
-              listId={suggestListId}
-              inputId="catalog-search-input"
-              onActiveDescendantChange={setActiveDescendant}
-              linkTarget="catalog"
-              onSearchInCatalog={() => submit()}
-            />
+            {q ? (
+              <button type="button" className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-muted" aria-label="Wyczyść wyszukiwanie" data-testid="catalog-search-clear" onClick={() => {
+                setQ("");
+                submit(defaultPublisher, "");
+                inputRef.current?.focus();
+              }}><X className="h-4 w-4" aria-hidden /></button>
+            ) : null}
+            <GameSearchSuggestions ref={suggestRef} query={debouncedQ} open={suggestOpen} onClose={closeSuggestions} onSelect={setQ} listId={listId} inputId="catalog-search-input" onActiveDescendantChange={setActiveDescendant} linkTarget="game" onSearchInCatalog={() => submit()} />
           </div>
-          <div className="flex gap-2">
-            <ScannerButton onClick={() => setScannerOpen(true)} className="h-12 flex-1 sm:flex-none" />
-            <Button
-              type="button"
-              className="zf-btn-primary h-12 flex-1 rounded-xl px-6 sm:flex-none"
-              onClick={() => submit()}
-              loading={isPending}
-            >
-              <Search className="h-4 w-4" aria-hidden />
-              Szukaj
-            </Button>
-          </div>
+          <Button type="button" className="zf-btn-primary h-12 rounded-xl px-6" loading={pending} onClick={() => submit()}><Search className="h-4 w-4" aria-hidden />Szukaj</Button>
         </div>
-        <EanScannerLazy open={scannerOpen} onOpenChange={setScannerOpen} onScan={onScan} />
+        <div className="grid gap-2 sm:grid-cols-[auto_minmax(0,24rem)] sm:items-center">
+          <label htmlFor="catalog-publisher" className="text-sm font-medium">Wydawca</label>
+          <select id="catalog-publisher" data-testid="catalog-publisher" value={defaultPublisher} disabled={pending} className="h-11 min-w-0 w-full rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onChange={(event) => submit(event.target.value)}>
+            <option value="">Wszyscy wydawcy</option>
+            {defaultPublisher && !publishers.some((publisher) => publisher.slug === defaultPublisher) ? <option value={defaultPublisher}>{defaultPublisher}</option> : null}
+            {publishers.map((publisher) => <option key={publisher.slug} value={publisher.slug}>{publisher.name}</option>)}
+          </select>
+        </div>
       </div>
     </SearchQueryShell>
   );

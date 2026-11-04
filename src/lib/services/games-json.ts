@@ -6,9 +6,6 @@ import type {
   GameType,
   PrismaClient,
 } from "@prisma/client";
-import { readFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
-import path from "node:path";
 import slugify from "slugify";
 import { parseCollectionType } from "@/lib/services/collection-type";
 import { normalizeEan } from "@/lib/services/ean";
@@ -72,8 +69,6 @@ export type ImportGamesJsonStats = {
   issues: string[];
 };
 
-const DEFAULT_PATHS = ["./games.json", "./data/games.json", "./public/games.json"];
-
 const COPY_STATUSES = new Set<string>([
   "AVAILABLE",
   "RESERVED",
@@ -102,21 +97,6 @@ function makeSlug(text: string) {
   return slugify(text, { lower: true, strict: true, locale: "pl" });
 }
 
-export function resolveGamesJsonPath(argv: string[]): string | null {
-  const pathArg = argv.find((a) => {
-    if (a.startsWith("-")) return false;
-    if (!a.toLowerCase().endsWith(".json")) return false;
-    const resolved = path.resolve(a);
-    return existsSync(resolved);
-  });
-  if (pathArg) return path.resolve(pathArg);
-  for (const p of DEFAULT_PATHS) {
-    const resolved = path.resolve(p);
-    if (existsSync(resolved)) return resolved;
-  }
-  return null;
-}
-
 export function parseGamesJson(content: string): GamesJsonFile {
   const raw = JSON.parse(content) as Record<string, unknown>;
 
@@ -141,11 +121,6 @@ export function parseGamesJson(content: string): GamesJsonFile {
     source: typeof raw.source === "string" ? raw.source : undefined,
     games: raw.games as GameJsonRecord[],
   };
-}
-
-export async function loadGamesJsonFile(filePath: string): Promise<GamesJsonFile> {
-  const content = await readFile(filePath, "utf8");
-  return parseGamesJson(content);
 }
 
 export async function fetchGamesForExport(prisma: PrismaClient) {
@@ -425,17 +400,15 @@ async function upsertCopies(
   }
 }
 
-export async function importGamesFromFile(
+export async function importGamesData(
   prisma: PrismaClient,
-  filePath: string,
-  options?: { dryRun?: boolean; noOverwrite?: boolean },
+  data: GamesJsonFile,
+  options?: { dryRun?: boolean; noOverwrite?: boolean; sourceName?: string },
 ): Promise<ImportGamesJsonStats> {
   const dryRun = options?.dryRun ?? false;
   const noOverwrite = options?.noOverwrite ?? false;
-  const data = await loadGamesJsonFile(filePath);
-
   const stats: ImportGamesJsonStats = {
-    filePath,
+    filePath: options?.sourceName ?? "games.json",
     dryRun,
     noOverwrite,
     read: data.games.length,

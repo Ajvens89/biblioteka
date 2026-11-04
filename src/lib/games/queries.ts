@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { resolveGameSlug } from "@/lib/services/slug-resolve";
@@ -7,13 +7,13 @@ import { normalizeEan } from "@/lib/services/ean";
 import { paginateIds, sortGamesByAvailableCopies } from "@/lib/games/sort-games-by-availability";
 import type { GameFilterInput } from "@/lib/validations/game";
 import { buildMoodWhere, isCatalogMood } from "@/lib/games/mood-filters";
+import { catalogTextConditions } from "@/lib/games/catalog-text-search";
 
 export const gameListInclude = {
   publisher: true,
   designer: true,
   categories: { include: { category: true } },
   tags: { include: { tag: true } },
-  copies: { select: { id: true, status: true } },
 } satisfies Prisma.GameInclude;
 
 export type GameListItem = Prisma.GameGetPayload<{ include: typeof gameListInclude }>;
@@ -41,23 +41,7 @@ export function buildGameWhere(filters: GameFilterInput): Prisma.GameWhereInput 
       where.ean = "__invalid__";
     }
   } else if (filters.q) {
-    let eanClause: Prisma.GameWhereInput | null = null;
-    try {
-      const normalized = normalizeEan(filters.q);
-      eanClause = { ean: normalized };
-    } catch {
-      /* nie wygląda na EAN — szukaj tekstowo */
-    }
-    const textClauses: Prisma.GameWhereInput[] = [
-      { title: { contains: filters.q, mode: "insensitive" } },
-      { description: { contains: filters.q, mode: "insensitive" } },
-      { shortDescription: { contains: filters.q, mode: "insensitive" } },
-      { tags: { some: { tag: { name: { contains: filters.q, mode: "insensitive" } } } } },
-      { publisher: { name: { contains: filters.q, mode: "insensitive" } } },
-      { designer: { name: { contains: filters.q, mode: "insensitive" } } },
-    ];
-    if (eanClause) textClauses.push(eanClause);
-    andClauses.push({ OR: textClauses });
+    andClauses.push({ OR: catalogTextConditions(filters.q) });
   }
 
   if (filters.mood && isCatalogMood(filters.mood)) {
@@ -82,7 +66,7 @@ export function buildGameWhere(filters: GameFilterInput): Prisma.GameWhereInput 
   if (filters.maxPlayTime) {
     where.maxPlayTime = { lte: filters.maxPlayTime, gt: 0 };
   }
-  if (filters.minAge) where.minAge = { lte: filters.minAge };
+  if (filters.minAge !== undefined) where.minAge = { lte: filters.minAge };
   if (filters.tag) {
     where.tags = { some: { tag: { slug: filters.tag } } };
   }
@@ -124,54 +108,57 @@ export function buildGameOrderBy(
   }
 }
 
-export async function fetchGames(filters: GameFilterInput) {
+export async function fetchGames(filters: GameFilterInput, db: Pick<PrismaClient, "game"> = prisma) {
   const where = buildGameWhere(filters);
 
   if (filters.sort === "available") {
-    return fetchGamesSortedByAvailability(filters, where);
+    return fetchGamesSortedByAvailability(filters, where, db);
   }
 
   const orderBy = buildGameOrderBy(filters.sort);
-  const skip = (filters.page - 1) * filters.pageSize;
-
-  const [items, total] = await Promise.all([
-    prisma.game.findMany({
-      where,
-      include: gameListInclude,
-      orderBy,
-      skip,
-      take: filters.pageSize,
-    }),
-    prisma.game.count({ where }),
-  ]);
-
-  return { items, total, page: filters.page, pageSize: filters.pageSize };
+  const fetchPage = (page: number) => db.game.findMany({
+    where,
+    include: gameListInclude,
+    orderBy,
+    skip: (page - 1) * filters.pageSize,
+    take: filters.pageSize,
+  });
+  // The common first page stays parallel; an outdated later-page link is bounded before fetching rows.
+  if (filters.page === 1) {
+    const [items, total] = await Promise.all([fetchPage(1), db.game.count({ where })]);
+    return { items, total, page: 1, pageSize: filters.pageSize };
+  }
+  const total = await db.game.count({ where });
+  const page = Math.min(filters.page, Math.max(1, Math.ceil(total / filters.pageSize)));
+  const items = total ? await fetchPage(page) : [];
+  return { items, total, page, pageSize: filters.pageSize };
 }
 
 async function fetchGamesSortedByAvailability(
   filters: GameFilterInput,
   where: Prisma.GameWhereInput,
+  db: Pick<PrismaClient, "game">,
 ) {
-  const [matching, total] = await Promise.all([
-    prisma.game.findMany({
-      where,
-      select: {
-        id: true,
-        title: true,
-        copies: { select: { status: true } },
-      },
-    }),
-    prisma.game.count({ where }),
-  ]);
+  const matching = await db.game.findMany({
+    where,
+    select: {
+      id: true,
+      title: true,
+      copies: { select: { status: true } },
+    },
+  });
+
+  const total = matching.length;
+  const page = Math.min(filters.page, Math.max(1, Math.ceil(total / filters.pageSize)));
 
   const sortedIds = sortGamesByAvailableCopies(matching).map((g) => g.id);
-  const pageIds = paginateIds(sortedIds, filters.page, filters.pageSize);
+  const pageIds = paginateIds(sortedIds, page, filters.pageSize);
 
   if (pageIds.length === 0) {
-    return { items: [], total, page: filters.page, pageSize: filters.pageSize };
+    return { items: [], total, page, pageSize: filters.pageSize };
   }
 
-  const rows = await prisma.game.findMany({
+  const rows = await db.game.findMany({
     where: { id: { in: pageIds } },
     include: gameListInclude,
   });
@@ -180,7 +167,7 @@ async function fetchGamesSortedByAvailability(
     .map((id) => byId.get(id))
     .filter((g): g is GameListItem => g !== undefined);
 
-  return { items, total, page: filters.page, pageSize: filters.pageSize };
+  return { items, total, page, pageSize: filters.pageSize };
 }
 
 export async function fetchGameBySlug(slug: string) {
@@ -188,18 +175,10 @@ export async function fetchGameBySlug(slug: string) {
   if (!resolved) return null;
 
   const game = await prisma.game.findFirst({
-    where: { id: resolved.gameId, deletedAt: null },
+    where: { id: resolved.gameId, ...ACTIVE_CATALOG_GAME_WHERE },
     include: {
       ...gameListInclude,
       images: { orderBy: { sortOrder: "asc" } },
-      reservations: {
-        where: {
-          status: { in: ["PENDING", "APPROVED", "READY_FOR_PICKUP"] },
-        },
-        include: { user: { select: { fullName: true, email: true } } },
-        take: 10,
-        orderBy: { createdAt: "desc" },
-      },
     },
   });
 
@@ -263,7 +242,7 @@ const showcaseCoverWhere = {
   NOT: { coverImageUrl: "" },
 } satisfies Prisma.GameWhereInput;
 
-/** Gry do podglądu w hero — tylko z okładką i wolnym egzemplarzem w bibliotece. */
+/** Catalog previews depend on published metadata, never on physical inventory. */
 export async function fetchShowcaseGames(
   collectionType: "BOARD_GAME" | "RPG",
   limit = 4,
@@ -275,31 +254,13 @@ export async function fetchShowcaseGames(
     ...showcaseCoverWhere,
   };
 
-  const withAvailable = await prisma.game.findMany({
-    where: {
-      ...baseWhere,
-      copies: { some: { status: "AVAILABLE" } },
-    },
+  return prisma.game.findMany({
+    where: baseWhere,
     include: gameListInclude,
     orderBy: [{ isFeatured: "desc" }, { popularityCount: "desc" }, { title: "asc" }],
     take: limit,
   });
 
-  if (withAvailable.length >= limit) return withAvailable;
-
-  const exclude = withAvailable.map((g) => g.id);
-  const rest = await prisma.game.findMany({
-    where: {
-      ...baseWhere,
-      id: exclude.length ? { notIn: exclude } : undefined,
-      copies: { some: {} },
-    },
-    include: gameListInclude,
-    orderBy: [{ isFeatured: "desc" }, { popularityCount: "desc" }, { title: "asc" }],
-    take: limit - withAvailable.length,
-  });
-
-  return [...withAvailable, ...rest];
 }
 
 export async function fetchSimilarGames(
@@ -337,10 +298,9 @@ export async function fetchSimilarGames(
       const sharedCategories = g.categories.filter((c) => categorySet.has(c.categoryId)).length;
       const samePublisher = publisherId && g.publisherId === publisherId ? 2 : 0;
       const sameDesigner = designerId && g.designerId === designerId ? 1 : 0;
-      const available = g.copies.filter((c) => c.status === "AVAILABLE").length;
       return {
         game: g,
-        score: sharedCategories * 3 + samePublisher + sameDesigner + (available > 0 ? 0.5 : 0),
+        score: sharedCategories * 3 + samePublisher + sameDesigner,
       };
     })
     .sort((a, b) => b.score - a.score || b.game.popularityCount - a.game.popularityCount);
@@ -348,24 +308,22 @@ export async function fetchSimilarGames(
   return scored.slice(0, limit).map((s) => s.game);
 }
 
-export async function fetchPublicStats() {
-  const [games, copies, available, boardGames, rpgGames] = await Promise.all([
-    prisma.game.count({ where: ACTIVE_CATALOG_GAME_WHERE }),
-    prisma.gameCopy.count(),
-    prisma.gameCopy.count({ where: { status: "AVAILABLE" } }),
-    prisma.game.count({
+export async function fetchPublicStats(db: Pick<PrismaClient, "game"> = prisma) {
+  const [games, boardGames, rpgGames] = await Promise.all([
+    db.game.count({ where: ACTIVE_CATALOG_GAME_WHERE }),
+    db.game.count({
       where: { ...ACTIVE_CATALOG_GAME_WHERE, collectionType: "BOARD_GAME" },
     }),
-    prisma.game.count({
+    db.game.count({
       where: { ...ACTIVE_CATALOG_GAME_WHERE, collectionType: "RPG" },
     }),
   ]);
-  return { games, copies, available, boardGames, rpgGames };
+  return { games, boardGames, rpgGames };
 }
 
 const HOME_CACHE_SECONDS = 60;
 
-export const fetchPublicStatsCached = unstable_cache(fetchPublicStats, ["home-public-stats-v4"], {
+export const fetchPublicStatsCached = unstable_cache(() => fetchPublicStats(), ["home-public-stats-v6-catalog"], {
   revalidate: HOME_CACHE_SECONDS,
   tags: ["public-stats"],
 });
@@ -379,6 +337,6 @@ export const fetchAvailableNowCached = unstable_cache(
 export const fetchShowcaseGamesCached = unstable_cache(
   (collectionType: "BOARD_GAME" | "RPG", limit = 4) =>
     fetchShowcaseGames(collectionType, limit),
-  ["home-showcase-v4"],
+  ["home-showcase-v5-catalog"],
   { revalidate: HOME_CACHE_SECONDS, tags: ["home-showcase"] },
 );

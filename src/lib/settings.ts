@@ -1,9 +1,10 @@
 import { DEFAULT_SETTINGS } from "@/lib/constants";
 import { prisma } from "@/lib/db";
+import { cache } from "react";
 
 export type AppSettingsMap = typeof DEFAULT_SETTINGS;
 
-export async function getAppSettings(): Promise<AppSettingsMap> {
+export const getAppSettings = cache(async (): Promise<AppSettingsMap> => {
   try {
     const rows = await prisma.appSetting.findMany();
     const map = { ...DEFAULT_SETTINGS } as Record<string, string>;
@@ -15,7 +16,7 @@ export async function getAppSettings(): Promise<AppSettingsMap> {
     // Build/SSG (Firebase App Hosting) uses a placeholder DB URL — never fail the page.
     return { ...DEFAULT_SETTINGS };
   }
-}
+});
 
 export async function getSettingNumber(key: keyof AppSettingsMap, fallback: number) {
   const settings = await getAppSettings();

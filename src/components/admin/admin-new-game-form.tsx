@@ -19,6 +19,7 @@ import { SectionCard } from "@/components/ui/section-card";
 import { GameCover } from "@/components/ui/game-cover";
 import { DIFFICULTY_LABELS, GAME_TYPE_LABELS, COLLECTION_TYPE_LABELS } from "@/lib/constants";
 import { applyLookupMetadata } from "@/components/admin/apply-lookup-metadata";
+import { validateCoverImageUrl } from "@/lib/services/ean-providers/image-utils";
 
 type Props = {
   publishers: Publisher[];
@@ -116,6 +117,10 @@ export function AdminGameWizard({
 
   const isRpg = collectionType === "RPG";
   const skipEanStep = mode === "manual";
+  const visibleSteps = WIZARD_STEPS.filter((item) => !skipEanStep || item.id !== 2);
+  const visibleStepNumber = (id: number) => visibleSteps.findIndex((item) => item.id === id) + 1;
+  const validCoverUrl = validateCoverImageUrl(coverImageUrl);
+  const invalidCoverUrl = Boolean(coverImageUrl.trim() && !validCoverUrl);
 
   const publisherOptions = useMemo(() => {
     const opts = publishers.map((p) => ({ value: p.id, label: p.name }));
@@ -126,7 +131,7 @@ export function AdminGameWizard({
     ) {
       opts.unshift({
         value: `__hint__:publisher:${publisherNameHint}`,
-        label: `${publisherNameHint} (z katalogu)`,
+        label: `${publisherNameHint} (nowy wydawca)`,
       });
     }
     return opts;
@@ -293,6 +298,11 @@ export function AdminGameWizard({
   };
 
   const submit = () => {
+    if (invalidCoverUrl) {
+      toast.error("Podaj poprawny adres okładki lub pozostaw pole puste.");
+      setStep(4);
+      return;
+    }
     const resolvedPublisherId = publisherId.startsWith("__hint__:") ? "" : publisherId;
     const resolvedDesignerId = designerId.startsWith("__hint__:") ? "" : designerId;
     const publisherName =
@@ -326,7 +336,7 @@ export function AdminGameWizard({
       publisherName: publisherName || null,
       designerName: designerName || null,
       yearPublished: yearPublished ? Number(yearPublished) : null,
-      coverImageUrl: coverImageUrl || "",
+      coverImageUrl: validCoverUrl || "",
       coverImageSource: coverImageSource || null,
       coverImageExternalId: coverImageExternalId || null,
       instructionUrl,
@@ -335,15 +345,13 @@ export function AdminGameWizard({
       categoryIds: selectedCategoryIds,
       tagIds: selectedTagIds,
       skipEanChecksum: skipChecksum,
-      // Startowy egzemplarz zawsze — bez pytania o półkę / numer.
-      addCopy: true,
-      copyCondition: "NEW" as const,
+      addCopy: false,
     };
 
     start(async () => {
       const result = await createGame(input);
       if (result.success) {
-        toast.success("Utworzono grę z egzemplarzem startowym.");
+        toast.success("Dodano grę do katalogu.");
         router.push("/admin/gry");
         router.refresh();
       } else toast.error(result.error);
@@ -356,7 +364,7 @@ export function AdminGameWizard({
       return;
     }
     if (step === 2 && existingGame) {
-      toast.info("Ta gra już istnieje — dodaj egzemplarz zamiast tworzyć duplikat.");
+      toast.info("Ta gra jest już w katalogu — otwórz jej edycję.");
       return;
     }
     setStep((s) => Math.min(6, s + 1));
@@ -370,27 +378,26 @@ export function AdminGameWizard({
   return (
     <div className="relative pb-24" data-testid="game-wizard">
       <nav className="mb-6 flex flex-wrap gap-2" aria-label="Kroki kreatora">
-        {WIZARD_STEPS.map((s) => {
-          const hidden = s.id === 2 && skipEanStep;
-          if (hidden) return null;
+        {visibleSteps.map((s, index) => {
           return (
             <button
               key={s.id}
               type="button"
               data-testid={`wizard-step-${s.id}`}
-              onClick={() => setStep(s.id === 2 && skipEanStep ? 3 : s.id)}
+              onClick={() => setStep(s.id)}
+              aria-current={step === s.id ? "step" : undefined}
               className={`rounded-full px-3 py-1 text-xs font-medium ${
                 step === s.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
               }`}
             >
-              {s.id}. {s.label}
+              {index + 1}. {s.label}
             </button>
           );
         })}
       </nav>
 
       {step === 1 && (
-        <SectionCard title="Krok 1 — Źródło" description="Wybierz sposób dodania gry do biblioteki.">
+        <SectionCard title={`Krok ${visibleStepNumber(1)} — Źródło`} description="Wybierz sposób dodania gry do katalogu.">
           <div className="flex flex-wrap gap-3">
             <Button type="button" variant={mode === "manual" ? "default" : "outline"} onClick={() => setMode("manual")}>
               Dodaj ręcznie
@@ -409,7 +416,7 @@ export function AdminGameWizard({
       )}
 
       {step === 2 && !skipEanStep && (
-        <SectionCard title="Krok 2 — EAN" description="Sprawdź kod — gra nie zostanie utworzona bez Twojego zatwierdzenia na końcu.">
+        <SectionCard title={`Krok ${visibleStepNumber(2)} — EAN`} description="Sprawdź kod — gra nie zostanie utworzona bez Twojego zatwierdzenia na końcu.">
         <EanCoverLookupPanel
           ean={ean}
           setEan={setEan}
@@ -470,7 +477,7 @@ export function AdminGameWizard({
         }}
       >
         {step === 3 && (
-        <SectionCard title="Krok 3 — Dane gry">
+        <SectionCard title={`Krok ${visibleStepNumber(3)} — Dane gry`}>
         <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="title">Tytuł</Label>
@@ -512,18 +519,48 @@ export function AdminGameWizard({
         )}
 
         {step === 4 && (
-        <SectionCard title="Krok 4 — Okładka">
+        <SectionCard title={`Krok ${visibleStepNumber(4)} — Okładka`}>
           <input type="hidden" name="coverImageUrl" value={coverImageUrl} />
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-            <GameCover src={coverImageUrl} alt={title || "Podgląd okładki"} className="w-full max-w-[200px]" />
+            <GameCover src={validCoverUrl} alt={title || "Podgląd okładki"} className="w-full max-w-[200px]" />
             <p className="text-small text-muted-foreground">
-              Okładkę wybierz w sekcji EAN powyżej lub wklej URL w panelu propozycji.
+              {mode === "manual"
+                ? "Okładka jest opcjonalna. Wklej adres obrazka poniżej albo przejdź dalej bez okładki."
+                : "Wybierz okładkę w panelu EAN poniżej lub podaj własny adres obrazka."}
               {coverImageSource && (
                 <span className="mt-1 block">Źródło: {coverImageSource}</span>
               )}
             </p>
           </div>
-          {(mode === "ean" || ean) && !existingGame && (
+          {mode === "manual" && (
+            <div className="mt-4 space-y-2">
+              <Label htmlFor="manualCoverUrl">Adres okładki (opcjonalnie)</Label>
+              <Input
+                id="manualCoverUrl"
+                data-testid="manual-cover-url"
+                type="text"
+                inputMode="url"
+                spellCheck={false}
+                value={coverImageUrl}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setCoverImageUrl(value);
+                  setCoverImageSource(value.trim() ? "manual" : "");
+                  setCoverImageExternalId("");
+                  setSelectedCover(null);
+                }}
+                placeholder="https://…/okladka.jpg"
+                aria-invalid={invalidCoverUrl}
+                aria-describedby="manual-cover-help"
+              />
+              <p id="manual-cover-help" className={invalidCoverUrl ? "text-xs text-destructive" : "text-xs text-muted-foreground"}>
+                {invalidCoverUrl
+                  ? "Podaj poprawny adres http/https albo usuń wpisany tekst."
+                  : "Możesz użyć adresu http/https lub istniejącego obrazka /covers/. Puste pole jest dozwolone."}
+              </p>
+            </div>
+          )}
+          {mode === "ean" && !existingGame && (
             <div className="mt-4">
               <EanCoverLookupPanel
                 ean={ean}
@@ -564,7 +601,7 @@ export function AdminGameWizard({
           )}
           <div className="mt-4 flex gap-2">
             <Button type="button" variant="outline" onClick={() => setStep(3)}>Wstecz</Button>
-            <Button type="button" onClick={() => setStep(5)}>Dalej</Button>
+            <Button type="button" disabled={invalidCoverUrl} onClick={() => setStep(5)}>Dalej</Button>
           </div>
         </SectionCard>
         )}
@@ -590,7 +627,7 @@ export function AdminGameWizard({
             </select>
           </SectionCard>
         )}
-        <SectionCard title="Krok 5 — Parametry i typ">
+        <SectionCard title={`Krok ${visibleStepNumber(5)} — Parametry i typ`}>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="minPlayers">Min graczy{isRpg ? " (opcj.)" : ""}</Label>
@@ -679,11 +716,20 @@ export function AdminGameWizard({
               }}
               placeholder="Szukaj wydawcy…"
               searchPlaceholder="Wpisz nazwę wydawcy…"
-              emptyText="Brak wydawcy — wybierz z listy lub uzupełnij z EAN"
+              emptyText="Brak wydawcy — wpisz nową nazwę poniżej"
+            />
+            <Label htmlFor="newPublisherName">Nowy wydawca (opcjonalnie)</Label>
+            <Input
+              id="newPublisherName"
+              name="publisherName"
+              maxLength={200}
+              value={publisherId ? "" : publisherNameHint}
+              onChange={(event) => { setPublisherId(""); setPublisherNameHint(event.target.value); }}
+              placeholder="Nazwa wydawcy, którego nie ma na liście"
             />
             {publisherNameHint && !publisherId && (
               <p className="text-xs text-muted-foreground">
-                Z katalogu: {publisherNameHint} — zostanie dodany przy zapisie.
+                {publisherNameHint} — zostanie przypisany przy zapisie; istniejąca nazwa nie utworzy duplikatu.
               </p>
             )}
           </div>
@@ -779,7 +825,7 @@ export function AdminGameWizard({
         )}
 
         {step === 6 && (
-        <SectionCard title="Krok 6 — Podsumowanie" description="Sprawdź dane przed zapisem. Gra nie powstanie automatycznie po skanie EAN.">
+        <SectionCard title={`Krok ${visibleStepNumber(6)} — Podsumowanie`} description="Sprawdź dane przed zapisem. Gra nie powstanie automatycznie po skanie EAN.">
           <dl className="grid gap-2 text-sm sm:grid-cols-2">
             <div><dt className="text-muted-foreground">Tytuł</dt><dd className="font-medium">{title || "—"}</dd></div>
             <div><dt className="text-muted-foreground">EAN</dt><dd className="font-mono">{ean || "—"}</dd></div>
@@ -801,10 +847,6 @@ export function AdminGameWizard({
                   designerNameHint ||
                   "—"}
               </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">Egzemplarz</dt>
-              <dd>Tak (automatycznie, stan: nowy)</dd>
             </div>
           </dl>
           {existingGame && (

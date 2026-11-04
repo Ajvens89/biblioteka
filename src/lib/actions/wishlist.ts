@@ -1,5 +1,7 @@
 "use server";
 
+import { CATALOG_ONLY_MODE, circulationDisabledResult } from "@/lib/catalog-mode";
+
 import { revalidatePath } from "next/cache";
 import { isActorResult, requireActor } from "@/lib/auth/actor";
 import { prisma } from "@/lib/db";
@@ -7,6 +9,7 @@ import { fail, ok, type ActionResult } from "@/lib/actions/utils";
 import { gameIdSchema } from "@/lib/validations/ids";
 
 export async function toggleWishlistAction(gameId: string): Promise<ActionResult<{ onWishlist: boolean }>> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = gameIdSchema.safeParse({ id: gameId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -40,6 +43,7 @@ export async function toggleWishlistAction(gameId: string): Promise<ActionResult
 }
 
 export async function isOnWishlistAction(gameId: string): Promise<boolean> {
+  if (CATALOG_ONLY_MODE) return false;
   const user = await requireActor();
   if (!isActorResult(user)) return false;
 
@@ -53,6 +57,7 @@ export async function isOnWishlistAction(gameId: string): Promise<boolean> {
 }
 
 export async function removeWishlistItemAction(gameId: string): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = gameIdSchema.safeParse({ id: gameId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 

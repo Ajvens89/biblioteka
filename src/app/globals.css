@@ -1625,3 +1625,80 @@ textarea::placeholder {
 .zf-game-row {
   display: none;
 }
+
+html[data-library-embedded="true"] #library-page-content {
+  min-height: 0;
+}
+
+html[data-library-embedded="true"] [data-library-dialog-content] {
+  top: calc(var(--library-visible-top, 0px) + var(--library-visible-height, 100dvh) / 2);
+  max-height: calc(var(--library-visible-height, 100dvh) - 2rem);
+}
+
+html[data-library-embedded="true"] [data-testid="catalog-filters-sheet"] {
+  top: calc(var(--library-visible-top, 0px) + var(--library-visible-height, 100dvh) - 0.5rem);
+  bottom: auto;
+  max-height: calc(var(--library-visible-height, 100dvh) - 1rem);
+  transform: translateY(-100%);
+}
+
+.library-skip-link {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  transform: translateY(-200%);
+}
+
+.library-skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid var(--foreground);
+  outline-offset: 3px;
+}
+
+/* The catalog already provides its own search. Keep one search on small screens,
+   without a client-only pathname check or a change during hydration. */
+@media (max-width: 1023px) {
+  body:has(.zf-catalog-page) .site-header-search {
+    display: none;
+  }
+}
+
+@media (max-width: 639px) {
+  .zf-catalog-page {
+    padding-top: 1rem;
+  }
+
+  .zf-catalog-header {
+    padding: 0 0 0.75rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .zf-catalog-header-title {
+    font-size: 1.625rem;
+    line-height: 1.15;
+  }
+
+  .zf-catalog-controls {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .zf-catalog-search {
+    padding: 0.625rem;
+  }
+
+  .zf-catalog-search .zf-search-input,
+  .zf-catalog-search .zf-btn-primary,
+  .zf-catalog-search [data-testid="ean-scan-button"] {
+    height: 2.75rem;
+  }
+
+  .zf-catalog-page .zf-quick-pick {
+    min-height: 2.75rem;
+  }
+}

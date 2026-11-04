@@ -54,10 +54,14 @@ export async function resetPasswordWithToken(
   const passwordHash = await hashPassword(newPassword);
 
   await db.$transaction(async (tx) => {
-    await tx.passwordResetToken.update({
-      where: { id: record.id },
+    const now = new Date();
+    const claimed = await tx.passwordResetToken.updateMany({
+      where: { id: record.id, tokenHash, usedAt: null, expiresAt: { gt: now } },
       data: { usedAt: new Date() },
     });
+    if (claimed.count !== 1) {
+      throw new ServiceError("Link resetu hasła jest nieprawidłowy lub wygasł.", "INVALID_TOKEN");
+    }
     await tx.passwordResetToken.updateMany({
       where: { userId: record.userId, usedAt: null, id: { not: record.id } },
       data: { usedAt: new Date() },

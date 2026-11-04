@@ -23,5 +23,6 @@ export async function readCsvBuffer(
   }
 
   if (!localPath) return null;
-  return readFile(localPath);
+  // Operator/CLI paths are resolved at runtime. Known deployed CSVs use explicit tracing includes.
+  return readFile(/*turbopackIgnore: true*/ localPath);
 }

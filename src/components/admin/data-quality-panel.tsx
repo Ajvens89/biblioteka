@@ -17,7 +17,6 @@ const SECTIONS: Array<{ key: keyof CatalogQualityReport; label: string }> = [
   { key: "missingEan", label: "Brak EAN" },
   { key: "invalidEan", label: "Błędny EAN" },
   { key: "slugMismatch", label: "Niespójny slug" },
-  { key: "noCopies", label: "Bez egzemplarzy" },
   { key: "typeMismatch", label: "Niespójny typ" },
   { key: "missingAuthor", label: "Brak autora" },
   { key: "missingPublisher", label: "Brak wydawcy" },

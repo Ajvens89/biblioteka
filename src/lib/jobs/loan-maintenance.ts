@@ -19,7 +19,7 @@ export async function markOverdueLoansJob(
   let marked = 0;
   for (const loan of loans) {
     const updated = await db.loan.updateMany({
-      where: { id: loan.id, status: "ACTIVE" },
+      where: { id: loan.id, status: "ACTIVE", dueAt: { lt: now } },
       data: { status: "OVERDUE" },
     });
     if (updated.count === 0) continue;

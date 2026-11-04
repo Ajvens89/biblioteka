@@ -2,12 +2,20 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getAuthProvider } from "@/lib/auth/config";
 import { SESSION_COOKIE, verifyProfileSession } from "@/lib/auth/session-token";
+import { CATALOG_ONLY_MODE } from "@/lib/catalog-mode";
 
 export async function middleware(request: NextRequest) {
   const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
   const isProtectedUserRoute =
     request.nextUrl.pathname.startsWith("/moje-") ||
     request.nextUrl.pathname === "/moje-konto";
+
+  if (CATALOG_ONLY_MODE && isProtectedUserRoute) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/katalog";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
 
   if (!isAdminRoute && !isProtectedUserRoute) {
     return NextResponse.next();
@@ -79,5 +87,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/moje-konto", "/moje-rezerwacje"],
+  matcher: ["/admin/:path*", "/moje-konto/:path*", "/moje-rezerwacje/:path*"],
 };

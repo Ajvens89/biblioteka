@@ -4,25 +4,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
-  BarChart3,
   BookCopy,
-  CalendarCheck,
   ChevronLeft,
   ChevronRight,
-  ClipboardList,
   FileUp,
   Gamepad2,
   LayoutDashboard,
   LogOut,
   Menu,
-  ScanLine,
+  Plus,
   ScrollText,
   Settings,
   ShieldCheck,
-  Timer,
-  Users,
 } from "lucide-react";
 import { logoutAction } from "@/lib/actions/auth";
+import { CATALOG_ADMIN_NAVIGATION } from "@/lib/admin/catalog-navigation";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,42 +29,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const navGroups = [
-  {
-    label: "Przegląd",
-    links: [
-      { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-      { href: "/admin/statystyki", label: "Statystyki", icon: BarChart3 },
-    ],
-  },
-  {
-    label: "Katalog",
-    links: [
-      { href: "/admin/gry", label: "Gry", icon: Gamepad2 },
-      { href: "/admin/egzemplarze", label: "Egzemplarze", icon: BookCopy },
-      { href: "/admin/import", label: "Import", icon: FileUp },
-      { href: "/admin/jakosc-danych", label: "Centrum jakości", icon: ShieldCheck },
-      { href: "/admin/duplikaty", label: "Duplikaty", icon: BookCopy },
-    ],
-  },
-  {
-    label: "Obsługa",
-    links: [
-      { href: "/admin/obsluga", label: "Skaner", icon: ScanLine },
-      { href: "/admin/rezerwacje", label: "Rezerwacje", icon: CalendarCheck },
-      { href: "/admin/wypozyczenia", label: "Wypożyczenia", icon: ClipboardList },
-      { href: "/admin/prosby-przedluzenia", label: "Przedłużenia", icon: Timer },
-    ],
-  },
-  {
-    label: "System",
-    links: [
-      { href: "/admin/uzytkownicy", label: "Użytkownicy", icon: Users },
-      { href: "/admin/ustawienia", label: "Ustawienia", icon: Settings },
-      { href: "/admin/logi", label: "Logi", icon: ScrollText },
-    ],
-  },
-];
+const navIcons = {
+  dashboard: LayoutDashboard, games: Gamepad2, add: Plus, import: FileUp,
+  quality: ShieldCheck, duplicates: BookCopy, settings: Settings, logs: ScrollText,
+};
 
 function NavLinks({
   collapsed,
@@ -81,7 +45,7 @@ function NavLinks({
 
   return (
     <div className="flex flex-col gap-4 p-2">
-      {navGroups.map((group) => (
+      {CATALOG_ADMIN_NAVIGATION.map((group) => (
         <div key={group.label}>
           {!collapsed && (
             <p className="mb-1 px-3 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -89,10 +53,11 @@ function NavLinks({
             </p>
           )}
           <nav className="flex flex-col gap-0.5">
-            {group.links.map(({ href, label, icon: Icon, exact }) => {
+            {group.links.map(({ href, label, icon, exact }) => {
+              const Icon = navIcons[icon];
               const active = exact
                 ? pathname === href
-                : pathname === href || (href !== "/admin" && pathname.startsWith(href));
+                : pathname === href || pathname.startsWith(href + "/");
               return (
                 <Link
                   key={href}
@@ -149,7 +114,7 @@ export function AdminShell({ children, userLabel }: Props) {
         <div className="flex items-center justify-between border-b border-border px-3 py-4">
           {!collapsed && (
             <div className="min-w-0 px-1">
-              <BrandLogo size="sm" showSubtitle subtitle="Panel biblioteczny" />
+              <BrandLogo size="sm" showSubtitle subtitle="Panel właściciela" />
             </div>
           )}
           <Button
@@ -169,6 +134,7 @@ export function AdminShell({ children, userLabel }: Props) {
         <div className="border-t border-border p-3">
           <Link
             href="/"
+            aria-label="Publiczny katalog gier"
             className={cn(
               "flex items-center gap-2 rounded-md px-3 py-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground",
               collapsed && "justify-center px-2",
@@ -193,7 +159,7 @@ export function AdminShell({ children, userLabel }: Props) {
               <Menu className="h-5 w-5" />
             </Button>
             <span className="font-display text-base font-medium md:text-lg">
-              Panel biblioteczny
+              Panel właściciela
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm">
@@ -201,7 +167,7 @@ export function AdminShell({ children, userLabel }: Props) {
               {userLabel}
             </span>
             <form action={logoutAction}>
-              <Button variant="outline" size="sm" type="submit" data-testid="logout-button">
+              <Button variant="outline" size="sm" type="submit" data-testid="logout-button" aria-label="Wyloguj się">
                 <LogOut className="h-4 w-4" aria-hidden />
                 <span className="hidden sm:inline">Wyloguj</span>
               </Button>
@@ -209,7 +175,7 @@ export function AdminShell({ children, userLabel }: Props) {
           </div>
         </header>
 
-        <main className="min-w-0 flex-1 overflow-x-hidden p-4 md:p-8">{children}</main>
+        <div className="min-w-0 flex-1 overflow-x-hidden p-4 md:p-8">{children}</div>
       </div>
 
       <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>

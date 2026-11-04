@@ -15,16 +15,17 @@ export default async function ContactPage() {
         <p className="text-eyebrow">Fundacja Zakątek Fantastyki</p>
         <h1 className="text-h2">Kontakt</h1>
         <p className="text-body text-muted-foreground">
-          Katalog działa w trybie poglądu. W sprawie wypożyczeń i współpracy napisz na poniższy adres.
+          Dane kontaktowe Fundacji Zakątek Fantastyki. W sprawie działalności i współpracy
+          napisz na poniższy adres.
         </p>
       </header>
 
-      <SectionCard title="Wypożyczenia i pytania">
+      <SectionCard title="Kontakt z Fundacją">
         <dl className="space-y-4 text-sm">
           <div>
             <dt className="text-muted-foreground">E-mail</dt>
             <dd className="mt-1">
-              <a href={`mailto:${loanEmail}`} className="font-medium text-primary hover:underline">
+              <a href={`mailto:${loanEmail}`} className="break-all font-medium text-primary hover:underline">
                 {loanEmail}
               </a>
             </dd>
@@ -44,11 +45,7 @@ export default async function ContactPage() {
 
       <SectionCard title="Jak do nas trafić">
         <p className="text-sm text-muted-foreground">
-          Odbiór gier odbywa się w siedzibie fundacji — szczegóły ustalasz mailowo. Zobacz też{" "}
-          <a href="/regulamin" className="text-primary hover:underline">
-            regulamin biblioteki
-          </a>
-          .
+          Adres siedziby Fundacji znajdziesz powyżej. Przed wizytą skontaktuj się z zespołem.
         </p>
         <a
           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.foundationAddress)}`}

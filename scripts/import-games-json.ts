@@ -6,11 +6,11 @@
  */
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { formatGamesImportReport } from "../src/lib/services/games-json";
 import {
-  formatGamesImportReport,
   importGamesFromFile,
   resolveGamesJsonPath,
-} from "../src/lib/services/games-json";
+} from "./lib/games-json-files";
 
 const dryRun = process.argv.includes("--dry-run");
 const noOverwrite = process.argv.includes("--no-overwrite");

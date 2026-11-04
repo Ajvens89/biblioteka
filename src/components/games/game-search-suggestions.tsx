@@ -60,9 +60,11 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
 
     useEffect(() => {
       onActiveDescendantChange?.(
-        activeIndex >= 0 ? `${listId}-option-${activeIndex}` : undefined,
+        panelOpen && activeIndex >= 0 && activeIndex < items.length
+          ? `${listId}-option-${activeIndex}`
+          : undefined,
       );
-    }, [activeIndex, listId, onActiveDescendantChange]);
+    }, [activeIndex, listId, onActiveDescendantChange, panelOpen, items.length]);
 
     const navigateToItem = (item: GameSuggestItem) => {
       onSelect(item.title);
@@ -154,13 +156,21 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
             <li key={item.slug} id={optionId} role="option" aria-selected={active}>
               <Link
                 href={href}
+                tabIndex={-1}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 text-sm transition-[background-color,transform] duration-[var(--motion-fast)] hover:bg-muted",
                   active && "bg-muted translate-x-0.5",
                 )}
-                onMouseDown={(e) => e.preventDefault()}
+                onMouseDown={(e) => {
+                  if (e.button === 0) e.preventDefault();
+                }}
                 onMouseEnter={() => setActiveIndex(index)}
-                onClick={() => navigateToItem(item)}
+                onClick={() => {
+                  // Link owns pointer navigation, including Ctrl/Cmd-click.
+                  // Keyboard selection above still uses navigateToItem().
+                  onSelect(item.title);
+                  onClose();
+                }}
               >
                 {item.coverImageUrl ? (
                   <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded">
@@ -194,6 +204,7 @@ export const GameSearchSuggestions = forwardRef<GameSearchSuggestionsHandle, Pro
           <li role="presentation" className="border-t border-border">
             <button
               type="button"
+              tabIndex={-1}
               className="w-full px-4 py-2.5 text-left text-sm font-medium text-primary hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => {

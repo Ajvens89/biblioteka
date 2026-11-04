@@ -58,7 +58,7 @@
     "check:all": "tsx scripts/check-all.ts"
   },
   "optionalDependencies": {
-    "@next/swc-linux-x64-gnu": "16.2.7",
+    "@next/swc-linux-x64-gnu": "16.4.5",
     "@tailwindcss/oxide-linux-x64-gnu": "4.3.0",
     "lightningcss-linux-x64-gnu": "1.32.0"
   },
@@ -92,7 +92,7 @@
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
     "lucide-react": "^1.17.0",
-    "next": "16.2.7",
+    "next": "16.4.5",
     "papaparse": "^5.5.3",
     "pg": "^8.21.0",
     "qrcode": "^1.5.4",
@@ -117,7 +117,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.7",
+    "eslint-config-next": "16.4.5",
     "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",

@@ -1,3 +1,5 @@
+import { pluralPl } from "@/lib/plural-pl";
+
 type Props = {
   total: number;
   matching: number;
@@ -10,20 +12,23 @@ export function CatalogHeader({ total, matching, hasActiveParams, dbOk }: Props)
     ? null
     : hasActiveParams
       ? `${matching} z ${total} pozycji pasuje do wyboru`
-      : `${total} światów w bibliotece`;
+      : `${total} ${pluralPl(total, "tytuł", "tytuły", "tytułów")} w bibliotece`;
 
   return (
     <header className="zf-catalog-header">
       <div className="zf-catalog-header-ambient" aria-hidden />
-      <div className="relative space-y-2.5">
-        <p className="text-eyebrow">Pulpit odkryć</p>
+      <div className="relative space-y-2 sm:space-y-2.5">
+        <p className="hidden text-eyebrow sm:block">Pulpit odkryć</p>
         <h1 className="zf-catalog-header-title">
-          Katalog {dbOk && total > 0 ? `${total} światów` : "światów"}
+          <span className="sm:hidden">Katalog gier</span>
+          <span className="hidden sm:inline">Katalog {dbOk && total > 0 ? `${total} światów` : "światów"}</span>
         </h1>
         <p className="text-body max-w-2xl text-muted-foreground">
-          {dbOk
-            ? "Filtruj po liczbie graczy, czasie i klimacie albo po prostu wpisz tytuł — resztą zajmie się katalog."
-            : "Katalog jest chwilowo niedostępny — sprawdź ponownie za chwilę."}
+          {dbOk ? (
+            <>
+              <span>Wyszukaj grę po tytule lub wybierz wydawcę.</span>
+            </>
+          ) : "Katalog jest chwilowo niedostępny — sprawdź ponownie za chwilę."}
         </p>
         {countText && (
           <p className="text-small font-medium text-muted-foreground" data-testid="catalog-total-count">

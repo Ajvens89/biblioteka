@@ -97,7 +97,7 @@ export function EanCoverLookupPanel({
       <div className="space-y-2">
         <Label htmlFor="ean">EAN / ISBN produktu (gra)</Label>
         <p className="text-xs text-muted-foreground">
-          Kod z pudełka lub książki — nie kod egzemplarza w bibliotece.
+          Kod wydania gry lub podręcznika.
         </p>
         <Input
           id="ean"
@@ -288,7 +288,7 @@ export function EanCoverLookupPanel({
               <Link href={`/admin/gry/${existingGame.id}`}>Edytuj grę</Link>
             </Button>
             <Button size="sm" asChild data-testid="ean-add-copy-button">
-              <Link href={`/admin/egzemplarze?gameId=${existingGame.id}`}>Dodaj kolejny egzemplarz</Link>
+              <Link href={`/admin/gry/${existingGame.id}`}>Edytuj istniejącą grę</Link>
             </Button>
           </div>
         </div>

@@ -47,7 +47,7 @@ export function MobileNav({ links, user }: Props) {
   const [open, setOpen] = useState(false);
 
   const staffLinks: NavLink[] = user
-    ? [{ href: "/admin", label: "Panel administracyjny", icon: "admin" }]
+    ? [{ href: "/admin", label: "Panel właściciela", icon: "admin" }, { href: "/admin/gry/nowa", label: "Dodaj grę", icon: "catalog" }]
     : [];
 
   function renderLink({ href, label, icon }: NavLink) {
@@ -56,6 +56,8 @@ export function MobileNav({ links, user }: Props) {
       <Link
         key={href}
         href={href}
+        target={href.startsWith("/admin") ? "_blank" : undefined}
+        rel={href.startsWith("/admin") ? "noopener noreferrer" : undefined}
         onClick={() => setOpen(false)}
         className="mobile-nav-link flex min-h-[44px] items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium"
       >
@@ -97,6 +99,7 @@ export function MobileNav({ links, user }: Props) {
                 {staffLinks.map(renderLink)}
               </>
             )}
+            {!user ? <Link href="/login" target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)} className="mobile-nav-link flex min-h-[44px] items-center rounded-md px-3 py-2.5 text-sm font-medium">Logowanie właściciela</Link> : null}
             <a
               href="https://zakatekfantastyki.pl/"
               target="_blank"

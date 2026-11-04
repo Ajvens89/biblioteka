@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useCatalogSearchParams } from "./use-catalog-search-params";
 import { SlidersHorizontal } from "lucide-react";
 import {
   CATALOG_FILTER_KEYS,
@@ -22,18 +23,19 @@ const SHEET_CLASS =
 
 export function CatalogMobileFilters({ lists }: Props) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useCatalogSearchParams();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<CatalogFilterValues>({});
   const [isPending, startTransition] = useTransition();
 
   const activeCount = countActiveFilters(new URLSearchParams(searchParams.toString()));
 
-  useEffect(() => {
-    if (open) {
+  const onOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
       setDraft(readFilterValues(new URLSearchParams(searchParams.toString())));
     }
-  }, [open, searchParams]);
+    setOpen(nextOpen);
+  };
 
   const onChange = (patch: Record<string, string | null>) => {
     setDraft((prev) => {
@@ -62,13 +64,13 @@ export function CatalogMobileFilters({ lists }: Props) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <Button
         type="button"
         variant="outline"
         className="lg:hidden"
         data-testid="catalog-filters-mobile"
-        onClick={() => setOpen(true)}
+        onClick={() => onOpenChange(true)}
         aria-haspopup="dialog"
         aria-label={activeCount > 0 ? `Otwórz filtry, aktywnych: ${activeCount}` : "Otwórz filtry"}
       >

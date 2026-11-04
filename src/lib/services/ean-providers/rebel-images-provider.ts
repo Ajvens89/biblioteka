@@ -55,12 +55,13 @@ let cachedPath: string | null = null;
 export function resolveRebelImagesCsvPath(extraPaths: string[] = []): string | null {
   const env = process.env.REBEL_IMAGES_CSV?.trim();
   if (env) {
-    const resolved = path.resolve(env);
-    if (existsSync(resolved)) return resolved;
+    const resolved = path.resolve(/*turbopackIgnore: true*/ env);
+    if (existsSync(/*turbopackIgnore: true*/ resolved)) return resolved;
   }
   for (const p of [...extraPaths, ...DEFAULT_PATHS]) {
-    const resolved = path.resolve(p);
-    if (existsSync(resolved)) return resolved;
+    // CLI/env overrides are runtime assets; deployed default CSVs are included explicitly.
+    const resolved = path.resolve(/*turbopackIgnore: true*/ p);
+    if (existsSync(/*turbopackIgnore: true*/ resolved)) return resolved;
   }
   return null;
 }
@@ -248,7 +249,7 @@ export async function loadRebelImageIndex(): Promise<RebelImageIndex | null> {
   if (cachedIndex && cachedPath === cacheKey) return cachedIndex;
 
   const buffer = await readCsvBuffer(
-    csvPath && existsSync(csvPath) ? csvPath : null,
+    csvPath,
     process.env.REBEL_IMAGES_CSV_URL,
   );
   if (!buffer) return null;

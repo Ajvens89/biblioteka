@@ -1,5 +1,7 @@
 "use server";
 
+import { CATALOG_ONLY_MODE, circulationDisabledResult } from "@/lib/catalog-mode";
+
 import { revalidatePath } from "next/cache";
 import { isActorResult, requireActorStaff } from "@/lib/auth/actor";
 import { logAudit } from "@/lib/audit";
@@ -7,6 +9,7 @@ import { prisma } from "@/lib/db";
 import { fail, fromServiceError, ok, type ActionResult } from "@/lib/actions/utils";
 import { assertBarcodeNotProductEan } from "@/lib/services/copy-barcode";
 import { assertCopyStatusTransition } from "@/lib/services/copy-status";
+import { updateCopyIfUnchanged } from "@/lib/services/copy-update";
 import { isServiceError } from "@/lib/services/errors";
 import { copyIdSchema, editCopySchema } from "@/lib/validations/ids";
 import type { CopyInput } from "@/lib/validations/game";
@@ -32,6 +35,7 @@ async function getCopyStatusContext(copyId: string) {
 }
 
 export async function editCopy(input: CopyInput & { copyId: string }): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = editCopySchema.safeParse(input);
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -78,17 +82,18 @@ export async function editCopy(input: CopyInput & { copyId: string }): Promise<A
     throw e;
   }
 
-  await prisma.gameCopy.update({
-    where: { id: parsed.data.copyId },
-    data: {
+  try {
+    await updateCopyIfUnchanged(prisma, parsed.data.copyId, existing.status, {
       inventoryNumber: parsed.data.inventoryNumber,
       barcode,
       status: parsed.data.status,
       condition: parsed.data.condition,
       location: parsed.data.location?.trim() || null,
       notes: parsed.data.notes?.trim() || null,
-    },
-  });
+    });
+  } catch (error) {
+    return fromServiceError(error);
+  }
 
   await logAudit({
     actorId: actorResult.id,
@@ -110,6 +115,7 @@ export async function editCopy(input: CopyInput & { copyId: string }): Promise<A
 }
 
 export async function getCopyForEdit(copyId: string) {
+  if (CATALOG_ONLY_MODE) return null;
   const parsed = copyIdSchema.safeParse({ copyId });
   if (!parsed.success) return null;
 

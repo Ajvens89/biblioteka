@@ -69,6 +69,17 @@ function makeSlug(title: string) {
 
 type DbClient = PrismaClient | Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
 
+export async function resolveGamePublisher(
+  db: DbClient,
+  input: { publisherId?: string | null; publisherName?: string | null },
+): Promise<string | null> {
+  if (input.publisherId?.trim()) return input.publisherId.trim();
+  const name = input.publisherName?.trim().replace(/\s+/g, " ");
+  if (!name) return null;
+  if (name.length > 200) throw new ServiceError("Nazwa wydawcy może mieć maksymalnie 200 znaków.", "PUBLISHER_NAME");
+  return ensureNamedEntity(db, "publisher", name);
+}
+
 async function ensureNamedEntity(
   tx: DbClient,
   kind: "publisher" | "designer",
@@ -146,11 +157,8 @@ export async function createGameFromEan(
   const slug = input.slug || makeSlug(input.title);
 
   const game = await prisma.$transaction(async (tx) => {
-    let publisherId = input.publisherId?.trim() || null;
+    const publisherId = await resolveGamePublisher(tx, input);
     let designerId = input.designerId?.trim() || null;
-    if (!publisherId && input.publisherName?.trim()) {
-      publisherId = await ensureNamedEntity(tx, "publisher", input.publisherName);
-    }
     if (!designerId && input.designerName?.trim()) {
       designerId = await ensureNamedEntity(tx, "designer", input.designerName);
     }

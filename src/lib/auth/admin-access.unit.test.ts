@@ -19,18 +19,17 @@ const ADMIN_PAGES = [
 ];
 
 describe("Admin access control (odczyt /admin)", () => {
-  it("layout wymaga requireStaffFromDb dla wszystkich stron /admin", async () => {
+  it("layout wymaga requireAdminFromDb dla całego panelu właściciela", async () => {
     const layout = await readFile(
       path.join(process.cwd(), "src/app/admin/layout.tsx"),
       "utf8",
     );
-    assert.match(layout, /requireStaffFromDb\(\)/);
+    assert.match(layout, /requireAdminFromDb\(\)/);
   });
 
   it("strony ADMIN-only mają requireAdmin()", async () => {
     const adminOnly = [
       "src/app/admin/gry/page.tsx",
-      "src/app/admin/uzytkownicy/page.tsx",
       "src/app/admin/import/page.tsx",
       "src/app/admin/logi/page.tsx",
       "src/app/admin/ustawienia/page.tsx",
@@ -41,19 +40,20 @@ describe("Admin access control (odczyt /admin)", () => {
     }
   });
 
-  it("strony staff bez własnego guarda są pod layoutem staff", async () => {
-    const staffViaLayout = [
-      "src/app/admin/page.tsx",
+  it("wycofane moduły przekierowują do katalogu bez odczytów danych obsługi", async () => {
+    const retiredPages = [
       "src/app/admin/rezerwacje/page.tsx",
       "src/app/admin/wypozyczenia/page.tsx",
       "src/app/admin/statystyki/page.tsx",
+      "src/app/admin/uzytkownicy/page.tsx",
+      "src/app/admin/egzemplarze/page.tsx",
     ];
-    for (const file of staffViaLayout) {
+    for (const file of retiredPages) {
       const src = await readFile(path.join(process.cwd(), file), "utf8");
-      assert.doesNotMatch(src, /requireAdmin\(\)/);
-      assert.doesNotMatch(src, /requireStaff\(\)/);
+      assert.match(src, /redirect\("\/admin\/gry"\)/);
+      assert.doesNotMatch(src, /prisma|ReservationActions|LoanActions/);
     }
-    assert.equal(staffViaLayout.length, 4);
+    assert.equal(retiredPages.length, 5);
   });
 
   it("API export wymaga roli ADMIN", async () => {

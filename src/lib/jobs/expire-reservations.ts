@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { logAudit } from "@/lib/audit";
 import { reservationExpiredEmail } from "@/lib/email";
 import { notifyUser } from "@/lib/notifications";
@@ -20,22 +20,19 @@ export async function expireReservations(
   options?: { actorId?: string | null },
 ): Promise<ExpireReservationsResult> {
   const now = new Date();
+  const validityDays = await getSettingNumber("reservationValidityDays", 3);
+  const expiredWhere = {
+    status: { in: [...ACTIVE_STATUSES] },
+    OR: [
+      { pickupDeadline: { lt: now } },
+      {
+        pickupDeadline: null,
+        createdAt: { lt: new Date(now.getTime() - validityDays * 24 * 60 * 60_000) },
+      },
+    ],
+  } satisfies Prisma.ReservationWhereInput;
   const candidates = await db.reservation.findMany({
-    where: {
-      status: { in: [...ACTIVE_STATUSES] },
-      OR: [
-        { pickupDeadline: { lt: now } },
-        {
-          pickupDeadline: null,
-          createdAt: {
-            lt: new Date(
-              now.getTime() -
-                (await getSettingNumber("reservationValidityDays", 3)) * 24 * 60 * 60_000,
-            ),
-          },
-        },
-      ],
-    },
+    where: expiredWhere,
     include: { user: true, game: true, copy: true },
   });
 
@@ -44,19 +41,22 @@ export async function expireReservations(
 
   for (const reservation of candidates) {
     const done = await db.$transaction(async (tx) => {
-      const current = await tx.reservation.findUnique({ where: { id: reservation.id } });
-      if (!current || !ACTIVE_STATUSES.includes(current.status as (typeof ACTIVE_STATUSES)[number])) {
-        return false;
-      }
-
-      await tx.reservation.update({
-        where: { id: reservation.id },
+      // Recheck both state and deadline while claiming the row, after competing issuance/extension.
+      const claimed = await tx.reservation.updateMany({
+        where: { id: reservation.id, ...expiredWhere },
         data: { status: "EXPIRED" },
       });
+      if (claimed.count !== 1) {
+        return false;
+      }
+      const current = await tx.reservation.findUnique({
+        where: { id: reservation.id },
+        select: { copyId: true },
+      });
 
-      if (reservation.copyId) {
+      if (current?.copyId) {
         const released = await tx.gameCopy.updateMany({
-          where: { id: reservation.copyId, status: "RESERVED" },
+          where: { id: current.copyId, status: "RESERVED" },
           data: { status: "AVAILABLE" },
         });
         if (released.count === 0) {

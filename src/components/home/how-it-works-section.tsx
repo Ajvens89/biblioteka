@@ -10,25 +10,30 @@ type Step = {
   text: string;
 };
 
-const steps: Step[] = [
-  {
-    icon: BookOpen,
-    title: "Znajdź tytuł",
-    text: "Filtruj po liczbie graczy, czasie i wieku albo zeskanuj kod EAN z pudełka.",
-  },
-  {
-    icon: Mail,
-    title: "Napisz do nas",
-    text: "Z karty gry wyślesz gotową wiadomość rezerwacyjną na adres fundacji.",
-  },
-  {
-    icon: MapPin,
-    title: "Odbierz i graj",
-    text: "Grę odbierzesz w siedzibie Zakątka przy ul. Partyzantów 44 w Bielsku-Białej.",
-  },
-];
+function getSteps(pickupAddress?: string): Step[] {
+  return [
+    {
+      icon: BookOpen,
+      title: "Znajdź tytuł",
+      text: "Filtruj po liczbie graczy, czasie i wieku albo zeskanuj kod EAN z pudełka.",
+    },
+    {
+      icon: Mail,
+      title: "Napisz do nas",
+      text: "Z karty gry wyślesz gotowe zapytanie o wypożyczenie na adres fundacji.",
+    },
+    {
+      icon: MapPin,
+      title: "Odbierz i graj",
+      text: pickupAddress
+        ? `Miejsce odbioru: ${pickupAddress}. Termin ustalimy po potwierdzeniu zapytania.`
+        : "Miejsce i termin odbioru ustalimy po potwierdzeniu zapytania.",
+    },
+  ];
+}
 
-export function HowItWorksSection() {
+export function HowItWorksSection({ pickupAddress }: { pickupAddress?: string }) {
+  const steps = getSteps(pickupAddress);
   return (
     <section className="zf-section-steps py-16 md:py-24" aria-labelledby="how-it-works-heading">
       <div className="mx-auto max-w-7xl px-4">

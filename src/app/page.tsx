@@ -1,14 +1,11 @@
 import { HeroSection } from "@/components/home/hero-section";
 import { AvailableGamesSection } from "@/components/home/available-games-section";
 import { HomePublicStats } from "@/components/home/home-public-stats";
-import { MoodPicksSection } from "@/components/home/mood-picks-section";
-import { HowItWorksSection } from "@/components/home/how-it-works-section";
 import { FAQSection } from "@/components/home/faq-section";
 import { FoundationSection } from "@/components/home/foundation-section";
 import { DbUnavailableBanner } from "@/components/db-unavailable-banner";
 import { isDatabaseAvailable } from "@/lib/db";
 import {
-  fetchAvailableNowCached,
   fetchPublicStatsCached,
   fetchShowcaseGamesCached,
   type GameListItem,
@@ -36,21 +33,20 @@ function toShowcase(games: GameListItem[]): ShowcaseGame[] {
 export default async function HomePage() {
   const empty: GameListItem[] = [];
   const dbOk = await isDatabaseAvailable();
-  const [available, boardShowcase, rpgShowcase, publicStats] = dbOk
+  const [boardShowcase, rpgShowcase, publicStats] = dbOk
     ? await Promise.all([
-        fetchAvailableNowCached(8),
         fetchShowcaseGamesCached("BOARD_GAME", 4),
         fetchShowcaseGamesCached("RPG", 4),
         fetchPublicStatsCached(),
       ])
-    : [empty, empty, empty, { games: 0, copies: 0, available: 0, boardGames: 0, rpgGames: 0 }];
+    : [empty, empty, { games: 0, boardGames: 0, rpgGames: 0 }];
 
   return (
     <div className="overflow-x-hidden">
       <HeroSection
         boardGames={toShowcase(boardShowcase)}
         rpgGames={toShowcase(rpgShowcase)}
-        copiesOnShelves={publicStats.copies}
+        titlesInCatalog={dbOk ? publicStats.games : undefined}
       />
 
       {dbOk && <HomePublicStats stats={publicStats} />}
@@ -61,15 +57,12 @@ export default async function HomePage() {
         </div>
       )}
 
-      <MoodPicksSection />
-
       <div className="zf-section-catalog px-4 py-16 md:py-24">
         <div className="mx-auto w-full max-w-[90rem]">
-          <AvailableGamesSection games={available} />
+          <AvailableGamesSection games={[...boardShowcase, ...rpgShowcase]} />
         </div>
       </div>
 
-      <HowItWorksSection />
       <FoundationSection />
       <FAQSection />
     </div>

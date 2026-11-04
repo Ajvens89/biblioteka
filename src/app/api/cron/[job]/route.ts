@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runCronJob, type JobName } from "@/lib/jobs/runner";
+import { CATALOG_ONLY_MODE } from "@/lib/catalog-mode";
 
 const VALID_JOBS = new Set<JobName>([
   "expire-reservations",
@@ -28,6 +29,9 @@ export async function POST(
   const { job } = await context.params;
   if (!VALID_JOBS.has(job as JobName)) {
     return NextResponse.json({ error: "Unknown job" }, { status: 404 });
+  }
+  if (CATALOG_ONLY_MODE) {
+    return NextResponse.json({ ok: true, job, skipped: true, reason: "catalog-only" });
   }
 
   try {

@@ -4,32 +4,35 @@ import { useId, useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { MotionReveal } from "@/components/ui/motion-reveal";
-import { FOUNDATION_LOAN_EMAIL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-const faq = [
-  {
-    q: "Czy trzeba mieć konto?",
-    a: "Nie. Katalog online jest w pełni otwarty — przeglądasz zbiory bez rejestracji i bez logowania.",
-  },
-  {
-    q: "Jak wypożyczyć grę?",
-    a: `Znajdź tytuł w katalogu, sprawdź dostępność i wyślij wiadomość z karty gry na ${FOUNDATION_LOAN_EMAIL}. Grę odbierzesz osobiście w siedzibie Zakątka.`,
-  },
-  {
-    q: "Czy są też podręczniki RPG?",
-    a: "Tak. Poza planszówkami biblioteka gromadzi także gry fabularne — znajdziesz je w kolekcji RPG.",
-  },
-];
+function getFaq() {
+  return [
+    {
+      q: "Czy trzeba mieć konto?",
+      a: "Nie. Katalog online jest w pełni otwarty — przeglądasz zbiory bez rejestracji i bez logowania.",
+    },
+    {
+      q: "Jak znaleźć grę?",
+      a: "Wpisz tytuł lub nazwę wydawcy w wyszukiwarce. W katalogu możesz również wybrać wydawcę z listy. Kliknij okładkę, aby zobaczyć opis i parametry gry.",
+    },
+    {
+      q: "Czy są też podręczniki RPG?",
+      a: "Tak. Poza planszówkami biblioteka gromadzi także gry fabularne — znajdziesz je w kolekcji RPG.",
+    },
+  ];
+}
 
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
+  const triggerId = `${panelId}-trigger`;
 
   return (
     <article className="zf-faq-item">
       <button
         type="button"
+        id={triggerId}
         className="zf-faq-trigger flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-display text-base font-medium text-foreground"
         aria-expanded={open}
         aria-controls={panelId}
@@ -45,6 +48,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
         id={panelId}
         className={cn("zf-faq-panel", open && "zf-faq-panel--open")}
         role="region"
+        aria-labelledby={triggerId}
         aria-hidden={!open}
       >
         <p className="text-body px-5 pb-4 leading-relaxed text-muted-foreground">{a}</p>
@@ -54,6 +58,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 }
 
 export function FAQSection() {
+  const faq = getFaq();
   return (
     <section className="zf-section-faq py-16 md:py-24" aria-labelledby="faq-heading">
       <div className="mx-auto max-w-2xl px-4">
@@ -72,11 +77,7 @@ export function FAQSection() {
         </MotionReveal>
 
         <p className="text-small mt-10 text-center text-muted-foreground">
-          Więcej w{" "}
-          <Link href="/regulamin" className="font-medium text-primary underline-offset-2 hover:underline">
-            regulaminie
-          </Link>{" "}
-          i na stronie{" "}
+          Dane Fundacji znajdziesz na stronie{" "}
           <Link href="/kontakt" className="font-medium text-primary underline-offset-2 hover:underline">
             kontakt
           </Link>

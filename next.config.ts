@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import { librarySecurityHeaders } from "./src/lib/embed-policy";
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "/admin/**": ["./data/hurt.csv", "./data/rebel-images.csv", "./hurt.csv", "./images.csv"],
+    "/admin/import": [
+      "./data/products.json", "./data/games.json", "./products.json", "./games.json",
+      "./public/products.json", "./public/games.json", "./public/covers/**/*",
+    ],
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200],
@@ -37,20 +45,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
-          },
-        ],
-      },
-    ];
+    return librarySecurityHeaders();
   },
 };
 

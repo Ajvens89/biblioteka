@@ -1,7 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useCatalogSearchParams } from "./use-catalog-search-params";
 import { CheckCircle2, Clock, Crown, PartyPopper, Scroll, Sparkles, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +37,7 @@ const MOOD_OWNED_KEYS = [
 
 export function CatalogQuickPicks() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useCatalogSearchParams();
   const [, startTransition] = useTransition();
 
   const isActive = (pick: QuickPick) =>

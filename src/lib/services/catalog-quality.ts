@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { validateEanChecksum } from "@/lib/services/ean";
+import { CATALOG_ONLY_MODE } from "@/lib/catalog-mode";
 
 export type CatalogQualityIssue = {
   id: string;
@@ -69,7 +70,7 @@ export async function buildCatalogQualityReport(db: PrismaClient): Promise<Catal
     if (g.minPlayers <= 0 || g.maxPlayers <= 0) missingPlayers.push(baseIssue(g, "Brak danych graczy", "players"));
     if (g.minPlayTime <= 0 && g.maxPlayTime <= 0) missingPlayTime.push(baseIssue(g, "Brak czasu rozgrywki", "playtime"));
     if (g.minAge <= 0) missingAge.push(baseIssue(g, "Brak wieku", "age"));
-    if (g.copies.length === 0) noCopies.push(baseIssue(g, "Brak egzemplarzy", "copies"));
+    if (!CATALOG_ONLY_MODE && g.copies.length === 0) noCopies.push(baseIssue(g, "Brak egzemplarzy", "copies"));
 
     const slugNorm = g.slug.toLowerCase().replace(/-/g, "");
     const titleNorm = g.title.toLowerCase().replace(/[^a-z0-9ąćęłńóśźż]/gi, "").slice(0, 8);

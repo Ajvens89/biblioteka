@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient, ReservationStatus } from "@prisma/client";
 import { logAudit } from "@/lib/audit";
 import { getSettingNumber } from "@/lib/settings";
 import { ServiceError } from "@/lib/services/errors";
@@ -100,7 +100,7 @@ export async function reserveGame(
     }
 
     const updated = await tx.gameCopy.updateMany({
-      where: { id: copyId, status: "AVAILABLE" },
+      where: { id: copyId, gameId: params.gameId, status: "AVAILABLE" },
       data: { status: "RESERVED" },
     });
     if (updated.count === 0) {
@@ -180,10 +180,13 @@ export async function markReadyForPickup(
     throw new ServiceError("Nieprawidłowy status rezerwacji.", "INVALID_STATUS");
   }
 
-  await prisma.reservation.update({
-    where: { id: reservationId },
+  const claimed = await prisma.reservation.updateMany({
+    where: { id: reservationId, status: { in: ["APPROVED", "PENDING"] } },
     data: { status: "READY_FOR_PICKUP", readyAt: new Date() },
   });
+  if (claimed.count !== 1) {
+    throw new ServiceError("Nieprawidłowy status rezerwacji.", "INVALID_STATUS");
+  }
 
   await logAudit({
     actorId: audit.actorId,
@@ -208,17 +211,27 @@ export async function markReadyForPickup(
 export async function cancelReservation(
   prisma: PrismaClient,
   reservationId: string,
-  copyId: string | null | undefined,
+  _copyId: string | null | undefined,
   audit: AuditContext,
+  allowedStatuses: ReservationStatus[] = ["PENDING", "APPROVED", "READY_FOR_PICKUP"],
 ): Promise<void> {
   await prisma.$transaction(async (tx) => {
-    await tx.reservation.update({
-      where: { id: reservationId },
+    // Claim the reservation before touching its copy, in the same order as issuance.
+    const claimed = await tx.reservation.updateMany({
+      where: { id: reservationId, status: { in: allowedStatuses } },
       data: { status: "CANCELLED", cancelledAt: new Date() },
     });
-    if (copyId) {
-      await tx.gameCopy.update({
-        where: { id: copyId },
+    if (claimed.count !== 1) {
+      throw new ServiceError("Nie można anulować tej rezerwacji.", "INVALID_STATUS");
+    }
+    const reservation = await tx.reservation.findUnique({
+      where: { id: reservationId },
+      select: { copyId: true },
+    });
+    if (reservation?.copyId) {
+      // A damaged/lost copy must not become available merely because its reservation ended.
+      await tx.gameCopy.updateMany({
+        where: { id: reservation.copyId, status: "RESERVED" },
         data: { status: "AVAILABLE" },
       });
     }
@@ -258,7 +271,7 @@ export async function rejectReservation(
         ? (audit.metadata as Prisma.InputJsonObject)
         : {}),
     },
-  });
+  }, ["PENDING", "APPROVED"]);
 }
 
 export async function extendPickupDeadline(
@@ -282,10 +295,17 @@ export async function extendPickupDeadline(
   const pickupDeadline = new Date(base);
   pickupDeadline.setDate(pickupDeadline.getDate() + days);
 
-  await prisma.reservation.update({
-    where: { id: reservationId },
+  const updated = await prisma.reservation.updateMany({
+    where: {
+      id: reservationId,
+      status: { in: ["PENDING", "APPROVED", "READY_FOR_PICKUP"] },
+      pickupDeadline: reservation.pickupDeadline,
+    },
     data: { pickupDeadline },
   });
+  if (updated.count !== 1) {
+    throw new ServiceError("Rezerwacja została zmieniona — odśwież stronę i spróbuj ponownie.", "INVALID_STATUS");
+  }
 
   await logAudit({
     actorId: audit.actorId,

@@ -3,24 +3,16 @@
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { saveSettingsAction } from "@/lib/actions/settings";
-import { DEFAULT_SETTINGS } from "@/lib/constants";
+import { CATALOG_SETTINGS_KEYS } from "@/lib/admin/catalog-navigation";
 import type { AppSettingsMap } from "@/lib/settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 
-const labels: Record<keyof typeof DEFAULT_SETTINGS, string> = {
-  maxActiveReservations: "Maks. aktywnych rezerwacji",
-  defaultLoanDays: "Domyślny czas wypożyczenia (dni)",
-  reservationValidityDays: "Ważność rezerwacji (dni)",
-  maxLoanExtensions: "Maks. przedłużeń",
-  waitlistValidityDays: "Ważność wpisu na liście oczekujących (dni)",
-  waitlistNotifyHours: "Czas na rezerwację po powiadomieniu (godz.)",
+const labels: Record<typeof CATALOG_SETTINGS_KEYS[number], string> = {
   contactEmail: "E-mail kontaktowy",
   contactPhone: "Telefon",
   foundationAddress: "Adres fundacji",
-  termsText: "Regulamin",
 };
 
 export function SettingsForm({ settings }: { settings: AppSettingsMap }) {
@@ -37,14 +29,10 @@ export function SettingsForm({ settings }: { settings: AppSettingsMap }) {
         })
       }
     >
-      {(Object.keys(DEFAULT_SETTINGS) as Array<keyof typeof DEFAULT_SETTINGS>).map((key) => (
+      {CATALOG_SETTINGS_KEYS.map((key) => (
         <div key={key} className="space-y-2">
           <Label htmlFor={key}>{labels[key]}</Label>
-          {key === "termsText" ? (
-            <Textarea id={key} name={key} rows={8} defaultValue={settings[key]} />
-          ) : (
-            <Input id={key} name={key} defaultValue={settings[key]} />
-          )}
+          <Input id={key} name={key} defaultValue={settings[key]} />
         </div>
       ))}
       <Button type="submit" disabled={pending}>

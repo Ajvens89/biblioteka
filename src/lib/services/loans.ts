@@ -17,25 +17,29 @@ export async function issueLoanFromReservation(
   reservationId: string,
   audit: AuditContext,
 ): Promise<IssueLoanResult> {
-  const reservation = await prisma.reservation.findUnique({
-    where: { id: reservationId },
-    include: { copy: true, game: true },
-  });
-  if (!reservation?.copyId || !reservation.copy) {
-    throw new ServiceError("Rezerwacja bez przypisanego egzemplarza.", "NO_COPY");
-  }
-  if (!["APPROVED", "READY_FOR_PICKUP", "PENDING"].includes(reservation.status)) {
-    throw new ServiceError("Nieprawidłowy status rezerwacji.", "INVALID_STATUS");
-  }
-
   const loanDays = await getSettingNumber("defaultLoanDays", 14);
   const dueAt = new Date();
   dueAt.setDate(dueAt.getDate() + loanDays);
 
-  const loan = await prisma.$transaction(async (tx) => {
+  const { loan, gameSlug } = await prisma.$transaction(async (tx) => {
+    const claimed = await tx.reservation.updateMany({
+      where: { id: reservationId, status: { in: ["APPROVED", "READY_FOR_PICKUP", "PENDING"] } },
+      data: { status: "BORROWED" },
+    });
+    if (claimed.count !== 1) {
+      throw new ServiceError("Nieprawidłowy status rezerwacji.", "INVALID_STATUS");
+    }
+    const reservation = await tx.reservation.findUnique({
+      where: { id: reservationId },
+      include: { copy: true, game: true },
+    });
+    if (!reservation?.copyId || !reservation.copy) {
+      throw new ServiceError("Rezerwacja bez przypisanego egzemplarza.", "NO_COPY");
+    }
     const copyLock = await tx.gameCopy.updateMany({
       where: {
-        id: reservation.copyId!,
+        id: reservation.copyId,
+        gameId: reservation.gameId,
         status: { in: ["RESERVED", "AVAILABLE"] },
       },
       data: { status: "BORROWED" },
@@ -47,19 +51,14 @@ export async function issueLoanFromReservation(
     const created = await tx.loan.create({
       data: {
         userId: reservation.userId,
-        copyId: reservation.copyId!,
+        copyId: reservation.copyId,
         reservationId: reservation.id,
         dueAt,
         status: "ACTIVE",
       },
     });
 
-    await tx.reservation.update({
-      where: { id: reservationId },
-      data: { status: "BORROWED" },
-    });
-
-    return created;
+    return { loan: created, gameSlug: reservation.game?.slug ?? null };
   });
 
   await logAudit({
@@ -75,7 +74,7 @@ export async function issueLoanFromReservation(
     },
   });
 
-  return { loanId: loan.id, gameSlug: reservation.game?.slug ?? null };
+  return { loanId: loan.id, gameSlug };
 }
 
 /**
@@ -157,6 +156,50 @@ export async function issueWalkInLoan(
   return { loanId: loan.id, gameSlug: copy.game.slug ?? null };
 }
 
+/** Extend only the still-active loan/version the staff member originally reviewed. */
+export async function extendLoan(
+  prisma: PrismaClient,
+  loanId: string,
+  days: number,
+  audit: AuditContext,
+): Promise<{ dueAt: Date }> {
+  if (!Number.isInteger(days) || days < 1 || days > 21) {
+    throw new ServiceError("Przedłużenie musi wynosić od 1 do 21 dni.", "INVALID_DAYS");
+  }
+  const maxExtensions = await getSettingNumber("maxLoanExtensions", 2);
+  const loan = await prisma.loan.findUnique({ where: { id: loanId } });
+  if (!loan || !["ACTIVE", "OVERDUE"].includes(loan.status)) {
+    throw new ServiceError("Nie można przedłużyć zamkniętego wypożyczenia.", "INVALID_STATUS");
+  }
+  if (loan.extensionCount >= maxExtensions) {
+    throw new ServiceError(`Osiągnięto limit przedłużeń (${maxExtensions}).`, "LIMIT");
+  }
+  const dueAt = new Date(loan.dueAt);
+  dueAt.setDate(dueAt.getDate() + days);
+  await prisma.$transaction(async (tx) => {
+    const claimed = await tx.loan.updateMany({
+      where: {
+        id: loanId,
+        status: { in: ["ACTIVE", "OVERDUE"] },
+        dueAt: loan.dueAt,
+        extensionCount: loan.extensionCount,
+      },
+      data: { dueAt, extensionCount: { increment: 1 }, status: "ACTIVE" },
+    });
+    if (claimed.count !== 1) {
+      throw new ServiceError("Wypożyczenie zostało zmienione. Odśwież stronę i spróbuj ponownie.", "LOAN_CHANGED");
+    }
+    await tx.loanExtension.create({ data: {
+      loanId, previousDue: loan.dueAt, newDue: dueAt, reason: "Przedłużenie przez bibliotekarza",
+    } });
+  });
+  await logAudit({
+    actorId: audit.actorId, action: "UPDATE", entityType: "loan", entityId: loanId,
+    metadata: { newDue: dueAt.toISOString() },
+  });
+  return { dueAt };
+}
+
 export type ReturnLoanOptions = {
   damageNotes?: string;
   markDamaged?: boolean;
@@ -179,17 +222,6 @@ export async function returnLoan(
   audit: AuditContext,
   options?: ReturnLoanOptions,
 ): Promise<ReturnLoanResult> {
-  const loan = await prisma.loan.findUnique({
-    where: { id: loanId },
-    include: { copy: { include: { game: true } }, reservation: true },
-  });
-  if (!loan) {
-    throw new ServiceError("Wypożyczenie nie istnieje.", "NOT_FOUND");
-  }
-  if (!["ACTIVE", "OVERDUE"].includes(loan.status)) {
-    throw new ServiceError("To wypożyczenie jest już zamknięte.", "INVALID_STATUS");
-  }
-
   let copyStatus: ReturnLoanResult["copyStatus"] = "AVAILABLE";
   let loanStatus: ReturnLoanResult["loanStatus"] = "RETURNED";
   if (options?.markRepair) {
@@ -199,9 +231,9 @@ export async function returnLoan(
     loanStatus = "DAMAGED";
   }
 
-  await prisma.$transaction(async (tx) => {
-    await tx.loan.update({
-      where: { id: loanId },
+  const loan = await prisma.$transaction(async (tx) => {
+    const claimed = await tx.loan.updateMany({
+      where: { id: loanId, status: { in: ["ACTIVE", "OVERDUE"] } },
       data: {
         status: loanStatus,
         returnedAt: new Date(),
@@ -209,6 +241,16 @@ export async function returnLoan(
         returnNotes: options?.damageNotes ? "Zwrot z uwagą" : undefined,
       },
     });
+    if (claimed.count !== 1) {
+      throw new ServiceError("To wypożyczenie jest już zamknięte.", "INVALID_STATUS");
+    }
+    const loan = await tx.loan.findUnique({
+      where: { id: loanId },
+      include: { copy: { include: { game: true } }, reservation: true },
+    });
+    if (!loan) {
+      throw new ServiceError("Wypożyczenie nie istnieje.", "NOT_FOUND");
+    }
 
     await tx.gameCopy.update({
       where: { id: loan.copyId },
@@ -216,11 +258,12 @@ export async function returnLoan(
     });
 
     if (loan.reservationId) {
-      await tx.reservation.update({
-        where: { id: loan.reservationId },
+      await tx.reservation.updateMany({
+        where: { id: loan.reservationId, status: "BORROWED" },
         data: { status: "RETURNED" },
       });
     }
+    return loan;
   });
 
   await logAudit({

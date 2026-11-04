@@ -56,11 +56,11 @@ export function AdminGamesToolbar() {
     <div className="card-elevated space-y-4 p-4" data-testid="admin-games-toolbar">
       <div className="flex flex-wrap items-end gap-2">
         <div className="min-w-[160px] flex-1 space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">Szukaj (tytuł)</label>
+          <label className="text-xs font-medium text-muted-foreground">Tytuł lub wydawca</label>
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Tytuł…"
+            placeholder="Tytuł lub wydawca…"
             onKeyDown={(e) => e.key === "Enter" && applySearch()}
           />
         </div>
@@ -96,17 +96,6 @@ export function AdminGamesToolbar() {
 
         <select
           className={selectClass}
-          aria-label="Dostępność"
-          value={searchParams.get("availability") ?? ""}
-          onChange={(e) => setParam("availability", e.target.value || null)}
-        >
-          <option value="">Wszystkie dostępności</option>
-          <option value="available">Dostępne</option>
-          <option value="unavailable">Niedostępne</option>
-        </select>
-
-        <select
-          className={selectClass}
           aria-label="Sortowanie"
           value={searchParams.get("sort") ?? "title"}
           onChange={(e) => setParam("sort", e.target.value)}
@@ -134,15 +123,6 @@ export function AdminGamesToolbar() {
           onClick={() => toggleFlag("missingCover")}
         >
           Brak okładki
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant={searchParams.get("missingCopies") === "1" ? "default" : "outline"}
-          data-testid="admin-filter-no-copies"
-          onClick={() => toggleFlag("missingCopies")}
-        >
-          Brak egzemplarzy
         </Button>
         {(searchParams.toString().length > 0) && (
           <Button type="button" size="sm" variant="ghost" asChild>

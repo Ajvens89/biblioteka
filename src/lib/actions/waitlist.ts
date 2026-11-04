@@ -1,5 +1,7 @@
 "use server";
 
+import { CATALOG_ONLY_MODE, circulationDisabledResult } from "@/lib/catalog-mode";
+
 import { revalidatePath } from "next/cache";
 import { getActorFromDb, isActorResult, requireActor } from "@/lib/auth/actor";
 import { prisma } from "@/lib/db";
@@ -8,6 +10,7 @@ import { gameIdSchema } from "@/lib/validations/ids";
 import * as waitlistService from "@/lib/services/waitlist";
 
 export async function joinWaitlistAction(gameId: string): Promise<ActionResult<{ position: number }>> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = gameIdSchema.safeParse({ id: gameId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -25,6 +28,7 @@ export async function joinWaitlistAction(gameId: string): Promise<ActionResult<{
 }
 
 export async function leaveWaitlistAction(gameId: string): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = gameIdSchema.safeParse({ id: gameId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -44,6 +48,7 @@ export async function leaveWaitlistAction(gameId: string): Promise<ActionResult>
 export async function getWaitlistStatusAction(
   gameId: string,
 ): Promise<{ position: number; status: string } | null> {
+  if (CATALOG_ONLY_MODE) return null;
   const user = await getActorFromDb();
   if (!user) return null;
   const parsed = gameIdSchema.safeParse({ id: gameId });

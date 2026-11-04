@@ -1,7 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useCatalogSearchParams } from "./use-catalog-search-params";
 import { ArrowUpDown } from "lucide-react";
 import { GAME_SORT_LABELS } from "@/lib/constants";
 import { Label } from "@/components/ui/label";
@@ -22,7 +23,7 @@ function gamesWord(n: number): string {
 
 export function CatalogResultsToolbar({ total, query }: Props) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useCatalogSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const sort = searchParams.get("sort") ?? "title";

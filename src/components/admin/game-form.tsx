@@ -58,6 +58,7 @@ export function GameForm({
         .filter((c) => formData.get(`cat_${c.id}`) === "on")
         .map((c) => c.id);
       const tagIds = tags.filter((t) => formData.get(`tag_${t.id}`) === "on").map((t) => t.id);
+      const publisherName = String(formData.get("publisherName") || "").trim();
 
       const input = {
         title: String(formData.get("title")),
@@ -73,7 +74,8 @@ export function GameForm({
         difficulty: String(formData.get("difficulty")) as "EASY" | "MEDIUM" | "HARD" | "EXPERT",
         type: String(formData.get("type")) as "BOARD",
         skipEanChecksum: formData.get("skipEanChecksum") === "on",
-        publisherId: String(formData.get("publisherId") || "") || null,
+        publisherId: publisherName ? null : String(formData.get("publisherId") || "") || null,
+        publisherName: publisherName || null,
         designerId: String(formData.get("designerId") || "") || null,
         yearPublished: formData.get("yearPublished")
           ? Number(formData.get("yearPublished"))
@@ -195,6 +197,9 @@ export function GameForm({
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
+          <Label htmlFor="publisherName">Nowy wydawca (opcjonalnie)</Label>
+          <Input id="publisherName" name="publisherName" maxLength={200} placeholder="Nazwa wydawcy, którego nie ma na liście" />
+          <p className="text-xs text-muted-foreground">Wpisana nazwa zastąpi wybór z listy. Istniejący wydawca o tej nazwie zostanie użyty ponownie.</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="designerId">Autor</Label>

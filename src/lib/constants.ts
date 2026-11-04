@@ -10,7 +10,7 @@ import type {
 
 export const APP_NAME = "Wieczór przy stole — Biblioteka gier Zakątka Fantastyki";
 export const APP_DESCRIPTION =
-  "540 planszówek i podręczników RPG do bezpłatnego wypożyczenia w Bielsku-Białej. Znajdź grę na dziś wieczór, sprawdź dostępność i zarezerwuj mailem.";
+  "Katalog gier planszowych i podręczników RPG Zakątka Fantastyki. Wyszukuj po tytule lub wydawcy, przeglądaj okładki, opisy i parametry gier.";
 
 /** Publiczny kontakt w sprawie wypożyczeń (tryb poglądu katalogu). */
 export const FOUNDATION_LOAN_EMAIL = "fundacja@zakatekfantastyki.pl";

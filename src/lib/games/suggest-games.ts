@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { normalizeProductBarcode } from "@/lib/services/import-products";
+import { catalogTextConditions } from "@/lib/games/catalog-text-search";
 import {
   normalizeSuggestQuery,
   SUGGEST_DEFAULT_LIMIT,
@@ -23,47 +23,22 @@ export async function suggestGames(
   const q = normalizeSuggestQuery(query);
   if (q.length < 2) return [];
 
-  const take = Math.min(Math.max(limit, 1), SUGGEST_MAX_LIMIT);
-  const ean = normalizeProductBarcode(q);
-
-  if (ean && ean.length >= 8) {
-    const byEan = await prisma.game.findMany({
-      where: { deletedAt: null, isActive: true, ean },
-      select: {
-        title: true,
-        slug: true,
-        coverImageUrl: true,
-        collectionType: true,
-      },
-      take,
-    });
-    if (byEan.length > 0) {
-      return byEan.map((g) => ({ ...g, matchKind: "ean" as const }));
-    }
-  }
+  const take = Number.isFinite(limit)
+    ? Math.min(Math.max(Math.trunc(limit), 1), SUGGEST_MAX_LIMIT)
+    : SUGGEST_DEFAULT_LIMIT;
 
   const rows = await prisma.game.findMany({
     where: {
       deletedAt: null,
       isActive: true,
-      OR: [
-        { title: { contains: q, mode: "insensitive" } },
-        { shortDescription: { contains: q, mode: "insensitive" } },
-        { ean: { contains: q, mode: "insensitive" } },
-        { tags: { some: { tag: { name: { contains: q, mode: "insensitive" } } } } },
-        { publisher: { name: { contains: q, mode: "insensitive" } } },
-        { designer: { name: { contains: q, mode: "insensitive" } } },
-      ],
+      OR: catalogTextConditions(q),
     },
     select: {
       title: true,
       slug: true,
       coverImageUrl: true,
       collectionType: true,
-      ean: true,
-      tags: { select: { tag: { select: { name: true } } } },
       publisher: { select: { name: true } },
-      designer: { select: { name: true } },
     },
     orderBy: [{ title: "asc" }],
     take,
@@ -72,10 +47,9 @@ export async function suggestGames(
   const qLower = q.toLowerCase();
   return rows.map((g) => {
     let matchKind: GameSuggestItem["matchKind"] = "title";
-    if (g.ean?.includes(q)) matchKind = "ean";
-    else if (g.tags.some((t) => t.tag.name.toLowerCase().includes(qLower))) matchKind = "tag";
-    else if (g.publisher?.name.toLowerCase().includes(qLower)) matchKind = "publisher";
-    else if (g.designer?.name.toLowerCase().includes(qLower)) matchKind = "designer";
+    if (!g.title.toLowerCase().includes(qLower) && g.publisher?.name.toLowerCase().includes(qLower)) {
+      matchKind = "publisher";
+    }
     return {
       title: g.title,
       slug: g.slug,

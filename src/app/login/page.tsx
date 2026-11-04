@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { loginAction } from "@/lib/actions/auth";
 import { safeRedirectPath } from "@/lib/auth/redirect";
-import { FOUNDATION_LOAN_EMAIL } from "@/lib/constants";
 import { AuthForm } from "@/components/auth/auth-form";
 import { AuthPageShell } from "@/components/layout/auth-page-shell";
 import { Card, CardContent } from "@/components/ui/card";
 
-export const metadata = { title: "Logowanie — panel biblioteki" };
+export const metadata = { title: "Logowanie właściciela katalogu" };
 
 type Props = { searchParams: Promise<{ redirect?: string; reset?: string }> };
 
@@ -16,8 +15,8 @@ export default async function LoginPage({ searchParams }: Props) {
 
   return (
     <AuthPageShell
-      title="Panel biblioteki"
-      description="Logowanie tylko dla personelu. Katalog publiczny działa bez konta."
+      title="Panel właściciela"
+      description="Zaloguj się, aby dodawać i edytować gry. Katalog publiczny działa bez konta."
     >
       <Card className="card-elevated" data-testid="login-page">
         <CardContent className="pt-6">
@@ -39,16 +38,8 @@ export default async function LoginPage({ searchParams }: Props) {
             ]}
           />
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            W sprawie wypożyczeń napisz na{" "}
-            <a
-              href={`mailto:${FOUNDATION_LOAN_EMAIL}`}
-              className="font-medium text-primary underline-offset-2 hover:underline"
-            >
-              {FOUNDATION_LOAN_EMAIL}
-            </a>
-            {" · "}
             <Link href="/katalog" className="font-medium text-primary underline-offset-2 hover:underline">
-              Katalog
+              Wróć do katalogu
             </Link>
           </p>
         </CardContent>

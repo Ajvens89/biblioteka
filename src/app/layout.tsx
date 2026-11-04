@@ -3,6 +3,7 @@ import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { LibraryEmbedBridge } from "@/components/layout/library-embed-bridge";
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
 import { getAppUrl } from "@/lib/site-url";
 import "./globals.css";
@@ -42,13 +43,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
       className={`dark ${fraunces.variable} ${plusJakarta.variable}`}
     >
-      <body className="min-h-screen flex flex-col antialiased">
+      <body className="antialiased">
         <Providers>
-          <SiteHeader />
-          <main id="main" className="flex-1">
-            {children}
-          </main>
-          <SiteFooter />
+          <div id="library-page-content" className="min-h-screen flex flex-col">
+            <a className="library-skip-link" href="#main">Przejdź do katalogu i treści</a>
+            <SiteHeader />
+            <main id="main" className="flex-1" tabIndex={-1}>
+              {children}
+            </main>
+            <SiteFooter />
+          </div>
+          <LibraryEmbedBridge />
         </Providers>
       </body>
     </html>

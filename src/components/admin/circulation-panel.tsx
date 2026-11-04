@@ -13,7 +13,6 @@ import { EanScanner } from "@/components/barcode/ean-scanner";
 import { ScannerButton } from "@/components/ui/scanner-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { SectionCard } from "@/components/ui/section-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/utils";

@@ -14,13 +14,13 @@ type Props = {
 
 export function AvailableGamesSection({ games }: Props) {
   return (
-    <section className="zf-section-available" aria-labelledby="available-games-heading">
+    <section className="zf-section-available" aria-labelledby="catalog-preview-heading">
       <MotionReveal variant="fade-up">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border/80 pb-8">
           <div className="space-y-2">
-            <p className="text-eyebrow">Na stole w tym tygodniu</p>
-            <h2 id="available-games-heading" className="text-h2 text-foreground">
-              Świeżo z półki
+            <p className="text-eyebrow">Poznaj kolekcję</p>
+            <h2 id="catalog-preview-heading" className="text-h2 text-foreground">
+              Gry z naszego katalogu
             </h2>
           </div>
           <Button variant="ghost" className="text-primary hover:text-primary" asChild>
@@ -36,7 +36,7 @@ export function AvailableGamesSection({ games }: Props) {
         <MotionReveal variant="fade-up" className="mt-10">
           <div
             className="rounded-xl border border-dashed border-border/80 bg-muted/20 px-6 py-12 text-center"
-            data-testid="home-available-empty"
+            data-testid="home-catalog-empty"
           >
             <p className="text-body text-muted-foreground">
               Brak wyróżnionych tytułów — zajrzyj do pełnego katalogu.

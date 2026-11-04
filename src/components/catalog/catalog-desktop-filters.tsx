@@ -1,7 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useCatalogSearchParams } from "./use-catalog-search-params";
 import Link from "next/link";
 import {
   buildCatalogQuery,
@@ -17,7 +18,7 @@ type Props = { lists: CatalogOptionLists };
 
 export function CatalogDesktopFilters({ lists }: Props) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useCatalogSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const params = new URLSearchParams(searchParams.toString());

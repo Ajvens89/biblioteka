@@ -23,7 +23,7 @@ export async function FoundationSection() {
               <p className="text-body text-muted-foreground">
                 Biblioteka gier to część działań Fundacji Zakątek Fantastyki — miejsca spotkań
                 miłośników planszówek i gier fabularnych w Bielsku-Białej. Zbiory są otwarte dla
-                wszystkich, a wypożyczenie nic nie kosztuje.
+                wszystkich — odkrywaj tytuły, wydawców i szczegóły gier w naszym katalogu.
               </p>
               <p className="text-small inline-flex items-start gap-2 text-muted-foreground">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />

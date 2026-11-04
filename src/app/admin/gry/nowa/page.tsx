@@ -28,7 +28,7 @@ export default async function NewGamePage({ searchParams }: Props) {
         designers={designers}
         categories={categories}
         tags={tags}
-        initialSource={mode === "manual" ? "manual" : "ean"}
+        initialSource={mode === "ean" ? "ean" : "manual"}
         openScanner={scan === "1"}
       />
     </div>

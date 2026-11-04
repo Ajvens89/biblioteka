@@ -70,32 +70,37 @@ export async function approveExtensionRequest(
   const newDue = new Date(loan.dueAt);
   newDue.setDate(newDue.getDate() + request.requestedDays);
 
-  await db.$transaction([
-    db.loanExtension.create({
-      data: {
-        loanId: loan.id,
-        previousDue: loan.dueAt,
-        newDue,
-        reason: request.reason ?? "Prośba użytkownika — zatwierdzona",
-      },
-    }),
-    db.loan.update({
-      where: { id: loan.id },
-      data: {
-        dueAt: newDue,
-        extensionCount: { increment: 1 },
-        status: "ACTIVE",
-      },
-    }),
-    db.loanExtensionRequest.update({
-      where: { id: requestId },
+  await db.$transaction(async (tx) => {
+    const requestClaim = await tx.loanExtensionRequest.updateMany({
+      where: { id: requestId, status: "PENDING" },
       data: {
         status: "APPROVED",
         reviewedAt: new Date(),
         reviewedById: reviewerId,
       },
-    }),
-  ]);
+    });
+    if (requestClaim.count !== 1) {
+      throw new ServiceError("Prośba została już rozpatrzona.", "INVALID_STATUS");
+    }
+    const loanClaim = await tx.loan.updateMany({
+      where: {
+        id: loan.id,
+        status: { in: ["ACTIVE", "OVERDUE"] },
+        dueAt: loan.dueAt,
+        extensionCount: loan.extensionCount,
+      },
+      data: { dueAt: newDue, extensionCount: { increment: 1 }, status: "ACTIVE" },
+    });
+    if (loanClaim.count !== 1) {
+      throw new ServiceError("Wypożyczenie zostało zmienione. Odśwież stronę i spróbuj ponownie.", "LOAN_CHANGED");
+    }
+    await tx.loanExtension.create({ data: {
+      loanId: loan.id,
+      previousDue: loan.dueAt,
+      newDue,
+      reason: request.reason ?? "Prośba użytkownika — zatwierdzona",
+    } });
+  });
 
   const gameTitle = loan.copy.game.title;
   await notifyUser({
@@ -127,14 +132,17 @@ export async function rejectExtensionRequest(
     throw new ServiceError("Prośba nie istnieje lub została już rozpatrzona.", "NOT_FOUND");
   }
 
-  await db.loanExtensionRequest.update({
-    where: { id: requestId },
+  const claimed = await db.loanExtensionRequest.updateMany({
+    where: { id: requestId, status: "PENDING" },
     data: {
       status: "REJECTED",
       reviewedAt: new Date(),
       reviewedById: reviewerId,
     },
   });
+  if (claimed.count !== 1) {
+    throw new ServiceError("Prośba została już rozpatrzona.", "INVALID_STATUS");
+  }
 
   const gameTitle = request.loan.copy.game.title;
   await notifyUser({

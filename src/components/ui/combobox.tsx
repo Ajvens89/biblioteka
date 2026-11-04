@@ -63,14 +63,14 @@ export function Combobox({
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
-    if (next) setActiveIndex(0);
+    if (next) setActiveIndex(Math.max(0, options.findIndex((option) => option.value === value)));
     else setQuery("");
   };
 
   const onInputKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveIndex((i) => Math.min(i + 1, filtered.length - 1));
+      setActiveIndex((i) => Math.max(0, Math.min(i + 1, filtered.length - 1)));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActiveIndex((i) => Math.max(i - 1, 0));
@@ -95,10 +95,17 @@ export function Combobox({
             type="button"
             id={id}
             role="combobox"
+            aria-controls={listId}
             aria-expanded={open}
             aria-haspopup="listbox"
             aria-label={ariaLabel}
             data-testid={testId}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                event.preventDefault();
+                handleOpenChange(true);
+              }
+            }}
             className={cn(
               "flex h-10 min-w-0 flex-1 items-center justify-between gap-2 rounded-lg border border-input bg-background px-3 text-left text-sm",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
@@ -124,6 +131,9 @@ export function Combobox({
               onKeyDown={onInputKeyDown}
               placeholder={searchPlaceholder}
               aria-label={searchPlaceholder}
+              role="combobox"
+              aria-expanded={open}
+              aria-autocomplete="list"
               aria-controls={listId}
               aria-activedescendant={
                 filtered[safeActiveIndex] ? `${listId}-opt-${safeActiveIndex}` : undefined
@@ -151,6 +161,7 @@ export function Combobox({
                     <button
                       type="button"
                       role="option"
+                      tabIndex={-1}
                       id={`${listId}-opt-${index}`}
                       data-index={index}
                       aria-selected={isSelected}

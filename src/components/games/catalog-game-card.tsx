@@ -1,7 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Clock, Users } from "lucide-react";
+import { ArrowRight, Clock, Users } from "lucide-react";
 import type { GameCollectionType } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { GameCover } from "@/components/ui/game-cover";
@@ -18,9 +16,7 @@ type Props = {
   maxPlayers: number;
   maxPlayTime: number;
   minAge: number;
-  isAvailable: boolean;
-  availLabel: string;
-  showReserve: boolean;
+  publisherName?: string;
   className?: string;
 };
 
@@ -34,9 +30,7 @@ export function CatalogGameCard({
   maxPlayers,
   maxPlayTime,
   minAge,
-  isAvailable,
-  availLabel,
-  showReserve,
+  publisherName,
   className,
 }: Props) {
   const playersText =
@@ -53,7 +47,6 @@ export function CatalogGameCard({
     <article
       className={cn("zf-game-card group", className)}
       data-testid="game-card"
-      data-available={isAvailable ? "true" : "false"}
     >
       <Link href={`/gry/${slug}`} className="zf-game-card-cover relative block overflow-hidden">
         <GameCover
@@ -75,6 +68,7 @@ export function CatalogGameCard({
             {title}
           </Link>
         </h3>
+        {publisherName ? <p className="line-clamp-2 text-xs text-muted-foreground">{publisherName}</p> : null}
 
         {hasMeta && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
@@ -94,28 +88,12 @@ export function CatalogGameCard({
           </div>
         )}
 
-        <p
-          className={cn(
-            "zf-game-card-status mt-auto inline-flex items-center gap-1",
-            isAvailable ? "zf-game-card-status--available" : "text-muted-foreground",
-          )}
-        >
-          {isAvailable && <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />}
-          {availLabel}
-        </p>
-
-        {showReserve && isAvailable ? (
-          <Button size="sm" className="mt-1 h-9 w-full text-xs" asChild>
-            <Link href={`/gry/${slug}#rezerwacja`}>Zarezerwuj</Link>
-          </Button>
-        ) : (
-          <Button variant="outline" size="sm" className="mt-1 h-9 w-full text-xs" asChild>
-            <Link href={`/gry/${slug}`}>
-              Zobacz szczegóły
-              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-            </Link>
-          </Button>
-        )}
+        <Button variant="outline" size="sm" className="mt-auto h-9 w-full text-xs" asChild>
+          <Link href={`/gry/${slug}`}>
+            Zobacz szczegóły
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+        </Button>
       </div>
     </article>
   );

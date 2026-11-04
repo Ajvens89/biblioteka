@@ -5,14 +5,13 @@ import { getAppUrl } from "@/lib/site-url";
 /** Zawsze dynamicznie — unikamy SSG z placeholder DB na Firebase build. */
 export const dynamic = "force-dynamic";
 
-const FALLBACK_BASE = "https://bookshelf--bibl-2c364.europe-west4.hosted.app";
+const FALLBACK_BASE = "https://biblioteka-seven.vercel.app";
 
 function staticRoutes(base: string, now: Date): MetadataRoute.Sitemap {
   return [
     { url: base, lastModified: now, changeFrequency: "daily", priority: 1 },
     { url: `${base}/katalog`, lastModified: now, changeFrequency: "hourly", priority: 0.9 },
     { url: `${base}/kontakt`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
-    { url: `${base}/regulamin`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
   ];
 }
 

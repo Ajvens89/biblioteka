@@ -1,5 +1,7 @@
 "use server";
 
+import { CATALOG_ONLY_MODE, circulationDisabledResult } from "@/lib/catalog-mode";
+
 import { revalidatePath } from "next/cache";
 import { isActorResult, requireActor } from "@/lib/auth/actor";
 import { prisma } from "@/lib/db";
@@ -18,6 +20,7 @@ export async function submitGameRatingAction(
   rating: number,
   comment?: string,
 ): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = ratingSchema.safeParse({ gameId, rating, comment });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -50,6 +53,7 @@ export async function submitGameRatingAction(
 }
 
 export async function getGameRatingSummary(gameId: string) {
+  if (CATALOG_ONLY_MODE) return { average: 0, count: 0 };
   const parsed = gameIdSchema.safeParse({ id: gameId });
   if (!parsed.success) return { average: 0, count: 0 };
 
@@ -66,6 +70,7 @@ export async function getGameRatingSummary(gameId: string) {
 }
 
 export async function getUserGameRating(gameId: string, userId: string) {
+  if (CATALOG_ONLY_MODE) return null;
   return prisma.gameRating.findUnique({
     where: { userId_gameId: { userId, gameId } },
   });

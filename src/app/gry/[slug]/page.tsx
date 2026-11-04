@@ -4,12 +4,10 @@ import { ExternalLink } from "lucide-react";
 import { GameCard } from "@/components/games/game-card";
 import { GameDetailBackLink } from "@/components/games/game-detail-back-link";
 import { GameDetailCover } from "@/components/games/game-detail-cover";
-import { GameDetailAvailability } from "@/components/games/game-detail-availability";
 import {
   buildGameDetailParams,
   GameDetailParams,
 } from "@/components/games/game-detail-params";
-import { GameBorrowContact } from "@/components/games/game-borrow-contact";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GameTypeBadge } from "@/components/ui/game-type-badge";
@@ -17,9 +15,10 @@ import { PageShell } from "@/components/ui/page-shell";
 import { SectionCard } from "@/components/ui/section-card";
 import { MotionReveal } from "@/components/ui/motion-reveal";
 import { APP_NAME, COLLECTION_TYPE_LABELS } from "@/lib/constants";
-import { countAvailableCopies } from "@/lib/games/availability";
 import { fetchGameBySlug, fetchSimilarGames } from "@/lib/games/queries";
 import { getAppUrl } from "@/lib/site-url";
+import { serializeJsonLd } from "@/lib/json-ld";
+import { getPublicGameDescriptions } from "@/lib/games/public-descriptions";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -30,9 +29,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Gra" };
   }
 
+  const publicDescriptions = getPublicGameDescriptions(game);
   const description =
-    game.shortDescription?.trim() ||
-    game.description?.slice(0, 160).trim() ||
+    publicDescriptions.shortDescription ||
+    publicDescriptions.description?.slice(0, 160).trim() ||
     `${game.title} — ${COLLECTION_TYPE_LABELS[game.collectionType]} w bibliotece ${APP_NAME}.`;
 
   const base = getAppUrl();
@@ -72,9 +72,9 @@ export default async function GameDetailPage({ params }: Props) {
   }
 
   const game = result;
+  const { description: publicDescription, shortDescription: publicShortDescription } =
+    getPublicGameDescriptions(game);
 
-  const available = countAvailableCopies(game.copies);
-  const total = game.copies.length;
   const isBoard = game.collectionType !== "RPG";
   const categoryIds = game.categories.map((c) => c.categoryId);
 
@@ -113,8 +113,8 @@ export default async function GameDetailPage({ params }: Props) {
     "@type": "Game",
     name: game.title,
     description:
-      game.shortDescription?.trim() ||
-      game.description?.slice(0, 500).trim() ||
+      publicShortDescription ||
+      publicDescription?.slice(0, 500).trim() ||
       `${game.title} w bibliotece ${APP_NAME}.`,
     url: `${baseUrl}/gry/${game.slug}`,
     ...(coverForSchema ? { image: coverForSchema } : {}),
@@ -127,7 +127,7 @@ export default async function GameDetailPage({ params }: Props) {
     <PageShell className="zf-game-page overflow-x-hidden pb-10" width="wide">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <div className="mb-6">
         <GameDetailBackLink />
@@ -160,26 +160,25 @@ export default async function GameDetailPage({ params }: Props) {
             )}
           </header>
 
-          <GameDetailAvailability available={available} total={total} />
-
           <GameDetailParams params={paramsList} />
-
-          <GameBorrowContact gameTitle={game.title} available={available} />
         </div>
       </div>
 
-      {(game.description || game.shortDescription) && (
-        <SectionCard title="O grze" className="mt-10">
-          {game.shortDescription && game.shortDescription !== game.description && (
-            <p className="text-body mb-4 font-medium text-foreground">{game.shortDescription}</p>
-          )}
-          {game.description && (
-            <div className="text-body prose-game max-w-none whitespace-pre-wrap text-muted-foreground">
-              {game.description}
-            </div>
-          )}
-        </SectionCard>
-      )}
+      <SectionCard title="O grze" className="mt-10">
+        {publicShortDescription && publicShortDescription !== publicDescription && (
+          <p className="text-body mb-4 font-medium text-foreground">{publicShortDescription}</p>
+        )}
+        {publicDescription && (
+          <div className="text-body prose-game max-w-none whitespace-pre-wrap text-muted-foreground">
+            {publicDescription}
+          </div>
+        )}
+        {!publicDescription && !publicShortDescription ? (
+          <p className="text-body text-muted-foreground">
+            Opis gry uzupełniamy.
+          </p>
+        ) : null}
+      </SectionCard>
 
       {(game.categories.length > 0 || game.tags.length > 0) && (
         <div className="mt-6 flex flex-wrap gap-2">

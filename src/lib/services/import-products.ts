@@ -3,9 +3,11 @@ import { copyFile, mkdir, readFile, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import slugify from "slugify";
-import { buildEan13, normalizeEan } from "@/lib/services/ean";
+import { normalizeProductBarcode } from "@/lib/services/product-barcode";
 import { fetchCoverForGame } from "@/lib/services/cover-fetch";
 import { validateCoverImageUrl } from "@/lib/services/ean-providers/image-utils";
+
+export { isValidBarcodeLength, normalizeProductBarcode } from "@/lib/services/product-barcode";
 
 export type ProductRecord = {
   name?: string;
@@ -38,44 +40,30 @@ export type ImportProductsStats = {
   issues: string[];
 };
 
-const DEFAULT_PATHS = ["./products.json", "./data/products.json", "./public/products.json"];
+const ROOT_PRODUCTS_FILE = path.join(process.cwd(), "products.json");
+const DATA_PRODUCTS_FILE = path.join(process.cwd(), "data", "products.json");
+const PUBLIC_PRODUCTS_FILE = path.join(process.cwd(), "public", "products.json");
+const DEFAULT_PATHS = [
+  { filePath: ROOT_PRODUCTS_FILE, exists: () => existsSync(ROOT_PRODUCTS_FILE) },
+  { filePath: DATA_PRODUCTS_FILE, exists: () => existsSync(DATA_PRODUCTS_FILE) },
+  { filePath: PUBLIC_PRODUCTS_FILE, exists: () => existsSync(PUBLIC_PRODUCTS_FILE) },
+];
 /** Numer inwentarzowy egzemplarza z importu products.json */
 const IMPORT_INVENTORY_PREFIX = "ZF-EGZ-IMP";
-
-export function isValidBarcodeLength(digits: string): boolean {
-  return [8, 12, 13, 14].includes(digits.length);
-}
-
-/** Cyfry z barcode; 12→EAN-13, 14 z zerem wiodącym→13; inaczej normalizeEan gdy możliwe. */
-export function normalizeProductBarcode(raw: string | undefined | null): string | null {
-  if (!raw?.trim()) return null;
-  const digits = raw.replace(/\D/g, "");
-  if (!digits || !isValidBarcodeLength(digits)) return null;
-
-  try {
-    if (digits.length === 12) return buildEan13(digits);
-    if (digits.length === 14 && digits.startsWith("0")) return normalizeEan(digits.slice(1));
-    if (digits.length === 13 || digits.length === 8) return normalizeEan(digits);
-    return digits;
-  } catch {
-    if (digits.length === 13 || digits.length === 8) return digits;
-    return null;
-  }
-}
 
 export function resolveProductsFilePath(argv: string[]): string | null {
   const pathArg = argv.find((a) => {
     if (a.startsWith("-")) return false;
     if (!a.toLowerCase().endsWith(".json")) return false;
-    const resolved = path.resolve(a);
-    return existsSync(resolved);
+    // CLI input is supplied at runtime; it must not expand the deployment trace to the repository.
+    const resolved = path.resolve(/*turbopackIgnore: true*/ a);
+    return existsSync(/*turbopackIgnore: true*/ resolved);
   });
   if (pathArg) {
-    return path.resolve(pathArg);
+    return path.resolve(/*turbopackIgnore: true*/ pathArg);
   }
-  for (const p of DEFAULT_PATHS) {
-    const resolved = path.resolve(p);
-    if (existsSync(resolved)) return resolved;
+  for (const candidate of DEFAULT_PATHS) {
+    if (candidate.exists()) return candidate.filePath;
   }
   return null;
 }
@@ -106,14 +94,15 @@ export function parseProductsJson(content: string): ProductsFile {
 }
 
 export async function loadProductsFile(filePath: string): Promise<{ data: ProductsFile; baseDir: string }> {
-  const resolved = path.resolve(filePath);
-  const info = await stat(resolved);
+  // Includes operator-selected CLI files and admin uploads in the OS temp directory.
+  const resolved = path.resolve(/*turbopackIgnore: true*/ filePath);
+  const info = await stat(/*turbopackIgnore: true*/ resolved);
   if (info.size === 0) {
     throw new Error(
       `Plik ${resolved} ma 0 bajtów (pusty). Przeciągnij ponownie z pulpitu lub wklej JSON w sekcji powyżej.`,
     );
   }
-  const content = await readFile(resolved, "utf8");
+  const content = await readFile(/*turbopackIgnore: true*/ resolved, "utf8");
   const data = parseProductsJson(content);
   return { data, baseDir: path.dirname(resolved) };
 }
@@ -123,10 +112,16 @@ const PUBLIC_COVERS_DIR = path.join(PUBLIC_DIR, "covers");
 
 /** Katalogi, w których szukamy plików okładek obok products.json. */
 export function getCoverSearchDirs(baseDir: string): string[] {
-  const dirs = [path.resolve(baseDir), PUBLIC_DIR, path.resolve("data"), path.resolve(".")];
+  // These are runtime import/CLI lookup locations, not a request to bundle every file in cwd.
+  const dirs = [
+    path.resolve(/*turbopackIgnore: true*/ baseDir),
+    PUBLIC_DIR,
+    path.resolve("data"),
+    path.resolve(/*turbopackIgnore: true*/ "."),
+  ];
   for (const candidate of ["./products.json", "../products.json", path.join("..", "products.json")]) {
-    const resolved = path.resolve(candidate);
-    if (existsSync(resolved)) {
+    const resolved = path.resolve(/*turbopackIgnore: true*/ candidate);
+    if (existsSync(/*turbopackIgnore: true*/ resolved)) {
       dirs.push(path.dirname(resolved));
     }
   }
@@ -168,7 +163,8 @@ function findCoverSourceFile(
   }
 
   for (const candidate of candidates) {
-    if (existsSync(candidate)) return candidate;
+    // External cover files adjacent to an operator's import are available only at runtime.
+    if (existsSync(/*turbopackIgnore: true*/ candidate)) return candidate;
   }
   return null;
 }

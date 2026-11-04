@@ -35,8 +35,8 @@ const baseGameFields = {
   type: gameTypeEnum,
   publisherId: z.string().optional().nullable(),
   designerId: z.string().optional().nullable(),
-  /** Gdy brak publisherId — utwórz / dopasuj wydawcę po nazwie z lookupu. */
-  publisherName: z.string().max(200).optional().nullable(),
+  /** Gdy brak publisherId — utwórz / dopasuj wydawcę z formularza lub lookupu. */
+  publisherName: z.string().trim().max(200, "Nazwa wydawcy może mieć maksymalnie 200 znaków.").optional().nullable(),
   /** Gdy brak designerId — utwórz / dopasuj autora po nazwie z lookupu. */
   designerName: z.string().max(200).optional().nullable(),
   yearPublished: z.coerce.number().int().optional().nullable(),

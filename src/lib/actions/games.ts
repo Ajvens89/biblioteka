@@ -1,5 +1,7 @@
 "use server";
 
+import { CATALOG_ONLY_MODE, circulationDisabledResult } from "@/lib/catalog-mode";
+
 import { revalidatePath } from "next/cache";
 import slugify from "slugify";
 import { logAudit } from "@/lib/audit";
@@ -11,6 +13,7 @@ import {
   createGameFromEan,
   lookupByEan,
   lookupEanByTitle,
+  resolveGamePublisher,
   type EanLookupResult,
   type TitleToEanResult,
 } from "@/lib/services/games";
@@ -71,7 +74,10 @@ export async function createGame(input: GameInput): Promise<ActionResult<{ id: s
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
   try {
-    const game = await createGameFromEan(prisma, parsed.data, actorResult.id);
+    const game = await createGameFromEan(prisma, {
+      ...parsed.data,
+      addCopy: CATALOG_ONLY_MODE ? false : parsed.data.addCopy,
+    }, actorResult.id);
     revalidatePath("/admin/gry");
     revalidatePath("/katalog");
     return ok({ id: game.id });
@@ -106,6 +112,7 @@ export async function updateGame(id: string, input: GameInput): Promise<ActionRe
       await tx.gameTag.deleteMany({ where: { gameId: idParsed.data.id } });
 
       const normalizedEan = data.ean?.trim() ? normalizeEan(data.ean) : null;
+      const publisherId = await resolveGamePublisher(tx, data);
 
       await tx.game.update({
         where: { id: idParsed.data.id },
@@ -123,7 +130,7 @@ export async function updateGame(id: string, input: GameInput): Promise<ActionRe
           maxPlayTime: data.maxPlayTime,
           difficulty: data.difficulty,
           type: data.type,
-          publisherId: data.publisherId || null,
+          publisherId,
           designerId: data.designerId || null,
           yearPublished: data.yearPublished ?? null,
         coverImageUrl: data.coverImageUrl || null,
@@ -180,6 +187,7 @@ export async function archiveGame(id: string): Promise<ActionResult> {
 }
 
 export async function createCopy(input: CopyInput): Promise<ActionResult<{ id: string }>> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const actorResult = await requireActorStaff();
   if (!isActorResult(actorResult)) return actorResult;
 
@@ -209,6 +217,7 @@ export async function createCopy(input: CopyInput): Promise<ActionResult<{ id: s
 }
 
 export async function updateCopy(id: string, input: CopyInput): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const idParsed = z.object({ id: uuidSchema }).safeParse({ id });
   if (!idParsed.success) return fail(idParsed.error.issues[0]?.message ?? "Błąd walidacji");
 

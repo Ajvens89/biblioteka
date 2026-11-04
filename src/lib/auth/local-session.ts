@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { SESSION_COOKIE, signProfileSession, verifyProfileSession } from "@/lib/auth/session-token";
+import { SESSION_COOKIE, SESSION_TTL_SECONDS, signProfileSession, verifyProfileSession } from "@/lib/auth/session-token";
 
 export async function getLocalSessionProfileId(): Promise<string | null> {
   const cookieStore = await cookies();
@@ -14,7 +14,7 @@ export async function setLocalSession(profileId: string) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 14,
+    maxAge: SESSION_TTL_SECONDS,
   });
 }
 

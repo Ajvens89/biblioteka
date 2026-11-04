@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { LayoutDashboard, LogOut } from "lucide-react";
+import { LayoutDashboard, LogOut, Plus } from "lucide-react";
 import { logoutAction } from "@/lib/actions/auth";
 import { getSessionUser, isStaff } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ export async function SiteHeader() {
     { href: "/katalog?collectionType=BOARD_GAME", label: "Planszówki", icon: "board" as const },
     { href: "/katalog?collectionType=RPG", label: "RPG", icon: "rpg" as const },
     { href: "/katalog", label: "Katalog", icon: "catalog" as const },
-    { href: "/jak-wypozyczyc", label: "Jak wypożyczyć", icon: "account" as const },
     { href: "/kontakt", label: "Kontakt", icon: "account" as const },
   ];
 
@@ -27,7 +26,7 @@ export async function SiteHeader() {
       <div className="site-header-inner mx-auto flex h-[3.75rem] w-full max-w-[90rem] items-center justify-between gap-3 px-4 md:h-16 md:px-6">
         <div className="flex min-w-0 items-center gap-2">
           <MobileNav links={navLinks} user={staff ? user : null} />
-          <BrandLogo size="sm" subtitle="Biblioteka gier" />
+          <BrandLogo size="sm" subtitle="Katalog gier" />
         </div>
 
         <Suspense fallback={null}>
@@ -44,10 +43,13 @@ export async function SiteHeader() {
           {staff && user ? (
             <>
               <Button variant="outline" size="sm" asChild>
-                <Link href="/admin">
+                <Link href="/admin" target="_blank" rel="noopener noreferrer" aria-label="Panel właściciela katalogu">
                   <LayoutDashboard className="h-4 w-4" aria-hidden />
                   <span className="hidden max-w-[8rem] truncate md:inline">Panel</span>
                 </Link>
+              </Button>
+              <Button size="sm" className="hidden sm:inline-flex" asChild>
+                <Link href="/admin/gry/nowa" target="_blank" rel="noopener noreferrer"><Plus className="h-4 w-4" aria-hidden />Dodaj grę</Link>
               </Button>
               <form action={logoutAction} className="hidden sm:block">
                 <Button variant="ghost" size="sm" type="submit" data-testid="logout-button">
@@ -57,8 +59,8 @@ export async function SiteHeader() {
               </form>
             </>
           ) : (
-            <Button size="sm" className="hidden sm:inline-flex" asChild>
-              <Link href="/katalog">Otwórz portal</Link>
+            <Button size="sm" asChild>
+              <Link href="/login" target="_blank" rel="noopener noreferrer" aria-label="Logowanie właściciela katalogu" data-testid="owner-login">Zaloguj</Link>
             </Button>
           )}
         </div>

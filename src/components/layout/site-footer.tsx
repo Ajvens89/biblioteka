@@ -4,24 +4,23 @@ import { FOUNDATION_LOAN_EMAIL } from "@/lib/constants";
 import { getAppSettings } from "@/lib/settings";
 
 const FOUNDATION_URL = "https://zakatekfantastyki.pl/";
-const PHONE = "+48573232474";
-const PHONE_DISPLAY = "+48 573232474";
-
 export async function SiteFooter() {
   const settings = await getAppSettings();
   const loanEmail = settings.contactEmail || FOUNDATION_LOAN_EMAIL;
+  const phone = settings.contactPhone.trim();
+  const showPhone = Boolean(phone && phone !== "+48 000 000 000");
 
   return (
     <footer className="zf-footer mt-auto">
       <div className="mx-auto w-full max-w-[90rem] px-4 py-12 md:px-6 md:py-14">
-        <p className="mb-8 font-display text-2xl font-medium text-primary md:text-3xl">540 światów</p>
+        <p className="mb-8 font-display text-2xl font-medium text-primary md:text-3xl">Twój następny wieczór zaczyna się tutaj</p>
 
         <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr] md:gap-12">
           <div className="space-y-4">
-            <BrandLogo showSubtitle subtitle="Biblioteka gier" />
+            <BrandLogo showSubtitle subtitle="Katalog gier" />
             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
               Biblioteka gier planszowych i fabularnych prowadzona przez Fundację Zakątek Fantastyki
-              w Bielsku-Białej. Wypożyczasz za darmo, grasz z bliskimi.
+              w Bielsku-Białej. Przeglądaj tytuły, wydawców, okładki i opisy gier.
             </p>
           </div>
 
@@ -44,18 +43,13 @@ export async function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/jak-wypozyczyc" className="site-footer-link">
-                  Jak wypożyczyć
-                </Link>
-              </li>
-              <li>
                 <Link href="/kontakt" className="site-footer-link">
                   Kontakt
                 </Link>
               </li>
               <li>
-                <Link href="/regulamin" className="site-footer-link">
-                  Regulamin
+                <Link href="/login" target="_blank" rel="noopener noreferrer" className="site-footer-link">
+                  Logowanie właściciela
                 </Link>
               </li>
             </ul>
@@ -66,15 +60,17 @@ export async function SiteFooter() {
             <ul className="space-y-2.5 text-sm text-muted-foreground">
               <li>{settings.foundationAddress}</li>
               <li>
-                <a href={`mailto:${loanEmail}`} className="site-footer-link text-primary">
+                <a href={`mailto:${loanEmail}`} className="site-footer-link break-all text-primary">
                   {loanEmail}
                 </a>
               </li>
-              <li>
-                <a href={`tel:${PHONE}`} className="site-footer-link">
-                  {PHONE_DISPLAY}
-                </a>
-              </li>
+              {showPhone ? (
+                <li>
+                  <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} className="site-footer-link">
+                    {phone}
+                  </a>
+                </li>
+              ) : null}
               <li>
                 <a
                   href={FOUNDATION_URL}

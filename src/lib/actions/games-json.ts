@@ -1,18 +1,16 @@
 "use server";
 
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { tmpdir } from "os";
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
 import { isActorResult, requireActorAdmin } from "@/lib/auth/actor";
 import { prisma } from "@/lib/db";
 import {
   formatGamesImportReport,
-  importGamesFromFile,
-  resolveGamesJsonPath,
+  importGamesData,
+  parseGamesJson,
   type ImportGamesJsonStats,
 } from "@/lib/services/games-json";
+import { loadDefaultGamesJsonFile, resolveDefaultGamesJsonPath } from "@/lib/services/games-json-default-file";
 import { fail, ok, type ActionResult } from "@/lib/actions/utils";
 
 export async function importGamesJsonDefaultAction(
@@ -22,15 +20,16 @@ export async function importGamesJsonDefaultAction(
   const actorResult = await requireActorAdmin();
   if (!isActorResult(actorResult)) return actorResult;
 
-  const filePath = resolveGamesJsonPath([]);
-  if (!filePath) {
-    return fail(
-      "Nie znaleziono games.json. Umieść plik w ./data/games.json lub prześlij plik poniżej.",
-    );
-  }
-
   try {
-    const stats = await importGamesFromFile(prisma, filePath, { dryRun, noOverwrite });
+    const source = await loadDefaultGamesJsonFile();
+    if (!source) {
+      return fail(
+        "Nie znaleziono games.json. Umieść plik w ./data/games.json lub prześlij plik poniżej.",
+      );
+    }
+    const stats = await importGamesData(prisma, source.data, {
+      dryRun, noOverwrite, sourceName: source.filePath,
+    });
     const report = formatGamesImportReport(stats);
 
     if (!dryRun) {
@@ -62,14 +61,9 @@ export async function importGamesJsonUploadAction(
   const file = formData.get("file");
   if (!(file instanceof File)) return fail("Wybierz plik games.json.");
 
-  const dir = path.join(tmpdir(), "biblioteka-import");
-  await mkdir(dir, { recursive: true });
-  const filePath = path.join(dir, `games-${Date.now()}.json`);
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(filePath, buffer);
-
   try {
-    const stats = await importGamesFromFile(prisma, filePath, { dryRun, noOverwrite });
+    const data = parseGamesJson(await file.text());
+    const stats = await importGamesData(prisma, data, { dryRun, noOverwrite, sourceName: file.name });
     const report = formatGamesImportReport(stats);
 
     if (!dryRun) {
@@ -93,5 +87,5 @@ export async function importGamesJsonUploadAction(
 export async function getDefaultGamesJsonPath(): Promise<ActionResult<{ path: string | null }>> {
   const actorResult = await requireActorAdmin();
   if (!isActorResult(actorResult)) return actorResult;
-  return ok({ path: resolveGamesJsonPath([]) });
+  return ok({ path: resolveDefaultGamesJsonPath() });
 }

@@ -1,5 +1,7 @@
 "use server";
 
+import { CATALOG_ONLY_MODE, circulationDisabledResult } from "@/lib/catalog-mode";
+
 import { revalidatePath } from "next/cache";
 import { isActorResult, requireActor, requireActorStaff } from "@/lib/auth/actor";
 import { prisma } from "@/lib/db";
@@ -19,6 +21,7 @@ export async function requestLoanExtensionAction(
   reason?: string,
   requestedDays = 7,
 ): Promise<ActionResult<{ requestId: string }>> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = requestSchema.safeParse({ loanId, reason, requestedDays });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -43,6 +46,7 @@ export async function requestLoanExtensionAction(
 }
 
 export async function approveExtensionRequestAction(requestId: string): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = z.object({ requestId: uuidSchema }).safeParse({ requestId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -61,6 +65,7 @@ export async function approveExtensionRequestAction(requestId: string): Promise<
 }
 
 export async function rejectExtensionRequestAction(requestId: string): Promise<ActionResult> {
+  if (CATALOG_ONLY_MODE) return circulationDisabledResult();
   const parsed = z.object({ requestId: uuidSchema }).safeParse({ requestId });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Błąd walidacji");
 
@@ -79,6 +84,7 @@ export async function rejectExtensionRequestAction(requestId: string): Promise<A
 }
 
 export async function getPendingExtensionRequests() {
+  if (CATALOG_ONLY_MODE) return [];
   const actor = await requireActorStaff();
   if (!isActorResult(actor)) return [];
 
@@ -94,6 +100,7 @@ export async function getPendingExtensionRequests() {
 }
 
 export async function getUserPendingExtension(loanId: string) {
+  if (CATALOG_ONLY_MODE) return null;
   const parsed = loanIdSchema.safeParse({ loanId });
   if (!parsed.success) return null;
 

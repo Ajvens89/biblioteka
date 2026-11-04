@@ -28,7 +28,7 @@ export function HeaderSearch({ className }: { className?: string }) {
     <SearchQueryShell>
       <div className={cn("relative min-w-0 flex-1 max-w-md", className)} data-testid="header-search">
         <label htmlFor={inputId} className="sr-only">
-          Szukaj w katalogu
+          Tytuł gry lub wydawca
         </label>
         <Search
           className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
@@ -38,7 +38,7 @@ export function HeaderSearch({ className }: { className?: string }) {
           id={inputId}
           data-testid="header-search-input"
           className="h-9 rounded-lg border-border/80 bg-secondary/40 pl-9 text-sm"
-          placeholder="Szukaj gry…"
+          placeholder="Tytuł gry lub wydawca…"
           value={q}
           onChange={(e) => {
             setQ(e.target.value);
@@ -52,6 +52,7 @@ export function HeaderSearch({ className }: { className?: string }) {
             if (q.trim().length >= SUGGEST_MIN_QUERY_LENGTH) setSuggestOpen(true);
           }}
           onBlur={() => window.setTimeout(() => setSuggestOpen(false), 150)}
+          role="combobox"
           aria-autocomplete="list"
           aria-controls={suggestListId}
           aria-expanded={suggestOpen}
