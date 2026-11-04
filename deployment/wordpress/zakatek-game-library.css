@@ -11,5 +11,7 @@
   font-size: 1rem;
   line-height: 1.5;
 }
-.zakatek-library-entry__toolbar a { text-decoration: underline; }
+.zakatek-library-entry__toolbar a { color: #43316a; text-decoration: underline; }
+.zakatek-library-entry__toolbar a:hover,
+.zakatek-library-entry__toolbar a:focus-visible { color: #252025; }
 #zakatek-game-library { display: block; width: 100%; height: 1200px; border: 0; }

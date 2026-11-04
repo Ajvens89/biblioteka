@@ -727,6 +727,11 @@ body:has([data-admin-panel]) .site-footer {
   box-shadow: 0 0 0 4px rgb(188 240 16 / 0.25);
 }
 
+.zf-search-input::placeholder {
+  color: #5b5550;
+  opacity: 1;
+}
+
 .zf-cover-fan {
   position: relative;
   min-height: 280px;
