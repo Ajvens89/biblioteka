@@ -22,8 +22,14 @@
     });
   };
   window.addEventListener('message', (event) => {
-    if (event.origin !== appOrigin || event.source !== frame.contentWindow) return;
+    if (!frame.contentWindow || event.origin !== appOrigin || event.source !== frame.contentWindow) return;
     const data = event.data;
+    if (data && data.type === 'zakatek-library:navigate') {
+      const top = Math.max(0, Math.round(window.scrollY + frame.getBoundingClientRect().top - 112));
+      window.scrollTo({top, behavior: 'instant'});
+      publishViewport();
+      return;
+    }
     if (!data || data.type !== 'zakatek-library:resize') return;
     if (!Number.isInteger(data.height) || data.height < 100 || data.height > 40000) return;
     frame.style.height = `${data.height + 2}px`;

@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { LIBRARY_PARENT_ORIGINS } from "@/lib/embed-policy";
 
-/** The parent website receives public layout dimensions only. */
+/** Only public layout dimensions and a route-change marker cross the trusted frame boundary. */
 export function LibraryEmbedBridge() {
   const pathname = usePathname();
+  const previousPathname = useRef(pathname);
 
   useEffect(() => {
+    const navigated = previousPathname.current !== pathname;
+    previousPathname.current = pathname;
     if (window.parent === window) return;
     let parentOrigin: string;
     try {
@@ -21,6 +24,9 @@ export function LibraryEmbedBridge() {
     const content = document.getElementById("library-page-content");
     if (!content) return;
     document.documentElement.dataset.libraryEmbedded = "true";
+    if (navigated) {
+      window.parent.postMessage({ type: "zakatek-library:navigate" }, parentOrigin);
+    }
     const receiveViewport = (event: MessageEvent) => {
       if (event.source !== window.parent || event.origin !== parentOrigin) return;
       const data = event.data;
