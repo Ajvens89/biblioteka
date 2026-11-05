@@ -9,7 +9,12 @@ const appOrigin = "https://biblioteka-seven.vercel.app";
 
 function parentFrame(top = -320, scrollY = 900) {
   const callbacks = new Map<string, (event: unknown) => void>();
-  const frameWindow = { postMessage() {} };
+  const messages: { data: Record<string, unknown>; targetOrigin: string }[] = [];
+  const frameWindow = {
+    postMessage(data: Record<string, unknown>, targetOrigin: string) {
+      messages.push({ data: { ...data }, targetOrigin });
+    },
+  };
   const scrolls: { top: number; behavior: string }[] = [];
   const frame = {
     style: { height: "1200px" }, contentWindow: frameWindow as typeof frameWindow | null,
@@ -29,7 +34,12 @@ function parentFrame(top = -320, scrollY = 900) {
     cancelAnimationFrame: (id: number) => scheduled.delete(id),
   });
   return {
-    frame, frameWindow, scrolls,
+    frame, frameWindow, scrolls, messages,
+    flush() {
+      const work = [...scheduled.values()];
+      scheduled.clear();
+      work.forEach((callback) => callback());
+    },
     message(data: unknown, origin = appOrigin, sender: unknown = frameWindow) {
       callbacks.get("message")!({ data, origin, source: sender });
     },
@@ -55,6 +65,46 @@ test("navigation messages require the exact application origin and the actual if
   parent.frame.contentWindow = null;
   parent.message({ type: "zakatek-library:navigate" }, appOrigin, null);
   assert.deepEqual(parent.scrolls, []);
+});
+
+test("initial ready does not scroll, but ready after a full iframe reload reveals the detail page", () => {
+  const parent = parentFrame();
+  parent.message({ type: "zakatek-library:ready" });
+  assert.deepEqual(parent.scrolls, []);
+  parent.message({ type: "zakatek-library:ready" });
+  assert.deepEqual(parent.scrolls, [{ top: 468, behavior: "instant" }]);
+});
+
+test("untrusted ready messages cannot scroll or prime the ready state", () => {
+  const parent = parentFrame();
+  parent.message({ type: "zakatek-library:ready" }, "https://example.com");
+  parent.message({ type: "zakatek-library:ready" }, appOrigin, {});
+  parent.message({ type: "zakatek-library:ready" });
+  assert.deepEqual(parent.scrolls, [], "spoofed ready must not count as the initial ready");
+  parent.message({ type: "zakatek-library:ready" }, "https://example.com");
+  parent.message({ type: "zakatek-library:ready" }, appOrigin, {});
+  assert.deepEqual(parent.scrolls, []);
+  parent.message({ type: "zakatek-library:ready" });
+  assert.deepEqual(parent.scrolls, [{ top: 468, behavior: "instant" }]);
+});
+
+test("a viewport handshake answers only the trusted iframe and never primes navigation scrolling", () => {
+  const parent = parentFrame();
+  parent.flush();
+  assert.equal(parent.messages.length, 1);
+  parent.message({ type: "zakatek-library:request-viewport" }, "https://example.com");
+  parent.message({ type: "zakatek-library:request-viewport" }, appOrigin, {});
+  parent.flush();
+  assert.equal(parent.messages.length, 1);
+  parent.message({ type: "zakatek-library:request-viewport" });
+  parent.flush();
+  assert.equal(parent.messages.length, 2);
+  assert.deepEqual(parent.messages[1], {
+    data: { type: "zakatek-library:viewport", top: 320, height: 800 }, targetOrigin: appOrigin,
+  });
+  assert.deepEqual(parent.scrolls, []);
+  parent.message({ type: "zakatek-library:ready" });
+  assert.deepEqual(parent.scrolls, [], "a viewport request is not an initial-ready event");
 });
 
 test("the header margin never requests a negative document scroll position", () => {

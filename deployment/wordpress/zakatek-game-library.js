@@ -4,6 +4,7 @@
   if (!frame) return;
   const appOrigin = 'https://biblioteka-seven.vercel.app';
   let pending = 0;
+  let readySeen = false;
   const publishViewport = () => {
     cancelAnimationFrame(pending);
     pending = requestAnimationFrame(() => {
@@ -21,13 +22,26 @@
       }, appOrigin);
     });
   };
+  const revealFrameTop = () => {
+    const top = Math.max(0, Math.round(window.scrollY + frame.getBoundingClientRect().top - 112));
+    window.scrollTo({top, behavior: 'instant'});
+    publishViewport();
+  };
   window.addEventListener('message', (event) => {
     if (!frame.contentWindow || event.origin !== appOrigin || event.source !== frame.contentWindow) return;
     const data = event.data;
-    if (data && data.type === 'zakatek-library:navigate') {
-      const top = Math.max(0, Math.round(window.scrollY + frame.getBoundingClientRect().top - 112));
-      window.scrollTo({top, behavior: 'instant'});
+    if (data && data.type === 'zakatek-library:request-viewport') {
       publishViewport();
+      return;
+    }
+    if (data && data.type === 'zakatek-library:ready') {
+      if (readySeen) revealFrameTop();
+      readySeen = true;
+      return;
+    }
+    if (data && data.type === 'zakatek-library:navigate') {
+      readySeen = true;
+      revealFrameTop();
       return;
     }
     if (!data || data.type !== 'zakatek-library:resize') return;
