@@ -5,6 +5,8 @@
   const appOrigin = 'https://biblioteka-seven.vercel.app';
   let pending = 0;
   let readySeen = false;
+  let navigationFrame = 0;
+  let navigationPending = false;
   const publishViewport = () => {
     cancelAnimationFrame(pending);
     pending = requestAnimationFrame(() => {
@@ -23,9 +25,20 @@
     });
   };
   const revealFrameTop = () => {
-    const top = Math.max(0, Math.round(window.scrollY + frame.getBoundingClientRect().top - 112));
-    window.scrollTo({top, behavior: 'instant'});
-    publishViewport();
+    navigationPending = true;
+    frame.dataset.libraryNavigation = 'pending';
+    cancelAnimationFrame(navigationFrame);
+    // Let iframe resizing and browser scroll anchoring settle before revealing the new page.
+    navigationFrame = requestAnimationFrame(() => {
+      navigationFrame = requestAnimationFrame(() => {
+        const top = Math.max(0, Math.round(window.scrollY + frame.getBoundingClientRect().top - 112));
+        window.scrollTo({top, behavior: 'instant'});
+        navigationPending = false;
+        frame.dataset.libraryScrollTarget = String(top);
+        frame.dataset.libraryNavigation = 'settled';
+        publishViewport();
+      });
+    });
   };
   window.addEventListener('message', (event) => {
     if (!frame.contentWindow || event.origin !== appOrigin || event.source !== frame.contentWindow) return;
@@ -46,7 +59,10 @@
     }
     if (!data || data.type !== 'zakatek-library:resize') return;
     if (!Number.isInteger(data.height) || data.height < 100 || data.height > 40000) return;
+    // A cached iframe can send its first ready before this footer script has loaded.
+    readySeen = true;
     frame.style.height = `${data.height + 2}px`;
+    if (navigationPending) revealFrameTop();
     publishViewport();
   });
   frame.addEventListener('load', publishViewport);

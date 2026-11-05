@@ -17,6 +17,7 @@ function parentFrame(top = -320, scrollY = 900) {
   };
   const scrolls: { top: number; behavior: string }[] = [];
   const frame = {
+    dataset: {} as Record<string, string>,
     style: { height: "1200px" }, contentWindow: frameWindow as typeof frameWindow | null,
     getBoundingClientRect: () => ({ top, bottom: top + 1200 }),
     addEventListener() {},
@@ -35,6 +36,7 @@ function parentFrame(top = -320, scrollY = 900) {
   });
   return {
     frame, frameWindow, scrolls, messages,
+    setTop(value: number) { top = value; },
     flush() {
       const work = [...scheduled.values()];
       scheduled.clear();
@@ -50,6 +52,9 @@ test("a trusted pathname-change marker reveals the iframe top without animation"
   const parent = parentFrame();
   assert.equal(parent.scrolls.length, 0, "initial frame setup must not scroll");
   parent.message({ type: "zakatek-library:navigate" });
+  parent.flush();
+  assert.deepEqual(parent.scrolls, [], "wait for browser layout before scrolling");
+  parent.flush();
   assert.deepEqual(parent.scrolls, [{ top: 468, behavior: "instant" }]);
   assert.equal(parent.frame.style.height, "1200px", "navigation does not change the resize contract");
 });
@@ -72,6 +77,7 @@ test("initial ready does not scroll, but ready after a full iframe reload reveal
   parent.message({ type: "zakatek-library:ready" });
   assert.deepEqual(parent.scrolls, []);
   parent.message({ type: "zakatek-library:ready" });
+  parent.flush(); parent.flush();
   assert.deepEqual(parent.scrolls, [{ top: 468, behavior: "instant" }]);
 });
 
@@ -85,6 +91,7 @@ test("untrusted ready messages cannot scroll or prime the ready state", () => {
   parent.message({ type: "zakatek-library:ready" }, appOrigin, {});
   assert.deepEqual(parent.scrolls, []);
   parent.message({ type: "zakatek-library:ready" });
+  parent.flush(); parent.flush();
   assert.deepEqual(parent.scrolls, [{ top: 468, behavior: "instant" }]);
 });
 
@@ -110,7 +117,33 @@ test("a viewport handshake answers only the trusted iframe and never primes navi
 test("the header margin never requests a negative document scroll position", () => {
   const parent = parentFrame(20, 0);
   parent.message({ type: "zakatek-library:navigate" });
+  parent.flush(); parent.flush();
   assert.deepEqual(parent.scrolls, [{ top: 0, behavior: "instant" }]);
+});
+
+test("navigation waits for a late resize and uses the resulting layout", () => {
+  const parent = parentFrame();
+  parent.message({ type: "zakatek-library:navigate" });
+  parent.flush();
+  assert.equal(parent.frame.dataset.libraryNavigation, "pending");
+  parent.setTop(-80);
+  parent.message({ type: "zakatek-library:resize", height: 2100 });
+  parent.flush();
+  assert.deepEqual(parent.scrolls, []);
+  parent.flush();
+  assert.deepEqual(parent.scrolls, [{ top: 708, behavior: "instant" }]);
+  assert.equal(parent.frame.dataset.libraryNavigation, "settled");
+  assert.equal(parent.frame.dataset.libraryScrollTarget, "708");
+});
+
+test("a received layout establishes readiness when the early ready message was missed", () => {
+  const parent = parentFrame();
+  parent.message({ type: "zakatek-library:resize", height: 1900 });
+  parent.flush(); parent.flush();
+  assert.deepEqual(parent.scrolls, [], "the initial layout must not scroll");
+  parent.message({ type: "zakatek-library:ready" });
+  parent.flush(); parent.flush();
+  assert.deepEqual(parent.scrolls, [{ top: 468, behavior: "instant" }]);
 });
 
 test("resize keeps working and invalid resize messages neither resize nor navigate", () => {
