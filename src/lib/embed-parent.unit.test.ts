@@ -146,6 +146,20 @@ test("a received layout establishes readiness when the early ready message was m
   assert.deepEqual(parent.scrolls, [{ top: 468, behavior: "instant" }]);
 });
 
+test("a streamed loading view cannot finalize navigation before the actual page arrives", () => {
+  const parent = parentFrame();
+  parent.message({ type: "zakatek-library:navigate" });
+  parent.message({ type: "zakatek-library:resize", height: 700, contentReady: false });
+  parent.flush(); parent.flush();
+  assert.equal(parent.frame.dataset.libraryNavigation, "pending");
+  parent.setTop(-80);
+  parent.message({ type: "zakatek-library:resize", height: 2800, contentReady: true });
+  parent.flush(); parent.flush();
+  assert.equal(parent.frame.dataset.libraryNavigation, "settled");
+  assert.equal(parent.frame.dataset.libraryScrollTarget, "708");
+  assert.deepEqual(parent.scrolls.at(-1), { top: 708, behavior: "instant" });
+});
+
 test("resize keeps working and invalid resize messages neither resize nor navigate", () => {
   const parent = parentFrame();
   parent.message({ type: "zakatek-library:resize", height: 1800 });

@@ -18,17 +18,22 @@ export function LibraryEmbedBridge() {
     if (!content) return;
     let parentOrigin: string | null = null;
     let observer: ResizeObserver | null = null;
+    let mutations: MutationObserver | null = null;
     let frame = 0;
     let previousHeight = 0;
+    let previousContentReady = false;
     const publish = () => {
       if (!parentOrigin) return;
       const targetOrigin = parentOrigin;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const height = Math.ceil(content.getBoundingClientRect().height);
-        if (!Number.isFinite(height) || height < 100 || height > 40_000 || height === previousHeight) return;
+        const contentReady = Boolean(content.querySelector("#main h1"));
+        if (!Number.isFinite(height) || height < 100 || height > 40_000) return;
+        if (height === previousHeight && contentReady === previousContentReady) return;
         previousHeight = height;
-        window.parent.postMessage({ type: "zakatek-library:resize", height }, targetOrigin);
+        previousContentReady = contentReady;
+        window.parent.postMessage({ type: "zakatek-library:resize", height, contentReady }, targetOrigin);
       });
     };
     const startBridge = (origin: string) => {
@@ -43,6 +48,9 @@ export function LibraryEmbedBridge() {
       }
       observer = new ResizeObserver(publish);
       observer.observe(content);
+      // Streamed pages can replace a loading view after the layout bridge has mounted.
+      mutations = new MutationObserver(publish);
+      mutations.observe(content, { childList: true, subtree: true });
       window.addEventListener("load", publish);
       publish();
     };
@@ -71,6 +79,7 @@ export function LibraryEmbedBridge() {
     return () => {
       cancelAnimationFrame(frame);
       observer?.disconnect();
+      mutations?.disconnect();
       window.removeEventListener("load", publish);
       window.removeEventListener("message", receiveViewport);
       delete document.documentElement.dataset.libraryEmbedded;

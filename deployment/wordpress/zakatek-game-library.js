@@ -7,6 +7,7 @@
   let readySeen = false;
   let navigationFrame = 0;
   let navigationPending = false;
+  let navigationContentReady = false;
   const publishViewport = () => {
     cancelAnimationFrame(pending);
     pending = requestAnimationFrame(() => {
@@ -33,9 +34,11 @@
       navigationFrame = requestAnimationFrame(() => {
         const top = Math.max(0, Math.round(window.scrollY + frame.getBoundingClientRect().top - 112));
         window.scrollTo({top, behavior: 'instant'});
-        navigationPending = false;
         frame.dataset.libraryScrollTarget = String(top);
-        frame.dataset.libraryNavigation = 'settled';
+        if (navigationContentReady) {
+          navigationPending = false;
+          frame.dataset.libraryNavigation = 'settled';
+        }
         publishViewport();
       });
     });
@@ -48,12 +51,13 @@
       return;
     }
     if (data && data.type === 'zakatek-library:ready') {
-      if (readySeen) revealFrameTop();
+      if (readySeen) { navigationContentReady = false; revealFrameTop(); }
       readySeen = true;
       return;
     }
     if (data && data.type === 'zakatek-library:navigate') {
       readySeen = true;
+      navigationContentReady = false;
       revealFrameTop();
       return;
     }
@@ -61,6 +65,7 @@
     if (!Number.isInteger(data.height) || data.height < 100 || data.height > 40000) return;
     // A cached iframe can send its first ready before this footer script has loaded.
     readySeen = true;
+    navigationContentReady = data.contentReady !== false;
     frame.style.height = `${data.height + 2}px`;
     if (navigationPending) revealFrameTop();
     publishViewport();
